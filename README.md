@@ -1,5 +1,5 @@
-# usb-tree
-Multiplatform USB device tree generator and logger.
+# USB Tree
+Cross-platform USB device tree viewer, monitor, and logger.
 
 
 ## CLI
