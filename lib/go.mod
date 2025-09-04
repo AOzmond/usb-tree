@@ -1,4 +1,4 @@
-module toollib
+module usb_tree_lib
 
 go 1.25.0
 

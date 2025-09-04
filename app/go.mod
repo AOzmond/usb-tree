@@ -2,11 +2,11 @@ module usb-tree
 
 go 1.25.0
 
-replace toollib => ../lib
+replace usb_tree_lib => ../lib
 
 require (
 	github.com/wailsapp/wails/v2 v2.10.2
-	toollib v0.0.0-00010101000000-000000000000
+	usb_tree_lib v0.0.0-00010101000000-000000000000
 )
 
 require (
