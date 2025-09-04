@@ -38,9 +38,11 @@ type Log struct {
 	State LogState
 }
 
-var cachedDevices []Device
-var lastMergedMap map[string]Device
-var logs []Log
+var (
+	cachedDevices []Device
+	lastMergedMap map[string]Device
+	logs          []Log
+)
 
 var pollingStop chan bool
 
@@ -222,7 +224,7 @@ func sortDeviceSlice(devices []Device) []Device {
 }
 
 func addDeviceLog(device Device) {
-	newLog := Log{ Time: time.Now(), Text: device.Name, State: device.State}
+	newLog := Log{Time: time.Now(), Text: device.Name, State: device.State}
 	logs = append(logs, newLog)
 }
 

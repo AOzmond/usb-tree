@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"usb_tree_lib"
 )
 
 // App struct
@@ -23,5 +22,5 @@ func (a *App) startup(ctx context.Context) {
 
 // Wrapper for usb_tree_lib.HelloWorld()
 func (a *App) Greet() string {
-	return usb_tree_lib.HelloWorld()
+	return "Hello World"
 }
