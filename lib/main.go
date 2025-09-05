@@ -1,6 +1,5 @@
 package toollib
 
-
-func HelloWorld() string{
+func HelloWorld() string {
 	return "Hello World!"
 }
