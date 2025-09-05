@@ -63,7 +63,7 @@ func Init(onUpdateCallback func([]Device)) []Device {
 			select {
 			case <-ticker.C:
 				newDevices := getDevices()
-				changed, mergedDevices := deviceDiff(cachedDevices, newDevices)
+				changed, mergedDevices := deviceDiff(newDevices)
 				if changed {
 					onUpdateCallback(mergedDevices)
 				}
@@ -103,17 +103,17 @@ func getDevices() []Device {
 // Returns device based on a given DeviceDesc
 func descToDevice(desc gousb.DeviceDesc) Device {
 	return Device{
-		Path:      desc.Path,
-		Name:      usbid.Describe(desc),
-		VendorId:  fmt.Sprintf("%04x", desc.Vendor),
-		ProductId: fmt.Sprintf("%04x", desc.Product),
-		Speed:     fmt.Sprintf("%v", desc.Speed),
 		Bus:       desc.Bus,
+		Path:      desc.Path,
+		Name:      usbid.Describe(&desc),
+		VendorId:  desc.Vendor.String(),
+		ProductId: desc.Product.String(),
+		Speed:     fmt.Sprintf("%v", desc.Speed),
 		State:     StateNormal,
 	}
 }
 
-func deviceDiff(cachedDevices []Device, newDevices []Device) (changed bool, merged []Device) {
+func deviceDiff(newDevices []Device) (changed bool, merged []Device) {
 	mergedMap := make(map[string]Device)
 	changed = false
 
@@ -137,15 +137,20 @@ func deviceDiff(cachedDevices []Device, newDevices []Device) (changed bool, merg
 			// Device is new, add to mergedMap
 			newDevice.State = StateAdded
 			mergedMap[key] = newDevice
-			changed = true
+
 		}
 	}
 	// Convert map back into slice and log changes since lastMergedMap
 	merged = make([]Device, 0, len(mergedMap))
 	for key, device := range mergedMap {
 		merged = append(merged, device)
-		if _, exists := lastMergedMap[key]; !exists {
+
+		if lastDevice, exists := lastMergedMap[key]; !exists {
 			addDeviceLog(device)
+			changed = true
+		} else if device.State != lastDevice.State {
+			addDeviceLog(device)
+			changed = true
 		}
 	}
 
@@ -163,20 +168,20 @@ func BuildDeviceTree(devices []Device) []TreeNode {
 		nodes = append(nodes, makeNode(dev))
 	}
 	// Loop through each node
-	for _, parent := range nodes {
-		parentLen := len(parent.Path)
-		if parentLen == 0 {
-			roots = append(roots, parent)
-		}
+	for parent := range nodes {
+		parentLen := len(nodes[parent].Path)
 		// Find this node's children
-		for _, child := range nodes {
-			childLen := len(child.Path)
+		for child := range nodes {
+			childLen := len(nodes[child].Path)
 			if parentLen >= childLen {
-				break
+				continue
 			}
-			if isChild(parent, child) {
-				parent.Children = append(parent.Children, child)
+			if isChild(nodes[parent], nodes[child]) {
+				nodes[parent].Children = append(nodes[parent].Children, nodes[child])
 			}
+		}
+		if parentLen == 0 {
+			roots = append(roots, nodes[parent])
 		}
 	}
 	return roots
