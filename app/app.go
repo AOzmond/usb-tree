@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"toollib"
 )
 
 // App struct
@@ -21,7 +20,7 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Wrapper for toollib.HelloWorld()
+// Wrapper for usb_tree_lib.HelloWorld()
 func (a *App) Greet() string {
-	return toollib.HelloWorld()
+	return "Hello World"
 }
