@@ -71,8 +71,8 @@ func Init(onUpdateCallback func([]Device)) []Device {
 		for {
 			select {
 			case <-ticker.C:
-				newDevices := getDevices()
-				changed, mergedDevices := deviceDiff(newDevices)
+				logtime, newDevices := getDevices()
+				changed, mergedDevices := deviceDiff(newDevices, logtime)
 				if changed {
 					onUpdateCallback(mergedDevices)
 				}
@@ -89,12 +89,12 @@ func Init(onUpdateCallback func([]Device)) []Device {
 
 // Refresh resets the cached Device state to that of the current devices connected to the machine.
 func Refresh() []Device {
-	cachedDevices = getDevices()
+	_, cachedDevices = getDevices()
 	return cachedDevices
 }
 
 // returns lists of devices in depth first search order.
-func getDevices() []Device {
+func getDevices() (time.Time, []Device) {
 	ctx := gousb.NewContext()
 	defer ctx.Close()
 	devices := []Device{}
@@ -105,9 +105,9 @@ func getDevices() []Device {
 	})
 	if err != nil {
 		log.Printf("Issue accessing USB Devices: %v", err)
-		return nil
+		return time.Now(), nil
 	}
-	return devices
+	return time.Now(), devices
 }
 
 // Returns device based on a given DeviceDesc
@@ -127,7 +127,7 @@ func (d *Device) deviceKey() string {
 	return fmt.Sprintf("%d:%v:%s:%s:%s", d.Bus, d.Path, d.VendorID, d.ProductID, d.Speed)
 }
 
-func deviceDiff(newDevices []Device) (changed bool, merged []Device) {
+func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []Device) {
 	mergedMap := make(map[string]Device)
 	changed = false
 
@@ -157,10 +157,10 @@ func deviceDiff(newDevices []Device) (changed bool, merged []Device) {
 		merged = append(merged, device)
 
 		if lastDevice, exists := lastMergedMap[key]; !exists {
-			addDeviceLog(device)
+			addDeviceLog(device, logtime)
 			changed = true
 		} else if device.State != lastDevice.State {
-			addDeviceLog(device)
+			addDeviceLog(device, logtime)
 			changed = true
 		}
 	}
@@ -239,8 +239,8 @@ func sortDevices(devices []Device) []Device {
 	return devices
 }
 
-func addDeviceLog(device Device) {
-	logs = append(logs, Log{Time: time.Now(), Text: device.Name, State: device.State})
+func addDeviceLog(device Device, logtime time.Time) {
+	logs = append(logs, Log{Time: logtime, Text: device.Name, State: device.State})
 }
 
 // GetLog returns all stored device logs.

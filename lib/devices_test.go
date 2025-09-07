@@ -3,6 +3,7 @@ package usbtreelib
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/google/gousb"
 )
@@ -32,7 +33,7 @@ func mockDesc() gousb.DeviceDesc {
 // mockRefresh resets the cached devices and last diff state to the input devices.
 func mockRefresh(newDevices []Device) {
 	cachedDevices = newDevices
-	deviceDiff(cachedDevices)
+	deviceDiff(cachedDevices, time.Now())
 }
 
 // hasState returns true if a specific state is found within a list of Devices.
@@ -67,7 +68,7 @@ func TestDescToDevice(t *testing.T) {
 
 func TestDeviceDiff_Add(t *testing.T) {
 	mockRefresh([]Device{device1, device2})
-	changed, merged := deviceDiff([]Device{device1, device2, device3})
+	changed, merged := deviceDiff([]Device{device1, device2, device3}, time.Now())
 	if len(merged) != 3 {
 		t.Errorf("length of merged = %d, want 3", len(merged))
 	}
@@ -93,7 +94,7 @@ func TestDeviceDiff_Add(t *testing.T) {
 
 func TestDeviceDiff_Remove(t *testing.T) {
 	mockRefresh([]Device{device1, device2, device3})
-	changed, merged := deviceDiff([]Device{device1, device2})
+	changed, merged := deviceDiff([]Device{device1, device2}, time.Now())
 	if len(merged) != 3 {
 		t.Errorf("merged length = %d, want 3 ", len(merged))
 	}
@@ -119,7 +120,7 @@ func TestDeviceDiff_Remove(t *testing.T) {
 
 func TestDeviceDiff_NoChange(t *testing.T) {
 	mockRefresh([]Device{device1})
-	changed, merged := deviceDiff([]Device{device1})
+	changed, merged := deviceDiff([]Device{device1}, time.Now())
 	if len(merged) != 1 {
 		t.Errorf("length of merged = %d, want 1", len(merged))
 	}
@@ -130,7 +131,7 @@ func TestDeviceDiff_NoChange(t *testing.T) {
 
 func TestDeviceDiff_AddAndRemove(t *testing.T) {
 	mockRefresh([]Device{device1, device2})
-	changed, merged := deviceDiff([]Device{device2, device3})
+	changed, merged := deviceDiff([]Device{device2, device3}, time.Now())
 	if !changed {
 		t.Errorf("changed = false, want true")
 	}
@@ -234,7 +235,8 @@ func TestSortDeviceSlice(t *testing.T) {
 func TestAddDeviceLogAndGetLog(t *testing.T) {
 	logs = nil
 	d := Device{Name: "TestLog", State: StateAdded}
-	addDeviceLog(d)
+	logtime := time.Now()
+	addDeviceLog(d, logtime)
 	got := GetLog()
 	if len(got) == 0 || got[0].Text != "TestLog" || got[0].State != StateAdded {
 		t.Errorf("got %+v", got)
