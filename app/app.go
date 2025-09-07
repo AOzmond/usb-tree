@@ -20,7 +20,6 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Wrapper for usb_tree_lib.HelloWorld()
 func (a *App) Greet() string {
 	return "Hello World"
 }

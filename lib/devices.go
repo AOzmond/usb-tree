@@ -1,7 +1,8 @@
-package usb_tree_lib
+package usbtreelib
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -9,34 +10,39 @@ import (
 	"github.com/google/gousb/usbid"
 )
 
-const (
-	StateNormal  LogState = "normal"
-	StateAdded   LogState = "added"
-	StateRemoved LogState = "removed"
-)
-
+// A LogState represents the difference between the cached Device and current Device.
 type LogState string
 
+// A Device represents a USB Device
 type Device struct {
 	Path      []int
 	Name      string
-	VendorId  string
-	ProductId string
+	VendorID  string
+	ProductID string
 	Speed     string
 	Bus       int
 	State     LogState
 }
 
+// TreeNode represents a Device and its children for building tree structures.
 type TreeNode struct {
 	Device
 	Children []TreeNode
 }
 
+// Log represents a change in a Device.
 type Log struct {
 	Time  time.Time
 	Text  string
 	State LogState
 }
+
+// These constants represent the State of a Device.
+const (
+	StateNormal  LogState = "normal"
+	StateAdded   LogState = "added"
+	StateRemoved LogState = "removed"
+)
 
 var (
 	cachedDevices []Device
@@ -46,6 +52,7 @@ var (
 
 var pollingStop chan bool
 
+// Stop will turn off the polling of new Devices.
 func Stop() {
 	select {
 	case pollingStop <- true:
@@ -53,6 +60,8 @@ func Stop() {
 	}
 }
 
+// Init will start the polling of Devices connected to the machine, and return the current list of connected Devices.
+// It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
 	Refresh()
@@ -67,10 +76,10 @@ func Init(onUpdateCallback func([]Device)) []Device {
 				if changed {
 					onUpdateCallback(mergedDevices)
 				}
+
 			case <-pollingStop:
 				close(pollingStop)
 				return
-
 			}
 		}
 	}()
@@ -78,7 +87,7 @@ func Init(onUpdateCallback func([]Device)) []Device {
 	return cachedDevices
 }
 
-// Resets tree to current state
+// Refresh resets the cached Device state to that of the current devices connected to the machine.
 func Refresh() []Device {
 	cachedDevices = getDevices()
 	return cachedDevices
@@ -95,6 +104,7 @@ func getDevices() []Device {
 		return false
 	})
 	if err != nil {
+		log.Printf("Issue accessing USB Devices: %v", err)
 		return nil
 	}
 	return devices
@@ -106,29 +116,30 @@ func descToDevice(desc gousb.DeviceDesc) Device {
 		Bus:       desc.Bus,
 		Path:      desc.Path,
 		Name:      usbid.Describe(&desc),
-		VendorId:  desc.Vendor.String(),
-		ProductId: desc.Product.String(),
-		Speed:     fmt.Sprintf("%v", desc.Speed),
+		VendorID:  desc.Vendor.String(),
+		ProductID: desc.Product.String(),
+		Speed:     desc.Speed.String(),
 		State:     StateNormal,
 	}
+}
+
+func (d *Device) deviceKey() string {
+	return fmt.Sprintf("%d:%v:%s:%s:%s", d.Bus, d.Path, d.VendorID, d.ProductID, d.Speed)
 }
 
 func deviceDiff(newDevices []Device) (changed bool, merged []Device) {
 	mergedMap := make(map[string]Device)
 	changed = false
 
-	deviceKey := func(d Device) string {
-		return fmt.Sprintf("%d:%v:%s:%s:%s", d.Bus, d.Path, d.VendorId, d.ProductId, d.Speed)
-	}
-
 	// Mark all cachedDevices as removed initially
 	for _, device := range cachedDevices {
 		device.State = StateRemoved
-		mergedMap[deviceKey(device)] = device
+		mergedMap[device.deviceKey()] = device
 	}
+
 	// Reset persisting devices to normal, and add new devices
 	for _, newDevice := range newDevices {
-		key := deviceKey(newDevice)
+		key := newDevice.deviceKey()
 		if existingDevice, exists := mergedMap[key]; exists {
 			// Device exists, reset its status to normal
 			existingDevice.State = StateNormal
@@ -137,9 +148,9 @@ func deviceDiff(newDevices []Device) (changed bool, merged []Device) {
 			// Device is new, add to mergedMap
 			newDevice.State = StateAdded
 			mergedMap[key] = newDevice
-
 		}
 	}
+
 	// Convert map back into slice and log changes since lastMergedMap
 	merged = make([]Device, 0, len(mergedMap))
 	for key, device := range mergedMap {
@@ -154,66 +165,66 @@ func deviceDiff(newDevices []Device) (changed bool, merged []Device) {
 		}
 	}
 
-	merged = sortDeviceSlice(merged)
+	merged = sortDevices(merged)
 
 	lastMergedMap = mergedMap
 
 	return changed, merged
 }
 
+// BuildDeviceTree takes a []Device and converts each Device to a TreeNode and returns the roots of those Trees.
 func BuildDeviceTree(devices []Device) []TreeNode {
 	roots := []TreeNode{}
 	nodes := []TreeNode{}
+
 	for _, dev := range devices {
-		nodes = append(nodes, makeNode(dev))
+		nodes = append(nodes, dev.makeNode())
 	}
+
 	// Loop through each node
-	for parent := range nodes {
-		parentLen := len(nodes[parent].Path)
+	for parentIdx := range nodes {
+		parentDepth := len(nodes[parentIdx].Path)
+
 		// Find this node's children
-		for child := range nodes {
-			childLen := len(nodes[child].Path)
-			if parentLen >= childLen {
-				continue
-			}
-			if isChild(nodes[parent], nodes[child]) {
-				nodes[parent].Children = append(nodes[parent].Children, nodes[child])
+		for childIdx := range nodes {
+			if isChild(nodes[parentIdx], nodes[childIdx]) {
+				nodes[parentIdx].Children = append(nodes[parentIdx].Children, nodes[childIdx])
 			}
 		}
-		if parentLen == 0 {
-			roots = append(roots, nodes[parent])
+
+		if parentDepth == 0 {
+			roots = append(roots, nodes[parentIdx])
 		}
 	}
 	return roots
 }
 
-/*
-	 Checks parent and child relationship
-		Criteria: 	Same Bus
-					Path of Child matches path of parent with 1 extra port.
-*/
+// isChild takes two TreeNodes and returns true if the second is an immediate child of the first.
 func isChild(parent TreeNode, child TreeNode) bool {
+	// Only looking for immediate children
 	if len(parent.Path) != (len(child.Path) - 1) {
 		return false
 	}
+
 	for i := range parent.Path {
 		if parent.Path[i] != child.Path[i] {
 			return false
 		}
 	}
+
 	return true
 }
 
-func makeNode(device Device) TreeNode {
+func (d *Device) makeNode() TreeNode {
 	return TreeNode{
-		Device:   device,
+		Device:   *d,
 		Children: []TreeNode{},
 	}
 }
 
 // Returns sorted slice of Device
 // Sorts devices by Bus length, then Path.
-func sortDeviceSlice(devices []Device) []Device {
+func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
 		if devices[i].Bus != devices[j].Bus {
 			return devices[i].Bus < devices[j].Bus
@@ -229,10 +240,10 @@ func sortDeviceSlice(devices []Device) []Device {
 }
 
 func addDeviceLog(device Device) {
-	newLog := Log{Time: time.Now(), Text: device.Name, State: device.State}
-	logs = append(logs, newLog)
+	logs = append(logs, Log{Time: time.Now(), Text: device.Name, State: device.State})
 }
 
+// GetLog returns all stored device logs.
 func GetLog() []Log {
 	return logs
 }
