@@ -181,19 +181,18 @@ func BuildDeviceTree(devices []Device) []TreeNode {
 		nodes = append(nodes, dev.makeNode())
 	}
 
-	// Loop through each node
-	for parentIdx := range nodes {
-		parentDepth := len(nodes[parentIdx].Path)
-
+	// Loop through each node in reverse, to ensure proper child assignment
+	for parentIdx := len(nodes) - 1; parentIdx >= 0; parentIdx-- {
 		// Find this node's children
 		for childIdx := range nodes {
 			if isChild(nodes[parentIdx], nodes[childIdx]) {
 				nodes[parentIdx].Children = append(nodes[parentIdx].Children, nodes[childIdx])
 			}
 		}
-
-		if parentDepth == 0 {
-			roots = append(roots, nodes[parentIdx])
+	}
+	for _, node := range nodes {
+		if len(node.Path) == 0 {
+			roots = append(roots, node)
 		}
 	}
 	return roots

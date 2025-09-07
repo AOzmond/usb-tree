@@ -210,14 +210,22 @@ func TestIsChild(t *testing.T) {
 	}
 }
 
-func TestBuildDeviceTreeAndIsChild(t *testing.T) {
+func TestBuildDeviceTree(t *testing.T) {
 	tree := BuildDeviceTree([]Device{device4, device5, device6})
 	if len(tree) != 1 {
-		t.Errorf("expected 1 root, got %d, tree: %+v", len(tree), tree)
+		t.Errorf("number of roots = %d, wanted 1", len(tree))
 	}
-
 	if len(tree) > 0 && len(tree[0].Children) != 1 {
-		t.Errorf("expected 1 child for root, got %d, tree: %+v", len(tree[0].Children), tree)
+		t.Errorf("length of roots children = %d, expected 1", len(tree[0].Children))
+	}
+	if tree[0].Name != device4.Name {
+		t.Errorf("Root wrong")
+	}
+	if tree[0].Children[0].Name != device5.Name {
+		t.Errorf("child wrong")
+	}
+	if tree[0].Children[0].Children[0].Name != device6.Name {
+		t.Errorf("Wrong Grandchild")
 	}
 }
 
