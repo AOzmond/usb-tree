@@ -100,7 +100,7 @@ func getDevices() (time.Time, []Device) {
 	devices := []Device{}
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
-		devices = append([]Device{descToDevice(*desc)}, devices...)
+		devices = append(devices, descToDevice(*desc))
 		return false
 	})
 	if err != nil {
@@ -223,12 +223,9 @@ func (d *Device) makeNode() TreeNode {
 }
 
 // Returns sorted slice of Device
-// Sorts devices by Bus length, then Path.
+// Sorts devices Path.
 func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
-		if devices[i].Bus != devices[j].Bus {
-			return devices[i].Bus < devices[j].Bus
-		}
 		for pathIdx := 0; pathIdx < len(devices[i].Path) && pathIdx < len(devices[j].Path); pathIdx++ {
 			if devices[i].Path[pathIdx] != devices[j].Path[pathIdx] {
 				return devices[i].Path[pathIdx] < devices[j].Path[pathIdx]
