@@ -242,3 +242,23 @@ func TestAddDeviceLogAndGetLog(t *testing.T) {
 		t.Errorf("got %+v", got)
 	}
 }
+
+func TestDeviceDiffProducesLog(t *testing.T) {
+	logs = nil
+	mockRefresh([]Device{device1, device2})
+	logtime := time.Now()
+	deviceDiff([]Device{device1, device2, device3}, logtime)
+	gotLogs := GetLog()
+	if len(gotLogs) == 0 {
+		t.Fatalf("logs empty, want 1")
+	}
+	found := false
+	for _, l := range gotLogs {
+		if l.Text == device3.Name && l.State == StateAdded && l.Time.Equal(logtime) {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected log for added device3, got %+v", gotLogs)
+	}
+}
