@@ -1,4 +1,4 @@
-package usbtreelib
+package lib
 
 import (
 	"reflect"

@@ -1,10 +1,9 @@
-module app
+module github.com/AOzmond/usb-tree/app
 
 go 1.25.0
 
 require (
 	github.com/wailsapp/wails/v2 v2.10.2
-	usbtreelib v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -38,6 +37,5 @@ require (
 	golang.org/x/text v0.22.0 // indirect
 )
 
-replace usbtreelib => ../usbtreelib
 
 // replace github.com/wailsapp/wails/v2 v2.10.2 => /home/ozum/go/pkg/mod

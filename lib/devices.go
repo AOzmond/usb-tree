@@ -1,4 +1,4 @@
-package usbtreelib
+package lib
 
 import (
 	"fmt"
@@ -96,7 +96,11 @@ func Refresh() []Device {
 // returns lists of devices in depth first search order.
 func getDevices() (time.Time, []Device) {
 	ctx := gousb.NewContext()
-	defer ctx.Close()
+	defer func() {
+		if err := ctx.Close(); err != nil {
+			log.Printf("error closing USB context: %v\n", err)
+		}
+	}()
 	devices := []Device{}
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
