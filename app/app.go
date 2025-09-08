@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+
+	"github.com/AOzmond/usb-tree/lib"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -14,12 +17,29 @@ func NewApp() *App {
 	return &App{}
 }
 
-// startup is called when the app starts. The context is saved
-// so we can call the runtime methods
+// runs on startup to
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func (a *App) Greet() string {
-	return "Hello World"
+// InitFrontend initializes the usb tree library with the app.updateCallback
+func (a *App) InitFrontend() {
+	lib.Init(a.updateCallback)
+}
+
+// Refresh relays refresh request to library, sets updated device tree on frontend
+func (a *App) Refresh() []lib.Device {
+	return lib.Refresh()
+}
+
+func (a *App) Exit() {
+	lib.Stop()
+}
+
+// TODO better name maybe?
+func (a *App) updateCallback(newDevices []lib.Device) {
+	tree := lib.BuildDeviceTree(newDevices)
+	logs := lib.GetLog()
+	runtime.EventsEmit(a.ctx, "treeUpdated", tree)
+	runtime.EventsEmit(a.ctx, "logsUpdated", logs)
 }

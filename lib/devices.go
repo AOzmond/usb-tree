@@ -64,8 +64,7 @@ func Stop() {
 // It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
-	Refresh()
-
+	onUpdateCallback(Refresh())
 	go func() {
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
