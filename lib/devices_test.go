@@ -30,8 +30,8 @@ func mockDesc() gousb.DeviceDesc {
 	}
 }
 
-// mockRefresh resets the cached devices and last diff state to the input devices.
-func mockRefresh(newDevices []Device) {
+// fakeRefresh resets the cached devices and last diff state to the input devices.
+func fakeRefresh(newDevices []Device) {
 	cachedDevices = newDevices
 	deviceDiff(cachedDevices, time.Now())
 }
@@ -67,7 +67,7 @@ func TestDescToDevice(t *testing.T) {
 }
 
 func TestDeviceDiff_Add(t *testing.T) {
-	mockRefresh([]Device{device1, device2})
+	fakeRefresh([]Device{device1, device2})
 	changed, merged := deviceDiff([]Device{device1, device2, device3}, time.Now())
 	if len(merged) != 3 {
 		t.Errorf("length of merged = %d, want 3", len(merged))
@@ -88,15 +88,15 @@ func TestDeviceDiff_Add(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Errorf("found = false, want true.")
+		t.Errorf("could not find device3 in merged devices")
 	}
 }
 
 func TestDeviceDiff_Remove(t *testing.T) {
-	mockRefresh([]Device{device1, device2, device3})
+	fakeRefresh([]Device{device1, device2, device3})
 	changed, merged := deviceDiff([]Device{device1, device2}, time.Now())
 	if len(merged) != 3 {
-		t.Errorf("merged length = %d, want 3 ", len(merged))
+		t.Errorf("merged length = %d, want 3", len(merged))
 	}
 	if !changed {
 		t.Errorf("changed = false, want true")
@@ -104,6 +104,7 @@ func TestDeviceDiff_Remove(t *testing.T) {
 	if !hasState(merged, StateRemoved) {
 		t.Errorf("hasState(merged, StateRemoved) = false, want true")
 	}
+
 	found := false
 	for _, dev := range merged {
 		if dev.Name == device3.Name {
@@ -114,12 +115,12 @@ func TestDeviceDiff_Remove(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Errorf("found = false, want true.")
+		t.Errorf("could not find device3 in merged devices")
 	}
 }
 
 func TestDeviceDiff_NoChange(t *testing.T) {
-	mockRefresh([]Device{device1})
+	fakeRefresh([]Device{device1})
 	changed, merged := deviceDiff([]Device{device1}, time.Now())
 	if len(merged) != 1 {
 		t.Errorf("length of merged = %d, want 1", len(merged))
@@ -130,7 +131,7 @@ func TestDeviceDiff_NoChange(t *testing.T) {
 }
 
 func TestDeviceDiff_AddAndRemove(t *testing.T) {
-	mockRefresh([]Device{device1, device2})
+	fakeRefresh([]Device{device1, device2})
 	changed, merged := deviceDiff([]Device{device2, device3}, time.Now())
 	if !changed {
 		t.Errorf("changed = false, want true")
@@ -253,12 +254,12 @@ func TestAddDeviceLogAndGetLog(t *testing.T) {
 
 func TestDeviceDiffProducesLog(t *testing.T) {
 	logs = nil
-	mockRefresh([]Device{device1, device2})
+	fakeRefresh([]Device{device1, device2})
 	logtime := time.Now()
 	deviceDiff([]Device{device1, device2, device3}, logtime)
 	gotLogs := GetLog()
 	if len(gotLogs) == 0 {
-		t.Fatalf("logs empty, want 1")
+		t.Fatalf("logs empty, want >0")
 	}
 	found := false
 	for _, l := range gotLogs {

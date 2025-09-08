@@ -21,6 +21,4 @@ repos:
       - id: gofumpt
       - id: golint
       - id: staticcheck
-      # - id: go-mod-tidy
-      #   files: "go.mod"
       - id: golangci-lint

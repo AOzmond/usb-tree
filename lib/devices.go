@@ -27,7 +27,7 @@ type Device struct {
 // TreeNode represents a Device and its children for building tree structures.
 type TreeNode struct {
 	Device
-	Children []TreeNode
+	Children []*TreeNode
 }
 
 // Log represents a change in a Device.
@@ -65,9 +65,11 @@ func Stop() {
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
 	Refresh()
+
 	go func() {
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
+
 		for {
 			select {
 			case <-ticker.C:
@@ -93,7 +95,7 @@ func Refresh() []Device {
 	return cachedDevices
 }
 
-// returns lists of devices in depth first search order.
+// returns lists of devices.
 func getDevices() (time.Time, []Device) {
 	ctx := gousb.NewContext()
 	defer func() {
@@ -101,6 +103,7 @@ func getDevices() (time.Time, []Device) {
 			log.Printf("error closing USB context: %v\n", err)
 		}
 	}()
+
 	devices := []Device{}
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
@@ -109,8 +112,9 @@ func getDevices() (time.Time, []Device) {
 	})
 	if err != nil {
 		log.Printf("Issue accessing USB Devices: %v", err)
-		return time.Now(), nil
+		return time.Now(), []Device{}
 	}
+
 	return time.Now(), devices
 }
 
@@ -127,7 +131,7 @@ func descToDevice(desc gousb.DeviceDesc) Device {
 	}
 }
 
-func (d *Device) deviceKey() string {
+func (d *Device) key() string {
 	return fmt.Sprintf("%d:%v:%s:%s:%s", d.Bus, d.Path, d.VendorID, d.ProductID, d.Speed)
 }
 
@@ -138,12 +142,12 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 	// Mark all cachedDevices as removed initially
 	for _, device := range cachedDevices {
 		device.State = StateRemoved
-		mergedMap[device.deviceKey()] = device
+		mergedMap[device.key()] = device
 	}
 
 	// Reset persisting devices to normal, and add new devices
 	for _, newDevice := range newDevices {
-		key := newDevice.deviceKey()
+		key := newDevice.key()
 		if existingDevice, exists := mergedMap[key]; exists {
 			// Device exists, reset its status to normal
 			existingDevice.State = StateNormal
@@ -176,41 +180,47 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 	return changed, merged
 }
 
-// BuildDeviceTree takes a []Device and converts each Device to a TreeNode and returns the roots of those Trees.
-func BuildDeviceTree(devices []Device) []TreeNode {
-	roots := []TreeNode{}
-	nodes := []TreeNode{}
+// BuildDeviceTree converts a device list to a device tree
+func BuildDeviceTree(devices []Device) []*TreeNode {
+	roots := []*TreeNode{}
+	nodes := []*TreeNode{}
 
 	for _, dev := range devices {
-		nodes = append(nodes, dev.makeNode())
+		newNode := dev.treeNode()
+		nodes = append(nodes, &(newNode))
 	}
 
-	// Loop through each node in reverse, to ensure proper child assignment
+	// Loop through each node to assign children
 	for parentIdx := len(nodes) - 1; parentIdx >= 0; parentIdx-- {
 		// Find this node's children
 		for childIdx := range nodes {
-			if isChild(nodes[parentIdx], nodes[childIdx]) {
-				nodes[parentIdx].Children = append(nodes[parentIdx].Children, nodes[childIdx])
+
+			parent := nodes[parentIdx]
+			child := nodes[childIdx]
+			if isChild(*parent, *child) {
+				parent.Children = append(parent.Children, child)
 			}
 		}
 	}
+
 	for _, node := range nodes {
 		if len(node.Path) == 0 {
 			roots = append(roots, node)
 		}
 	}
+
 	return roots
 }
 
-// isChild takes two TreeNodes and returns true if the second is an immediate child of the first.
-func isChild(parent TreeNode, child TreeNode) bool {
+// isChild checks if maybeChild is an immediate child of the parent
+func isChild(parent TreeNode, maybeChild TreeNode) bool {
 	// Only looking for immediate children
-	if len(parent.Path) != (len(child.Path) - 1) {
+	if len(parent.Path) != (len(maybeChild.Path) - 1) {
 		return false
 	}
 
 	for i := range parent.Path {
-		if parent.Path[i] != child.Path[i] {
+		if parent.Path[i] != maybeChild.Path[i] {
 			return false
 		}
 	}
@@ -218,24 +228,27 @@ func isChild(parent TreeNode, child TreeNode) bool {
 	return true
 }
 
-func (d *Device) makeNode() TreeNode {
+func (d *Device) treeNode() TreeNode {
 	return TreeNode{
 		Device:   *d,
-		Children: []TreeNode{},
+		Children: []*TreeNode{},
 	}
 }
 
-// Returns sorted slice of Device
-// Sorts devices Path.
+// sortDevices sorts devices consistently by their path
 func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
-		for pathIdx := 0; pathIdx < len(devices[i].Path) && pathIdx < len(devices[j].Path); pathIdx++ {
-			if devices[i].Path[pathIdx] != devices[j].Path[pathIdx] {
-				return devices[i].Path[pathIdx] < devices[j].Path[pathIdx]
+		flatten := func(path []int) string {
+			s := ""
+			for _, p := range path {
+				s += fmt.Sprintf("%04d-", p)
 			}
+			return s
 		}
-		return len(devices[i].Path) < len(devices[j].Path)
+
+		return flatten(devices[i].Path) < flatten(devices[j].Path)
 	})
+
 	return devices
 }
 
