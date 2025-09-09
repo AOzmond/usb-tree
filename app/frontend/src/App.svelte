@@ -1,19 +1,19 @@
 <script lang="ts">
-  import {Greet} from '../wailsjs/go/main/App.js'
 
 
-  let resultText: string = ""
+
+  let resultText = $state("")
   let name: string
 
   function greet(): void {
-    Greet().then(result => resultText = result)
+    resultText = "Hello"
   }
 </script>
 
 <main>
   <div >Press the button</div>
   <div class="input-box" id="input">
-    <button class="btn" on:click={greet}>Hello</button>
+    <button class="btn" onclick={greet}>Hello</button>
     <div class="result" id="result">{resultText}</div>
   </div>
 </main>

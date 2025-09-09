@@ -2,7 +2,10 @@ module github.com/AOzmond/usb-tree/app
 
 go 1.25.0
 
+replace github.com/AOzmond/usb-tree/lib => ../lib
+
 require (
+	github.com/AOzmond/usb-tree/lib v0.0.0-00010101000000-000000000000
 	github.com/wailsapp/wails/v2 v2.10.2
 )
 
@@ -36,6 +39,5 @@ require (
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 )
-
 
 // replace github.com/wailsapp/wails/v2 v2.10.2 => /home/ozum/go/pkg/mod
