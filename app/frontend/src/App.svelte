@@ -2,11 +2,13 @@
   import { Init } from "./lib/state.svelte"
   import TreeNodeView from "./lib/components/TreeNode.svelte"
   import { deviceTree, deviceLogs } from "./lib/state.svelte"
+  import { Refresh } from "../wailsjs/go/main/App"
   Init()
 </script>
 
 <!-- TODO this code is just a mockup for api testing -->
 <main>
+  <button onclick={Refresh}>Refresh</button>
   {#if $deviceTree.length === 0}
     <div>No devices</div>
   {:else}
@@ -24,8 +26,12 @@
       <h1>LOGS</h1>
       {#each $deviceLogs as log}
         {#if log != null}
-          <span style="color: {log.State === 'removed' ? 'red' : log.State === 'added' ? 'green' : 'inherit'};">
-            {log.Time} {log.Text} {log.State}
+          <span
+            style="color: {log.State === 'removed' ? 'red' : log.State === 'added' ? 'green' : 'inherit'};"
+          >
+            {log.Time}
+            {log.Text}
+            {log.State}
           </span>
         {/if}
       {/each}
