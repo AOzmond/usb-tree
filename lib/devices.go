@@ -169,8 +169,8 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 	merged = make([]Device, 0, len(mergedMap))
 	for key, device := range mergedMap {
 		merged = append(merged, device)
+
 		if lastDevice, exists := lastMergedMap[key]; !exists {
-			// added
 			addDeviceLog(device, logtime)
 			changed = true
 		} else if device.State != lastDevice.State {
