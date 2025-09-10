@@ -1,0 +1,19 @@
+printWidth = 110
+trailingComma = "es5"
+useTabs = false
+tabWidth = 2
+semi = false
+singleQuote = false
+endOfLine = "lf"
+proseWrap = 'always'
+
+[[overrides]]
+  files = "*.{yaml,yml}"
+  [overrides.options]
+  proseWrap = "preserve"
+
+[[overrides]]
+  files = "*.svelte"
+  [overrides.options]
+  parser = "svelte"
+  proseWrap = "preserve"
