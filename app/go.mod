@@ -1,18 +1,16 @@
-module usb-tree
+module github.com/AOzmond/usb-tree/app
 
 go 1.25.0
 
-replace toollib => ../lib
-
 require (
 	github.com/wailsapp/wails/v2 v2.10.2
-	toollib v0.0.0-00010101000000-000000000000
 )
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/google/gousb v1.1.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
@@ -38,5 +36,6 @@ require (
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 )
+
 
 // replace github.com/wailsapp/wails/v2 v2.10.2 => /home/ozum/go/pkg/mod

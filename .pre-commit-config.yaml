@@ -15,15 +15,10 @@ repos:
   - repo: https://github.com/lietu/go-pre-commit
     rev: v0.1.0
     hooks:
-      #- id: errcheck
       - id: go-fmt-goimports
-      # - id: go-test  TODO currently no tests
-      #- id: go-vet
-      # files: '^(cli/|lib/).*\.(go)$'
+      - id: go-test
+      - id: go-vet
       - id: gofumpt
-      #- id: golint
-      #- id: staticcheck
-      - id: go-mod-tidy
-        files: "go.mod"
-      #- id: golangci-lint
-      #  files: "^(/cli|lib)"
+      - id: golint
+      - id: staticcheck
+      - id: golangci-lint
