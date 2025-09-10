@@ -28,15 +28,16 @@ func (a *App) InitFrontend() {
 }
 
 // Refresh relays refresh request to library, sets updated device tree on frontend
-func (a *App) Refresh() []lib.Device {
-	return lib.Refresh()
+func (a *App) Refresh() {
+	lib.Refresh()
 }
 
-func (a *App) Exit() {
+// Exit will stop polling of new devices.
+func (a *App) Exit(ctx context.Context) {
 	lib.Stop()
 }
 
-// TODO better name maybe?
+// updateCallback will emit update events on device changes.
 func (a *App) updateCallback(newDevices []lib.Device) {
 	tree := lib.BuildDeviceTree(newDevices)
 	logs := lib.GetLog()

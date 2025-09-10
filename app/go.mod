@@ -2,12 +2,12 @@ module github.com/AOzmond/usb-tree/app
 
 go 1.25.0
 
-replace github.com/AOzmond/usb-tree/lib => ../lib
-
 require (
 	github.com/AOzmond/usb-tree/lib v0.0.0-00010101000000-000000000000
 	github.com/wailsapp/wails/v2 v2.10.2
 )
+
+replace github.com/AOzmond/usb-tree/lib => ../lib
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
