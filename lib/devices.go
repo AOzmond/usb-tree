@@ -158,7 +158,7 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 		}
 	}
 
-	// After building mergedMap, but before converting to slice:
+	// Search for removed devices to update changed.
 	for key := range lastMergedMap {
 		if _, exists := mergedMap[key]; !exists {
 			changed = true
