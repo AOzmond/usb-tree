@@ -15,19 +15,19 @@ type LogState string
 
 // A Device represents a USB Device
 type Device struct {
-	Path      []int
-	Name      string
-	VendorID  string
-	ProductID string
-	Speed     string
-	Bus       int
-	State     LogState
+	Path      []int    `json:"path"`
+	Name      string   `json:"name"`
+	VendorID  string   `json:"vendorId"`
+	ProductID string   `json:"productId"`
+	Speed     string   `json:"speed"`
+	Bus       int      `json:"bus"`
+	State     LogState `json:"state"`
 }
 
 // TreeNode represents a Device and its children for building tree structures.
 type TreeNode struct {
-	Device
-	Children []*TreeNode
+	Device   `json:"device"`
+	Children []*TreeNode `json:"children"`
 }
 
 // Log represents a change in a Device.
@@ -64,8 +64,7 @@ func Stop() {
 // It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
-	Refresh()
-
+	onUpdateCallback(Refresh())
 	go func() {
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
@@ -159,6 +158,13 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 		}
 	}
 
+	// Search for removed devices to update changed.
+	for key := range lastMergedMap {
+		if _, exists := mergedMap[key]; !exists {
+			changed = true
+		}
+	}
+
 	// Convert map back into slice and log changes since lastMergedMap
 	merged = make([]Device, 0, len(mergedMap))
 	for key, device := range mergedMap {
@@ -214,6 +220,9 @@ func BuildDeviceTree(devices []Device) []*TreeNode {
 
 // isChild checks if maybeChild is an immediate child of the parent
 func isChild(parent TreeNode, maybeChild TreeNode) bool {
+	if parent.Bus != maybeChild.Bus {
+		return false
+	}
 	// Only looking for immediate children
 	if len(parent.Path) != (len(maybeChild.Path) - 1) {
 		return false

@@ -170,6 +170,31 @@ func TestDeviceDiff_AddAndRemove(t *testing.T) {
 	}
 }
 
+func TestDeviceDiff_AddThenRemove(t *testing.T) {
+	fakeRefresh([]Device{device1})
+	deviceDiff([]Device{device1, device2}, time.Now())
+	changed, merged := deviceDiff([]Device{device1}, time.Now())
+	if !changed {
+		t.Errorf("changed = false, want true")
+	}
+	if hasState(merged, StateAdded) {
+		t.Errorf("hasState(merged, StateAdded) = true, want false")
+	}
+	if hasState(merged, StateRemoved) {
+		t.Errorf("hasState(merged, StateRemoved) = true, want false")
+	}
+
+	found := false
+	for _, dev := range merged {
+		if dev.Name == device2.Name {
+			found = true
+		}
+	}
+	if found {
+		t.Errorf("found = true, want false.")
+	}
+}
+
 func TestIsChild(t *testing.T) {
 	parent := TreeNode{
 		Device: Device{
@@ -187,6 +212,12 @@ func TestIsChild(t *testing.T) {
 		Device: Device{
 			Path: []int{1, 3, 4},
 			Bus:  1,
+		},
+	}
+	differentBus := TreeNode{
+		Device: Device{
+			Path: []int{1, 2, 3},
+			Bus:  2,
 		},
 	}
 
@@ -207,6 +238,9 @@ func TestIsChild(t *testing.T) {
 	}
 
 	if isChild(child, notChild) {
+		t.Errorf("isChild(child, notChild) = true, want false")
+	}
+	if isChild(parent, differentBus) {
 		t.Errorf("isChild(child, notChild) = true, want false")
 	}
 }
