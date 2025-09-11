@@ -244,17 +244,17 @@ func (d *Device) treeNode() TreeNode {
 	}
 }
 
+func flatten(path []int) string {
+	s := ""
+	for _, p := range path {
+		s += fmt.Sprintf("%04d-", p)
+	}
+	return s
+}
+
 // sortDevices sorts devices consistently by their path
 func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
-		flatten := func(path []int) string {
-			s := ""
-			for _, p := range path {
-				s += fmt.Sprintf("%04d-", p)
-			}
-			return s
-		}
-
 		return flatten(devices[i].Path) < flatten(devices[j].Path)
 	})
 
