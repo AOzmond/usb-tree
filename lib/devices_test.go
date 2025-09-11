@@ -290,18 +290,19 @@ func TestDeviceDiffProducesLog(t *testing.T) {
 	logs = nil
 	fakeRefresh([]Device{device1, device2})
 	logtime := time.Now()
+	logsBefore := GetLog()
 	deviceDiff([]Device{device1, device2, device3}, logtime)
-	gotLogs := GetLog()
-	if len(gotLogs) == 0 {
-		t.Fatalf("logs empty, want >0")
+	logsAfter := GetLog()
+	if (len(logsAfter) - len(logsBefore)) != 1 {
+		t.Fatalf("logs empty, want 3")
 	}
 	found := false
-	for _, l := range gotLogs {
+	for _, l := range logsAfter {
 		if l.Text == device3.Name && l.State == StateAdded && l.Time.Equal(logtime) {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("expected log for added device3, got %+v", gotLogs)
+		t.Errorf("expected log for added device3, got %+v", logsAfter)
 	}
 }
