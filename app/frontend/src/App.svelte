@@ -13,7 +13,7 @@
     <div>No devices</div>
   {:else}
     <div style="width: 100%; text-align: left;">
-      {#each $deviceTree.slice().sort((a, b) => a.device.bus - b.device.bus) as node}
+      {#each $deviceTree as node}
         <TreeNodeView {node} indent={0} />
       {/each}
     </div>
