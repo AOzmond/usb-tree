@@ -1,5 +1,5 @@
 import "./style.css";
-import App from "./App.svelte";
+import App from "./+layout.svelte";
 import { mount } from "svelte";
 
 const app = mount(App, {
