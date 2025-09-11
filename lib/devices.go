@@ -197,7 +197,7 @@ func BuildDeviceTree(devices []Device) []*TreeNode {
 	}
 
 	// Loop through each node to assign children
-	for parentIdx := len(nodes) - 1; parentIdx >= 0; parentIdx-- {
+	for parentIdx := range nodes {
 		// Find this node's children
 		for childIdx := range nodes {
 
