@@ -1,11 +1,11 @@
 package lib
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
 	"github.com/google/gousb"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -49,140 +49,87 @@ func hasState(devs []Device, state LogState) bool {
 func TestDescToDevice(t *testing.T) {
 	desc := mockDesc()
 	dev := descToDevice(desc)
-	if dev.Name != "3.0 root hub (Linux Foundation)" {
-		t.Errorf(" Name = %s, want 3.0 root hub (Linux Foundation)", dev.Name)
-	}
-	if dev.VendorID != "1d6b" {
-		t.Errorf("VendorID = %s, want 1d6b", dev.VendorID)
-	}
-	if dev.ProductID != "0003" {
-		t.Errorf("ProductID = %s, want 0003", dev.ProductID)
-	}
-	if dev.Speed != "high" {
-		t.Errorf("Speed = %s, want high", dev.Speed)
-	}
-	if dev.Bus != 1 {
-		t.Errorf("Bus = %d, want 1", dev.Bus)
-	}
+	assert.Equal(t, "3.0 root hub (Linux Foundation)", dev.Name)
+	assert.Equal(t, "1d6b", dev.VendorID)
+	assert.Equal(t, "0003", dev.ProductID)
+	assert.Equal(t, "high", dev.Speed)
+	assert.Equal(t, 1, dev.Bus)
 }
 
 func TestDeviceDiff_Add(t *testing.T) {
 	fakeRefresh([]Device{device1, device2})
 	changed, merged := deviceDiff([]Device{device1, device2, device3}, time.Now())
-	if len(merged) != 3 {
-		t.Errorf("length of merged = %d, want 3", len(merged))
-	}
-	if !changed {
-		t.Errorf("changed = false, want true")
-	}
-	if !hasState(merged, StateAdded) {
-		t.Errorf("hasState(merged, stateAdded) = false, want true")
-	}
+	assert.Len(t, merged, 3)
+	assert.True(t, changed)
+	assert.True(t, hasState(merged, StateAdded))
+
 	found := false
 	for _, dev := range merged {
 		if dev.Name == device3.Name {
 			found = true
-			if dev.State != StateAdded {
-				t.Errorf("State = %v, want  %v", dev.State, StateAdded)
-			}
+			assert.Equal(t, StateAdded, dev.State)
 		}
 	}
-	if !found {
-		t.Errorf("could not find device3 in merged devices")
-	}
+	assert.True(t, found, "could not find device3 in merged devices")
 }
 
 func TestDeviceDiff_Remove(t *testing.T) {
 	fakeRefresh([]Device{device1, device2, device3})
 	changed, merged := deviceDiff([]Device{device1, device2}, time.Now())
-	if len(merged) != 3 {
-		t.Errorf("merged length = %d, want 3", len(merged))
-	}
-	if !changed {
-		t.Errorf("changed = false, want true")
-	}
-	if !hasState(merged, StateRemoved) {
-		t.Errorf("hasState(merged, StateRemoved) = false, want true")
-	}
+	assert.Len(t, merged, 3)
+	assert.True(t, changed)
+	assert.True(t, hasState(merged, StateRemoved))
 
 	found := false
 	for _, dev := range merged {
 		if dev.Name == device3.Name {
 			found = true
-			if dev.State != StateRemoved {
-				t.Errorf("State = %v, want %v", dev.State, StateRemoved)
-			}
+			assert.Equal(t, StateRemoved, dev.State)
 		}
 	}
-	if !found {
-		t.Errorf("could not find device3 in merged devices")
-	}
+	assert.True(t, found, "could not find device3 in merged devices")
 }
 
 func TestDeviceDiff_NoChange(t *testing.T) {
 	fakeRefresh([]Device{device1})
 	changed, merged := deviceDiff([]Device{device1}, time.Now())
-	if len(merged) != 1 {
-		t.Errorf("length of merged = %d, want 1", len(merged))
-	}
-	if changed {
-		t.Errorf("changed = true, want false")
-	}
+	assert.Len(t, merged, 1)
+	assert.False(t, changed)
 }
 
 func TestDeviceDiff_AddAndRemove(t *testing.T) {
 	fakeRefresh([]Device{device1, device2})
 	changed, merged := deviceDiff([]Device{device2, device3}, time.Now())
-	if !changed {
-		t.Errorf("changed = false, want true")
-	}
-	if !hasState(merged, StateAdded) {
-		t.Errorf("hasState(merged, StateAdded) = false, want true")
-	}
-	if !hasState(merged, StateRemoved) {
-		t.Errorf("hasState(merged, StateRemoved) = false, want true")
-	}
+	assert.True(t, changed)
+	assert.True(t, hasState(merged, StateAdded))
+	assert.True(t, hasState(merged, StateRemoved))
 
-	found := false
+	foundRemoved := false
 	for _, dev := range merged {
 		if dev.Name == device1.Name {
-			found = true
-			if dev.State != StateRemoved {
-				t.Errorf("State = %v, want %v", dev.State, StateRemoved)
-			}
+			foundRemoved = true
+			assert.Equal(t, StateRemoved, dev.State)
 		}
 	}
-	if !found {
-		t.Errorf("found = false, want true.")
-	}
+	assert.True(t, foundRemoved, "could not find removed device1")
 
-	found = false
+	foundAdded := false
 	for _, dev := range merged {
 		if dev.Name == device3.Name {
-			found = true
-			if dev.State != StateAdded {
-				t.Errorf("State = %v, want %v", dev.State, StateAdded)
-			}
+			foundAdded = true
+			assert.Equal(t, StateAdded, dev.State)
 		}
 	}
-	if !found {
-		t.Errorf("found = false, want true.")
-	}
+	assert.True(t, foundAdded, "could not find added device3")
 }
 
 func TestDeviceDiff_AddThenRemove(t *testing.T) {
 	fakeRefresh([]Device{device1})
 	deviceDiff([]Device{device1, device2}, time.Now())
 	changed, merged := deviceDiff([]Device{device1}, time.Now())
-	if !changed {
-		t.Errorf("changed = false, want true")
-	}
-	if hasState(merged, StateAdded) {
-		t.Errorf("hasState(merged, StateAdded) = true, want false")
-	}
-	if hasState(merged, StateRemoved) {
-		t.Errorf("hasState(merged, StateRemoved) = true, want false")
-	}
+	assert.True(t, changed)
+	assert.False(t, hasState(merged, StateAdded))
+	assert.False(t, hasState(merged, StateRemoved))
 
 	found := false
 	for _, dev := range merged {
@@ -190,9 +137,7 @@ func TestDeviceDiff_AddThenRemove(t *testing.T) {
 			found = true
 		}
 	}
-	if found {
-		t.Errorf("found = true, want false.")
-	}
+	assert.False(t, found, "device2 should not be found after removal")
 }
 
 func TestIsChild(t *testing.T) {
@@ -221,57 +166,31 @@ func TestIsChild(t *testing.T) {
 		},
 	}
 
-	if !isChild(parent, child) {
-		t.Errorf("isChild(parent, child) = false, want true")
-	}
-
-	if isChild(parent, notChild) {
-		t.Errorf("isChild(parent, notChild) = true, want false")
-	}
-
-	if isChild(parent, parent) {
-		t.Errorf("isChild(parent, parent) = true, want false")
-	}
-
-	if isChild(child, parent) {
-		t.Errorf("isChild(child, parent) = true, want false")
-	}
-
-	if isChild(child, notChild) {
-		t.Errorf("isChild(child, notChild) = true, want false")
-	}
-	if isChild(parent, differentBus) {
-		t.Errorf("isChild(child, notChild) = true, want false")
-	}
+	assert.True(t, isChild(parent, child))
+	assert.False(t, isChild(parent, notChild))
+	assert.False(t, isChild(parent, parent))
+	assert.False(t, isChild(child, parent))
+	assert.False(t, isChild(child, notChild))
+	assert.False(t, isChild(parent, differentBus))
 }
 
 func TestBuildDeviceTree(t *testing.T) {
 	tree := BuildDeviceTree([]Device{device4, device5, device6})
-	if len(tree) != 1 {
-		t.Errorf("number of roots = %d, wanted 1", len(tree))
-	}
-	if len(tree) > 0 && len(tree[0].Children) != 1 {
-		t.Errorf("length of roots children = %d, expected 1", len(tree[0].Children))
-	}
-	if tree[0].Name != device4.Name {
-		t.Errorf("Root wrong")
-	}
-	if tree[0].Children[0].Name != device5.Name {
-		t.Errorf("child wrong")
-	}
-	if tree[0].Children[0].Children[0].Name != device6.Name {
-		t.Errorf("Wrong Grandchild")
-	}
+	assert.Equal(t, 1, len(tree), "expected 1 root node")
+	assert.Equal(t, 1, len(tree[0].Children), "expected 1 child of root")
+	assert.Equal(t, device4.Name, tree[0].Name, "root name mismatch")
+	assert.Equal(t, device5.Name, tree[0].Children[0].Name, "child name mismatch")
+	assert.Equal(t, device6.Name, tree[0].Children[0].Children[0].Name, "grandchild name mismatch")
 }
 
 func TestSortDeviceSlice(t *testing.T) {
 	sorted := sortDevices(allDevices)
 	want := []Device{device4, device1, device5, device2, device3}
 
+	assert.Equal(t, len(want), len(sorted), "sorted slice length mismatch")
 	for i := range want {
-		if !reflect.DeepEqual(sorted[i].Path, want[i].Path) {
-			t.Errorf("got %+v want %+v", sorted[i].Name, want[i].Name)
-		}
+		assert.Equal(t, want[i].Path, sorted[i].Path, "device path mismatch at index %d", i)
+		assert.Equal(t, want[i].Name, sorted[i].Name, "device name mismatch at index %d", i)
 	}
 }
 
@@ -281,28 +200,18 @@ func TestAddDeviceLogAndGetLog(t *testing.T) {
 	logtime := time.Now()
 	addDeviceLog(d, logtime)
 	got := GetLog()
-	if len(got) == 0 || got[0].Text != "TestLog" || got[0].State != StateAdded {
-		t.Errorf("got %+v", got)
-	}
+	assert.NotEmpty(t, got, "log should not be empty")
+	assert.Equal(t, "TestLog", got[0].Text)
+	assert.Equal(t, StateAdded, got[0].State)
 }
 
 func TestDeviceDiffProducesLog(t *testing.T) {
-	logs = nil
 	fakeRefresh([]Device{device1, device2})
 	logtime := time.Now()
-	logsBefore := GetLog()
+	logs = nil
 	deviceDiff([]Device{device1, device2, device3}, logtime)
 	logsAfter := GetLog()
-	if (len(logsAfter) - len(logsBefore)) != 1 {
-		t.Fatalf("logs empty, want 3")
-	}
-	found := false
-	for _, l := range logsAfter {
-		if l.Text == device3.Name && l.State == StateAdded && l.Time.Equal(logtime) {
-			found = true
-		}
-	}
-	if !found {
-		t.Errorf("expected log for added device3, got %+v", logsAfter)
-	}
+	assert.Len(t, logsAfter, 1, "expected exactly one log entry")
+	assert.Equal(t, device3.Name, logsAfter[0].Text, "log entry device name should match device3")
+	assert.Equal(t, StateAdded, logsAfter[0].State, "log entry state should be StateAdded")
 }
