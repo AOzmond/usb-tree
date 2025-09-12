@@ -13,6 +13,7 @@
 
 <style lang="scss">
   .log-container {
+    padding: 1rem 12px;
     min-height: 25%;
     max-height: 75%;
     display: flex;

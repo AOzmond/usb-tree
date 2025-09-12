@@ -59,7 +59,7 @@ export class TreeNode {
 
 export class Log {
   // Go type: time
-  Time: any;
+  Time: Date;
   Text: string;
   State: string;
 

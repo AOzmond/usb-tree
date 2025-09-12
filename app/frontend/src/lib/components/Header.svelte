@@ -43,10 +43,7 @@
 
 <style lang="scss">
   .header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-sizing: border-box;
+    padding: 0 12px;
     box-shadow: #000 0px 1px;
     height: 64px;
     background: #f8f9fb;

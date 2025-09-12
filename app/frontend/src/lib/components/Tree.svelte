@@ -11,6 +11,7 @@
 
 <style lang="scss">
   div {
+    padding: 0 12px;
     min-height: 25%;
     resize: vertical;
     overflow: scroll;
