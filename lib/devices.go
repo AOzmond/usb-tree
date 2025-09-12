@@ -64,11 +64,12 @@ func Stop() {
 // It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
-	initialDevices := Refresh()
-
+	logtime, initialDevices := Refresh()
 	for initialDevices == nil {
 		time.Sleep(1 * time.Second)
-		initialDevices = Refresh()
+		addErrorLog("Failed to enumerate devices. Retrying...", logtime)
+		onUpdateCallback(nil)
+		logtime, initialDevices = Refresh()
 	}
 
 	onUpdateCallback(initialDevices)
@@ -85,6 +86,9 @@ func Init(onUpdateCallback func([]Device)) []Device {
 					if changed {
 						onUpdateCallback(mergedDevices)
 					}
+				} else {
+					addErrorLog("Failed to enumerate devices. Retrying...", logtime)
+					onUpdateCallback(nil)
 				}
 
 			case <-pollingStop:
@@ -98,13 +102,13 @@ func Init(onUpdateCallback func([]Device)) []Device {
 }
 
 // Refresh resets the cached Device state to that of the current devices connected to the machine.
-func Refresh() []Device {
-	_, retrievedDevices := getDevices()
+func Refresh() (time.Time, []Device) {
+	logtime, retrievedDevices := getDevices()
 	if retrievedDevices != nil {
 		cachedDevices = retrievedDevices
-		return cachedDevices
+		return logtime, cachedDevices
 	}
-	return nil
+	return logtime, nil
 }
 
 // returns lists of devices.
@@ -272,6 +276,10 @@ func sortDevices(devices []Device) []Device {
 	})
 
 	return devices
+}
+
+func addErrorLog(text string, logtime time.Time) {
+	logs = append(logs, Log{Time: logtime, Text: text})
 }
 
 func addDeviceLog(device Device, logtime time.Time) {
