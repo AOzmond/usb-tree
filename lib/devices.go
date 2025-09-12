@@ -64,7 +64,14 @@ func Stop() {
 // It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
-	onUpdateCallback(Refresh())
+	initialDevices := Refresh()
+
+	for initialDevices == nil {
+		time.Sleep(1 * time.Second)
+		initialDevices = Refresh()
+	}
+
+	onUpdateCallback(initialDevices)
 	go func() {
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
@@ -73,9 +80,11 @@ func Init(onUpdateCallback func([]Device)) []Device {
 			select {
 			case <-ticker.C:
 				logtime, newDevices := getDevices()
-				changed, mergedDevices := deviceDiff(newDevices, logtime)
-				if changed {
-					onUpdateCallback(mergedDevices)
+				if newDevices != nil {
+					changed, mergedDevices := deviceDiff(newDevices, logtime)
+					if changed {
+						onUpdateCallback(mergedDevices)
+					}
 				}
 
 			case <-pollingStop:
@@ -90,8 +99,12 @@ func Init(onUpdateCallback func([]Device)) []Device {
 
 // Refresh resets the cached Device state to that of the current devices connected to the machine.
 func Refresh() []Device {
-	_, cachedDevices = getDevices()
-	return cachedDevices
+	_, retrievedDevices := getDevices()
+	if retrievedDevices != nil {
+		cachedDevices = retrievedDevices
+		return cachedDevices
+	}
+	return nil
 }
 
 // returns lists of devices.
@@ -111,7 +124,7 @@ func getDevices() (time.Time, []Device) {
 	})
 	if err != nil {
 		log.Printf("Issue accessing USB Devices: %v", err)
-		return time.Now(), []Device{}
+		return time.Now(), nil
 	}
 
 	return time.Now(), devices
