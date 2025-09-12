@@ -44,6 +44,7 @@ func (a *App) updateCallback(newDevices []lib.Device) {
 		tree := lib.BuildDeviceTree(newDevices)
 		runtime.EventsEmit(a.ctx, "treeUpdated", tree)
 	}
+
 	logs := lib.GetLog()
 	runtime.EventsEmit(a.ctx, "logsUpdated", logs)
 }

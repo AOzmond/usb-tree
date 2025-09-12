@@ -65,6 +65,7 @@ func Stop() {
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
 	logtime, initialDevices := Refresh()
+
 	for initialDevices == nil {
 		time.Sleep(1 * time.Second)
 		addErrorLog("Failed to enumerate devices. Retrying...", logtime)
@@ -81,6 +82,7 @@ func Init(onUpdateCallback func([]Device)) []Device {
 			select {
 			case <-ticker.C:
 				logtime, newDevices := getDevices()
+
 				if newDevices != nil {
 					changed, mergedDevices := deviceDiff(newDevices, logtime)
 					if changed {
@@ -108,6 +110,7 @@ func Refresh() (time.Time, []Device) {
 		cachedDevices = retrievedDevices
 		return logtime, cachedDevices
 	}
+
 	return logtime, nil
 }
 
@@ -266,6 +269,7 @@ func flatten(path []int) string {
 	for _, p := range path {
 		s += fmt.Sprintf("%04d-", p)
 	}
+
 	return s
 }
 

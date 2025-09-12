@@ -43,6 +43,7 @@ func hasState(devs []Device, state LogState) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -70,6 +71,7 @@ func TestDeviceDiff_Add(t *testing.T) {
 			assert.Equal(t, StateAdded, dev.State)
 		}
 	}
+
 	assert.True(t, found, "could not find device3 in merged devices")
 }
 
@@ -87,6 +89,7 @@ func TestDeviceDiff_Remove(t *testing.T) {
 			assert.Equal(t, StateRemoved, dev.State)
 		}
 	}
+
 	assert.True(t, found, "could not find device3 in merged devices")
 }
 
@@ -111,6 +114,7 @@ func TestDeviceDiff_AddAndRemove(t *testing.T) {
 			assert.Equal(t, StateRemoved, dev.State)
 		}
 	}
+
 	assert.True(t, foundRemoved, "could not find removed device1")
 
 	foundAdded := false
@@ -120,6 +124,7 @@ func TestDeviceDiff_AddAndRemove(t *testing.T) {
 			assert.Equal(t, StateAdded, dev.State)
 		}
 	}
+
 	assert.True(t, foundAdded, "could not find added device3")
 }
 
@@ -137,6 +142,7 @@ func TestDeviceDiff_AddThenRemove(t *testing.T) {
 			found = true
 		}
 	}
+
 	assert.False(t, found, "device2 should not be found after removal")
 }
 
@@ -178,9 +184,9 @@ func TestBuildDeviceTree(t *testing.T) {
 	tree := BuildDeviceTree([]Device{device4, device5, device6})
 	assert.Equal(t, 1, len(tree), "expected 1 root node")
 	assert.Equal(t, 1, len(tree[0].Children), "expected 1 child of root")
-	assert.Equal(t, device4.Name, tree[0].Name, "root name mismatch")
-	assert.Equal(t, device5.Name, tree[0].Children[0].Name, "child name mismatch")
-	assert.Equal(t, device6.Name, tree[0].Children[0].Children[0].Name, "grandchild name mismatch")
+	assert.Equal(t, device4, tree[0].Device, "root name mismatch")
+	assert.Equal(t, device5, tree[0].Children[0].Device, "child name mismatch")
+	assert.Equal(t, device6, tree[0].Children[0].Children[0].Device, "grandchild name mismatch")
 }
 
 func TestSortDeviceSlice(t *testing.T) {
@@ -211,7 +217,7 @@ func TestDeviceDiffProducesLog(t *testing.T) {
 	logs = nil
 	deviceDiff([]Device{device1, device2, device3}, logtime)
 	logsAfter := GetLog()
-	assert.Len(t, logsAfter, 1, "expected exactly one log entry")
+	assert.Len(t, logsAfter, 1, "expected exactly one new log entry")
 	assert.Equal(t, device3.Name, logsAfter[0].Text, "log entry device name should match device3")
 	assert.Equal(t, StateAdded, logsAfter[0].State, "log entry state should be StateAdded")
 }
