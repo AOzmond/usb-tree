@@ -247,6 +247,9 @@ func (d *Device) treeNode() TreeNode {
 // sortDevices sorts devices consistently by their path
 func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
+		if devices[i].Bus != devices[j].Bus {
+			return devices[i].Bus < devices[j].Bus
+		}
 		flatten := func(path []int) string {
 			s := ""
 			for _, p := range path {

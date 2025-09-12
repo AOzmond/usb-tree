@@ -3,12 +3,16 @@
   import { deviceTree } from "../../lib/state.svelte"
 </script>
 
-{#if $deviceTree.length === 0}
-  <div>No devices</div>
-{:else}
-  <div style="width: 100%; text-align: left;">
-    {#each $deviceTree as node}
-      <TreeNode {node} indent={0} />
-    {/each}
-  </div>
-{/if}
+<div >
+  {#each $deviceTree as node}
+    <span><TreeNode {node} indent={0} /></span>
+  {/each}
+</div>
+
+<style lang="scss">
+  div {
+    min-height: 25%;
+    resize: vertical;
+    overflow: scroll;
+  }
+</style>

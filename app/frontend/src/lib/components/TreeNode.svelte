@@ -1,20 +1,24 @@
 <script lang="ts">
-  import TreeNode from "./TreeNode.svelte";
-  export let node;
-  export let indent = 0;
+  import TreeNode from "./TreeNode.svelte"
+  export let node
+  export let indent = 0
 </script>
 
-<!-- TODO this code is just a mockup for api testing -->
-<div class={node.device.state} style="margin-left: {indent}em;">
-  {node.device.name}
+<div class="{node.device.state} TreeNode" style="margin-left: {indent}rem;">
+  <div>{node.device.name}</div>
+  <!-- TODO convert speed to number -->
+  <div>{node.device.speed}</div>
 </div>
-{#each node.children
-  .slice()
-  .sort((a, b) => a.device.bus - b.device.bus) as child}
-  <TreeNode node={child} indent={indent + 6} />
+{#each node.children as child}
+  <TreeNode node={child} indent={indent + 1} />
 {/each}
 
-<style>
+<style lang="scss">
+  .TreeNode {
+    padding: 0.1rem 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
   .added {
     color: green;
   }

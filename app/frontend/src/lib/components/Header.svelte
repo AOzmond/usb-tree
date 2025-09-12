@@ -1,10 +1,13 @@
 <script>
   import { Refresh } from "../../../wailsjs/go/main/App"
+
+  // TODO
+  let lastTimeStamp = "some timestamp"
 </script>
 
-<div>
-  <span>last updated: 00:00:00 AM </span>
-  <span>
+<div class="header">
+  <span>last updated: {lastTimeStamp} </span>
+  <span class="icons">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -38,18 +41,32 @@
   </span>
 </div>
 
-<style>
-  button {
-    all: unset;
+<style lang="scss">
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     box-sizing: border-box;
-  }
-  div {
-    max-height: 64px;
-    height: 4rem;
+    box-shadow: #000 0px 1px;
+    height: 64px;
     background: #f8f9fb;
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    flex-grow: 0;
+  }
+  .icons {
+    height: 40px;
+  }
+  button {
+    all: unset;
+    box-sizing: border-box;
+    height: 100%;
+  }
+  svg {
+    height: 100%;
   }
 </style>

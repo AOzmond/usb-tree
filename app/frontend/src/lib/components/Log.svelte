@@ -1,19 +1,24 @@
 <script>
   import { deviceLogs } from "../../lib/state.svelte"
+  import LogRow from "../components/LogRow.svelte"
 </script>
 
-{#if $deviceLogs != null && $deviceLogs.length === 0}
-  <div>No logs</div>
-{:else}
-  <div style=" width: 100%; text-align: left; display: flex; flex-direction: column;">
-    {#each $deviceLogs as log}
-      {#if log != null}
-        <span style="color: {log.State === 'removed' ? 'red' : log.State === 'added' ? 'green' : 'inherit'};">
-          {log.Time}
-          {log.Text}
-          {log.State}
-        </span>
-      {/if}
-    {/each}
-  </div>
-{/if}
+<div class="log-container">
+  {#each $deviceLogs as log}
+    {#if log != null}
+      <LogRow {log} />
+    {/if}
+  {/each}
+</div>
+
+<style lang="scss">
+  .log-container {
+    min-height: 25%;
+    max-height: 75%;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #333;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+</style>

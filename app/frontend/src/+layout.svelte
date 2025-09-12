@@ -3,18 +3,32 @@
   import Header from "./lib/components/Header.svelte"
   import Tree from "./lib/components/Tree.svelte"
   import Log from "./lib/components/Log.svelte"
-  Init()
+
+  import "./style/index.scss"
+
+  import { onMount } from "svelte"
+
+  onMount(() => {
+    Init()
+  })
 </script>
 
-<Header />
-<Tree />
-<Log />
+<div class="layout">
+  <Header />
+  <Tree />
+  <Log />
+</div>
 
-<style>
+<style lang="scss">
   :root {
     background: white;
-    font-size: 16;
   }
-
-
+  .layout {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    margin-right: 8px;
+  }
 </style>
