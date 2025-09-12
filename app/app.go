@@ -40,8 +40,11 @@ func (a *App) Exit(ctx context.Context) {
 
 // updateCallback will emit update events on device changes.
 func (a *App) updateCallback(newDevices []lib.Device) {
-	tree := lib.BuildDeviceTree(newDevices)
+	if newDevices != nil {
+		tree := lib.BuildDeviceTree(newDevices)
+		runtime.EventsEmit(a.ctx, "treeUpdated", tree)
+	}
+
 	logs := lib.GetLog()
-	runtime.EventsEmit(a.ctx, "treeUpdated", tree)
 	runtime.EventsEmit(a.ctx, "logsUpdated", logs)
 }

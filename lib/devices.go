@@ -64,7 +64,16 @@ func Stop() {
 // It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
-	onUpdateCallback(Refresh())
+	logtime, initialDevices := Refresh()
+
+	for initialDevices == nil {
+		time.Sleep(1 * time.Second)
+		addErrorLog("Failed to enumerate devices. Retrying...", logtime)
+		onUpdateCallback(nil)
+		logtime, initialDevices = Refresh()
+	}
+
+	onUpdateCallback(initialDevices)
 	go func() {
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
@@ -73,9 +82,15 @@ func Init(onUpdateCallback func([]Device)) []Device {
 			select {
 			case <-ticker.C:
 				logtime, newDevices := getDevices()
-				changed, mergedDevices := deviceDiff(newDevices, logtime)
-				if changed {
-					onUpdateCallback(mergedDevices)
+
+				if newDevices != nil {
+					changed, mergedDevices := deviceDiff(newDevices, logtime)
+					if changed {
+						onUpdateCallback(mergedDevices)
+					}
+				} else {
+					addErrorLog("Failed to enumerate devices. Retrying...", logtime)
+					onUpdateCallback(nil)
 				}
 
 			case <-pollingStop:
@@ -89,9 +104,14 @@ func Init(onUpdateCallback func([]Device)) []Device {
 }
 
 // Refresh resets the cached Device state to that of the current devices connected to the machine.
-func Refresh() []Device {
-	_, cachedDevices = getDevices()
-	return cachedDevices
+func Refresh() (time.Time, []Device) {
+	logtime, retrievedDevices := getDevices()
+	if retrievedDevices != nil {
+		cachedDevices = retrievedDevices
+		return logtime, cachedDevices
+	}
+
+	return logtime, nil
 }
 
 // returns lists of devices.
@@ -111,7 +131,7 @@ func getDevices() (time.Time, []Device) {
 	})
 	if err != nil {
 		log.Printf("Issue accessing USB Devices: %v", err)
-		return time.Now(), []Device{}
+		return time.Now(), nil
 	}
 
 	return time.Now(), devices
@@ -197,7 +217,7 @@ func BuildDeviceTree(devices []Device) []*TreeNode {
 	}
 
 	// Loop through each node to assign children
-	for parentIdx := len(nodes) - 1; parentIdx >= 0; parentIdx-- {
+	for parentIdx := range nodes {
 		// Find this node's children
 		for childIdx := range nodes {
 
@@ -244,21 +264,26 @@ func (d *Device) treeNode() TreeNode {
 	}
 }
 
+func flatten(path []int) string {
+	s := ""
+	for _, p := range path {
+		s += fmt.Sprintf("%04d-", p)
+	}
+
+	return s
+}
+
 // sortDevices sorts devices consistently by their path
 func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
-		flatten := func(path []int) string {
-			s := ""
-			for _, p := range path {
-				s += fmt.Sprintf("%04d-", p)
-			}
-			return s
-		}
-
 		return flatten(devices[i].Path) < flatten(devices[j].Path)
 	})
 
 	return devices
+}
+
+func addErrorLog(text string, logtime time.Time) {
+	logs = append(logs, Log{Time: logtime, Text: text})
 }
 
 func addDeviceLog(device Device, logtime time.Time) {
