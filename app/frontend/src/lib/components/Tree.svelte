@@ -12,8 +12,11 @@
 <style lang="scss">
   div {
     padding: 0 12px;
+    min-height: 25%;
+    height: 50%;
+    flex: 0 1 auto;
     resize: vertical;
-    overflow: scroll;
+    overflow: auto;
     background: var(--color-tree-bg);
     color: var(--color-text);
     border-bottom: 1px solid var(--color-divider);

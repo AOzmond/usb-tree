@@ -45,6 +45,6 @@
     flex-direction: column;
     overflow: hidden;
     background: var(--color-tree-bg);
-    height: 100%;
+    flex: 1 1 auto;
   }
 </style>
