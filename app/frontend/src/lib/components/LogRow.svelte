@@ -1,5 +1,5 @@
-<script>
-  export let log
+<script lang="ts">
+  let { log } = $props();
 </script>
 
 <span class="row {log.State}">
