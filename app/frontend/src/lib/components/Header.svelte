@@ -1,5 +1,6 @@
 <script>
   import { Refresh } from "../../../wailsjs/go/main/App"
+  import { theme, toggleTheme } from "../../lib/state.svelte"
 
   // TODO
   let lastTimeStamp = "some timestamp"
@@ -8,18 +9,24 @@
 <div class="header">
   <span>last updated: {lastTimeStamp} </span>
   <span class="icons">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      class="lucide lucide-toggle-left-icon lucide-toggle-left"
-      ><circle cx="9" cy="12" r="3" /><rect width="20" height="14" x="2" y="5" rx="7" /></svg
+    <button
+      onclick={toggleTheme}
+      aria-label={`Switch to ${$theme === "dark" ? "light" : "dark"} theme`}
+      aria-pressed={$theme === "dark"}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="lucide lucide-toggle-left-icon lucide-toggle-left"
+        ><circle cx="9" cy="12" r="3" /><rect width="20" height="14" x="2" y="5" rx="7" /></svg
+      ></button
     >
     <button onclick={Refresh} aria-label="Refresh"
       ><svg
@@ -43,10 +50,13 @@
 
 <style lang="scss">
   .header {
+    margin-bottom: 1px;
+    box-sizing: border-box;
     padding: 0 12px;
-    box-shadow: #000 0px 1px;
+    box-shadow: 0 1px var(--color-divider);
     height: 64px;
-    background: #f8f9fb;
+    background: var(--color-header-bg);
+    color: var(--color-text);
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -57,13 +67,30 @@
   }
   .icons {
     height: 40px;
+    display: flex;
+    gap: 0.5rem;
   }
   button {
     all: unset;
     box-sizing: border-box;
     height: 100%;
+    color: inherit;
+    padding: 0 0.25rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  button:focus-visible {
+    outline: 2px solid var(--color-divider);
+    outline-offset: 2px;
+  }
+  button:hover {
+    background: var(--color-divider);
   }
   svg {
     height: 100%;
+    width: auto;
   }
 </style>

@@ -19,11 +19,12 @@
     padding: 0.2rem 0;
     display: flex;
     justify-content: space-between;
+    color: var(--color-text);
   }
   .added {
-    color: green;
+    color: var(--color-added);
   }
   .removed {
-    color: red;
+    color: var(--color-removed);
   }
 </style>

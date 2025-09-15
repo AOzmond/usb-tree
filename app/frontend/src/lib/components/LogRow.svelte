@@ -24,11 +24,12 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    color: var(--color-text);
   }
   .added {
-    color: green;
+    color: var(--color-added);
   }
   .removed {
-    color: red;
+    color: var(--color-removed);
   }
 </style>

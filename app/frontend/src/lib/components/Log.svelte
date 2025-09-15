@@ -14,12 +14,13 @@
 <style lang="scss">
   .log-container {
     padding: 1rem 12px;
-    min-height: 25%;
-    max-height: 75%;
     display: flex;
     flex-direction: column;
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--color-divider);
     overflow-y: scroll;
     overflow-x: hidden;
+    background: var(--color-log-bg);
+    color: var(--color-text);
+    gap: 0.5rem;
   }
 </style>
