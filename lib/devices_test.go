@@ -182,8 +182,8 @@ func TestIsChild(t *testing.T) {
 
 func TestBuildDeviceTree(t *testing.T) {
 	tree := BuildDeviceTree([]Device{device4, device5, device6})
-	assert.Equal(t, 1, len(tree), "expected 1 root node")
-	assert.Equal(t, 1, len(tree[0].Children), "expected 1 child of root")
+	assert.Len(t, tree, 1, "expected 1 root node")
+	assert.Len(t, tree[0].Children, 1, "expected 1 child of root")
 	assert.Equal(t, device4, tree[0].Device, "root name mismatch")
 	assert.Equal(t, device5, tree[0].Children[0].Device, "child name mismatch")
 	assert.Equal(t, device6, tree[0].Children[0].Children[0].Device, "grandchild name mismatch")

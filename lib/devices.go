@@ -2,7 +2,6 @@ package lib
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"time"
 
@@ -42,6 +41,7 @@ const (
 	StateNormal  LogState = "normal"
 	StateAdded   LogState = "added"
 	StateRemoved LogState = "removed"
+	StateError   LogState = "error"
 )
 
 var (
@@ -64,16 +64,18 @@ func Stop() {
 // It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
-	logtime, initialDevices := Refresh()
+	go func() {
+		logtime, initialDevices := Refresh()
 
-	for initialDevices == nil {
-		time.Sleep(1 * time.Second)
-		addErrorLog("Failed to enumerate devices. Retrying...", logtime)
-		onUpdateCallback(nil)
-		logtime, initialDevices = Refresh()
-	}
+		for initialDevices == nil {
+			time.Sleep(1 * time.Second)
+			addErrorLog("Failed to enumerate devices. Retrying...", logtime, StateError)
+			onUpdateCallback(nil)
+			logtime, initialDevices = Refresh()
+		}
 
-	onUpdateCallback(initialDevices)
+		onUpdateCallback(initialDevices)
+	}()
 	go func() {
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
@@ -89,7 +91,7 @@ func Init(onUpdateCallback func([]Device)) []Device {
 						onUpdateCallback(mergedDevices)
 					}
 				} else {
-					addErrorLog("Failed to enumerate devices. Retrying...", logtime)
+					addErrorLog("Failed to enumerate devices. Retrying...", logtime, StateError)
 					onUpdateCallback(nil)
 				}
 
@@ -119,7 +121,7 @@ func getDevices() (time.Time, []Device) {
 	ctx := gousb.NewContext()
 	defer func() {
 		if err := ctx.Close(); err != nil {
-			log.Printf("error closing USB context: %v\n", err)
+			addErrorLog(err.Error(), time.Now(), StateError)
 		}
 	}()
 
@@ -130,7 +132,7 @@ func getDevices() (time.Time, []Device) {
 		return false
 	})
 	if err != nil {
-		log.Printf("Issue accessing USB Devices: %v", err)
+		addErrorLog(err.Error(), time.Now(), StateError)
 		return time.Now(), nil
 	}
 
@@ -282,8 +284,8 @@ func sortDevices(devices []Device) []Device {
 	return devices
 }
 
-func addErrorLog(text string, logtime time.Time) {
-	logs = append(logs, Log{Time: logtime, Text: text})
+func addErrorLog(text string, logtime time.Time, state LogState) {
+	logs = append(logs, Log{Time: logtime, Text: text, State: state})
 }
 
 func addDeviceLog(device Device, logtime time.Time) {
