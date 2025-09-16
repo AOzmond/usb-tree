@@ -75,8 +75,7 @@ func Init(onUpdateCallback func([]Device)) []Device {
 		}
 
 		onUpdateCallback(initialDevices)
-	}()
-	go func() {
+
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
 
@@ -129,7 +128,7 @@ func getDevices() (time.Time, []Device) {
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
 		devices = append(devices, descToDevice(*desc))
-		return false
+		return true
 	})
 	if err != nil {
 		addErrorLog(err.Error(), time.Now(), StateError)
