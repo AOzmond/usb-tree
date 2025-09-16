@@ -34,6 +34,7 @@ type TreeNode struct {
 type Log struct {
 	Time  time.Time
 	Text  string
+	Speed string
 	State LogState
 }
 
@@ -265,7 +266,7 @@ func sortDevices(devices []Device) []Device {
 }
 
 func addDeviceLog(device Device, logtime time.Time) {
-	logs = append(logs, Log{Time: logtime, Text: device.Name, State: device.State})
+	logs = append(logs, Log{Time: logtime, Text: device.Name, State: device.State, Speed: device.Speed})
 }
 
 // GetLog returns all stored device logs.

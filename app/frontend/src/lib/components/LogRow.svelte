@@ -1,8 +1,9 @@
 <script lang="ts">
-  let { log } = $props();
+  import { formatSpeed } from "../utilities"
+  let { log } = $props()
 </script>
 
-<span class="row {log.State}">
+<span class="row {log.State} ">
   <div class="left">
     {new Date(log.Time).toLocaleTimeString([], {
       hour: "2-digit",
@@ -14,8 +15,7 @@
     {log.Text}
   </div>
   <div class="right">
-    <!-- TODO add speed to logs(?) -->
-    0.01 Mbps
+    {formatSpeed(log.Speed)}
   </div>
 </span>
 
@@ -31,5 +31,8 @@
   }
   .removed {
     color: var(--color-removed);
+  }
+  .error {
+    color: orange;
   }
 </style>

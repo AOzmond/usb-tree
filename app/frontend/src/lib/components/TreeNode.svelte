@@ -1,33 +1,7 @@
 <script lang="ts">
   import TreeNode from "./TreeNode.svelte"
   import type { TreeNode as TreeNodeModel } from "../models"
-
-  const SPEED_MAP: Record<string, number> = {
-    low: 1.5,
-    full: 12,
-    high: 480,
-    super: 5000,
-  }
-
-  const formatSpeed = (rawSpeed?: string): string => {
-    if (!rawSpeed) {
-      return "unknown"
-    }
-
-    const normalized = rawSpeed.toLowerCase()
-    const value = SPEED_MAP[normalized]
-
-    if (value === undefined) {
-      return rawSpeed
-    }
-
-    if (value >= 1000) {
-      const gbps = value / 1000
-      return `${Number.isInteger(gbps) ? gbps : gbps} Gbps`
-    }
-
-    return `${Number.isInteger(value) ? value : value} Mbps`
-  }
+  import { formatSpeed } from "../utilities";
 
   interface Props {
     node: TreeNodeModel
@@ -35,12 +9,87 @@
   }
 
   let { node, indent = 0 }: Props = $props()
+
+  const hasChildren = $derived(() => (node.children?.length ?? 0) > 0)
+  const isAdded = $derived(() => node.device.state === "added")
+  const isRemoved = $derived(() => node.device.state === "removed")
+  const isNormal = $derived(() => node.device.state === "normal")
 </script>
 
 <div class="{node.device.state} TreeNode" style="margin-left: {indent}rem;">
-  <!-- TODO Add symbol -->
-  <div>{node.device.name}</div>
-  <div>{formatSpeed(node.device.speed)}</div>
+  <div class="TreeNode__info">
+    {#if isAdded()}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="TreeNode__icon TreeNode__icon--state"
+        aria-hidden="true"
+      >
+        <path d="M5 12h14" />
+        <path d="M12 5v14" />
+      </svg>
+    {:else if isRemoved()}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="TreeNode__icon TreeNode__icon--state"
+        aria-hidden="true"
+      >
+        <path d="M5 12h14" />
+      </svg>
+    {:else if isNormal() && !hasChildren()}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="TreeNode__icon TreeNode__icon--state"
+        aria-hidden="true"
+      >
+        <circle cx="12.1" cy="12.1" r="1" />
+      </svg>
+    {/if}
+    <div class="TreeNode__label">
+      {#if hasChildren()}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="TreeNode__icon"
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      {/if}
+      <span>{node.device.name}</span>
+    </div>
+  </div>
+  <div class="TreeNode__speed">{formatSpeed(node.device.speed)}</div>
 </div>
 {#each node.children as child}
   <TreeNode node={child} indent={indent + 1} />
@@ -52,6 +101,25 @@
     display: flex;
     justify-content: space-between;
     color: var(--color-text);
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .TreeNode__info {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .TreeNode__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .TreeNode__icon {
+    width: 1rem;
+    height: 1rem;
+  }
+  .TreeNode__speed {
+    white-space: nowrap;
   }
   .added {
     color: var(--color-added);

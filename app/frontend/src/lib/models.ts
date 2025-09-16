@@ -62,6 +62,7 @@ export class Log {
   Time: Date;
   Text: string;
   State: string;
+  Speed: string;
 
   static createFrom(source: any = {}) {
     return new Log(source);
@@ -72,6 +73,7 @@ export class Log {
     this.Time = this.convertValues(source["Time"], null);
     this.Text = source["Text"];
     this.State = source["State"];
+    this.Speed = source["Speed"];
   }
 
   convertValues(a: any, classs: any, asMap: boolean = false): any {

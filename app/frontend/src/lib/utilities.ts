@@ -1,0 +1,26 @@
+const SPEED_MAP: Record<string, number> = {
+  low: 1.5,
+  full: 12,
+  high: 480,
+  super: 5000,
+};
+
+export const formatSpeed = (rawSpeed?: string): string => {
+  if (!rawSpeed) {
+    return "unknown";
+  }
+
+  const normalized = rawSpeed.toLowerCase();
+  const value = SPEED_MAP[normalized];
+
+  if (value === undefined) {
+    return rawSpeed;
+  }
+
+  if (value >= 1000) {
+    const gbps = value / 1000;
+    return `${Number.isInteger(gbps) ? gbps : gbps} Gbps`;
+  }
+
+  return `${Number.isInteger(value) ? value : value} Mbps`;
+};
