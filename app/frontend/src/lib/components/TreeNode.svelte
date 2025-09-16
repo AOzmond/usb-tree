@@ -1,7 +1,7 @@
 <script lang="ts">
   import TreeNode from "./TreeNode.svelte"
   import type { TreeNode as TreeNodeModel } from "../models"
-  import { formatSpeed } from "../utilities";
+  import { formatSpeed } from "../utilities"
 
   interface Props {
     node: TreeNodeModel
@@ -21,8 +21,6 @@
     {#if isAdded()}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -38,8 +36,6 @@
     {:else if isRemoved()}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -101,7 +97,7 @@
     display: flex;
     justify-content: space-between;
     color: var(--color-text);
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
   }
   .TreeNode__info {
@@ -120,6 +116,7 @@
   }
   .TreeNode__speed {
     white-space: nowrap;
+    align-self: flex-start;
   }
   .added {
     color: var(--color-added);
