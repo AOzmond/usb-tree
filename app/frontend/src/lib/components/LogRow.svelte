@@ -1,18 +1,34 @@
 <script lang="ts">
   import { formatSpeed } from "../utilities"
+  import Added from "../../assets/svgs/added.svg?component"
+  import Removed from "../../assets/svgs/removed.svg?component"
+  import Normal from "../../assets/svgs/normal.svg?component"
+  import DownChevron from "../../assets/svgs/downchevron.svg?component"
   let { log } = $props()
+
+  const isAdded = $derived(() => log.State === "added")
+  const isRemoved = $derived(() => log.State === "removed")
+  const isNormal = $derived(() => log.State === "normal")
 </script>
 
 <span class="row {log.State} ">
   <div class="left">
-    <div>
-      {new Date(log.Time).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      })}
-      {log.State}<!-- TODO should be replaced with symbol -->
+    <div class="logstamp">
+      <span
+        >{new Date(log.Time).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        })}
+      </span>
+      {#if isAdded()}
+        <Added width="24" />
+      {:else if isRemoved()}
+        <Removed width="24" />
+      {:else if isNormal()}
+        <Normal width="24" />
+      {/if}
     </div>
     <div class="logText">
       {log.Text}
@@ -42,6 +58,11 @@
       white-space: nowrap;
     }
   }
+  .logstamp {
+    display: flex;
+    align-items: center;
+  }
+
   .right {
     white-space: nowrap;
     align-self: center;

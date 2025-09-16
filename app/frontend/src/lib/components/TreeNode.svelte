@@ -2,6 +2,10 @@
   import TreeNode from "./TreeNode.svelte"
   import type { TreeNode as TreeNodeModel } from "../models"
   import { formatSpeed } from "../utilities"
+  import Added from "../../assets/svgs/added.svg?component"
+  import Removed from "../../assets/svgs/removed.svg?component"
+  import Normal from "../../assets/svgs/normal.svg?component"
+  import DownChevron from "../../assets/svgs/downchevron.svg?component"
 
   interface Props {
     node: TreeNodeModel
@@ -19,69 +23,16 @@
 <div class="{node.device.state} TreeNode" style="margin-left: {indent}rem;">
   <div class="TreeNode__info">
     {#if isAdded()}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="TreeNode__icon TreeNode__icon--state"
-        aria-hidden="true"
-      >
-        <path d="M5 12h14" />
-        <path d="M12 5v14" />
-      </svg>
+      <Added width="24" />
     {:else if isRemoved()}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="TreeNode__icon TreeNode__icon--state"
-        aria-hidden="true"
-      >
-        <path d="M5 12h14" />
-      </svg>
+      <Removed width="24" />
     {:else if isNormal() && !hasChildren()}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="TreeNode__icon TreeNode__icon--state"
-        aria-hidden="true"
-      >
-        <circle cx="12.1" cy="12.1" r="1" />
-      </svg>
+      <Normal />
+    {/if}
+    {#if hasChildren()}
+      <DownChevron />
     {/if}
     <div class="TreeNode__label">
-      {#if hasChildren()}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="TreeNode__icon"
-          aria-hidden="true"
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      {/if}
       <span>{node.device.name}</span>
     </div>
   </div>
@@ -103,7 +54,6 @@
   .TreeNode__info {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
   }
   .TreeNode__label {
     display: inline-flex;
