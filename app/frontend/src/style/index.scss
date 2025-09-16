@@ -280,6 +280,28 @@ progress {
   cursor: default;
 }
 
+// END OF RESET
+
 html {
   overflow: hidden;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("../assets/fonts/ibm-plex-sans_5.2.7/webfonts/ibm-plex-sans-latin-400-normal.woff2")
+      format("woff2"),
+    url("../assets/fonts/ibm-plex-sans_5.2.7/webfonts/ibm-plex-sans-latin-400-normal.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../assets/fonts/jetbrains-mono_5.2.7/webfonts/jetbrains-mono-latin-400-normal.woff2")
+      format("woff2"),
+    url("../assets/fonts/jetbrains-mono_5.2.7/webfonts/jetbrains-mono-latin-400-normal.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
