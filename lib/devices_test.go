@@ -206,7 +206,7 @@ func TestAddDeviceLogAndGetLog(t *testing.T) {
 	logtime := time.Now()
 	addDeviceLog(d, logtime)
 	got := GetLog()
-	assert.NotEmpty(t, got, "log should not be empty")
+	assert.Len(t, got, 1, "expected exactly one log entry")
 	assert.Equal(t, "TestLog", got[0].Text)
 	assert.Equal(t, StateAdded, got[0].State)
 }

@@ -65,13 +65,12 @@ func Stop() {
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
 	go func() {
-		logtime, initialDevices := Refresh()
+		_, initialDevices := Refresh()
 
 		for initialDevices == nil {
 			time.Sleep(1 * time.Second)
-			addErrorLog("Failed to enumerate devices. Retrying...", logtime, StateError)
 			onUpdateCallback(nil)
-			logtime, initialDevices = Refresh()
+			_, initialDevices = Refresh()
 		}
 
 		onUpdateCallback(initialDevices)
@@ -90,7 +89,6 @@ func Init(onUpdateCallback func([]Device)) []Device {
 						onUpdateCallback(mergedDevices)
 					}
 				} else {
-					addErrorLog("Failed to enumerate devices. Retrying...", logtime, StateError)
 					onUpdateCallback(nil)
 				}
 
