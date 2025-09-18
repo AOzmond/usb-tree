@@ -120,7 +120,7 @@ func getDevices() (time.Time, []Device) {
 	ctx := gousb.NewContext()
 	defer func() {
 		if err := ctx.Close(); err != nil {
-			addErrorLog(err.Error(), time.Now(), StateError)
+			addErrorLog(fmt.Sprintf("Error trying to get USB devices: %s", err.Error()), time.Now(), StateError)
 		}
 	}()
 
@@ -131,7 +131,7 @@ func getDevices() (time.Time, []Device) {
 		return true
 	})
 	if err != nil {
-		addErrorLog(err.Error(), time.Now(), StateError)
+		addErrorLog(fmt.Sprintf("Error trying to get USB devices: %s", err.Error()), time.Now(), StateError)
 		return time.Now(), nil
 	}
 
