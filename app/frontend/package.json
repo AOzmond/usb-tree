@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@fontsource-variable/ibm-plex-sans": "^5.2.8",
-    "@fontsource-variable/jetbrains-mono": "^5.2.8"
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@lucide/svelte": "^0.544.0"
   }
 }

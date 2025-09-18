@@ -2,10 +2,7 @@
   import TreeNode from "./TreeNode.svelte"
   import type { TreeNode as TreeNodeModel } from "../models"
   import { formatSpeed } from "../utilities"
-  import Added from "../../assets/svgs/added.svg?component"
-  import Removed from "../../assets/svgs/removed.svg?component"
-  import Normal from "../../assets/svgs/normal.svg?component"
-  import DownChevron from "../../assets/svgs/downchevron.svg?component"
+  import { Plus, Minus, Dot, ChevronDown } from '@lucide/svelte'
   import { tooltipTrigger } from "../tooltip.svelte"
 
   interface Props {
@@ -50,12 +47,12 @@
       onclick={toggleCollapsed}
     >
       {#if isAdded()}
-        <Added width="24" />
+        <Plus  />
       {:else if isRemoved()}
-        <Removed width="24" />
+        <Minus  />
       {/if}
       <span class="TreeNode__chevron" class:collapsed={isCollapsed}>
-        <DownChevron />
+        <ChevronDown />
       </span>
       <div class="TreeNode__label">
         <span>{node.device.name}</span>
@@ -66,11 +63,11 @@
       class="TreeNode__info"
     >
       {#if isAdded()}
-        <Added width="24" />
+        <Plus />
       {:else if isRemoved()}
-        <Removed width="24" />
+        <Minus  />
       {:else if isNormal()}
-        <Normal />
+        <Dot />
       {/if}
       <div class="TreeNode__label">
         <span>{node.device.name}</span>

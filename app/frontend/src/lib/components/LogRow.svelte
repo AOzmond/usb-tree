@@ -1,8 +1,8 @@
 <script lang="ts">
   import { formatSpeed } from "../utilities"
-  import Added from "../../assets/svgs/added.svg?component"
-  import Removed from "../../assets/svgs/removed.svg?component"
-  import Normal from "../../assets/svgs/normal.svg?component"
+  import { Plus, Minus, Dot } from '@lucide/svelte'
+
+
   let { log } = $props()
 
   const isAdded = $derived(() => log.State === "added")
@@ -22,11 +22,11 @@
         })}
       </span>
       {#if isAdded()}
-        <Added width="24" />
+        <Plus />
       {:else if isRemoved()}
-        <Removed width="24" />
+        <Minus />
       {:else if isNormal()}
-        <Normal width="24" />
+        <Dot />
       {/if}
     </div>
     <div class="logText">
