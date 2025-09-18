@@ -12,6 +12,27 @@
 
   let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : null)
   let formattedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : null)
+  let isRefreshing = $state(false)
+  let refreshCompleted = $state(false)
+
+  const handleRefresh = async () => {
+    if (isRefreshing) {
+      return
+    }
+    isRefreshing = true
+    refreshCompleted = false
+    try {
+      await Refresh()
+    } finally {
+      refreshCompleted = true
+    }
+  }
+
+  const handleSpinEnd = () => {
+    if (refreshCompleted) {
+      isRefreshing = false
+    }
+  }
 </script>
 
 <div class="header">
@@ -36,7 +57,7 @@
         ><rect width="20" height="14" x="2" y="5" rx="7" /><circle cx="9" cy="12" r="6" /></svg
       ></button
     >
-    <button onclick={Refresh} aria-label="Refresh"
+    <button onclick={handleRefresh} aria-label="Refresh" class:spinning={isRefreshing}
       ><svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -48,6 +69,7 @@
         stroke-linecap="round"
         stroke-linejoin="round"
         class="lucide lucide-refresh-ccw-icon lucide-refresh-ccw refresh"
+        onanimationend={handleSpinEnd}
         ><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path
           d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"
         /><path d="M16 16h5v5" /></svg
@@ -111,5 +133,18 @@
 
   .refresh {
     height: 28px;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  button.spinning .refresh {
+    animation: spin 0.9s ease-in-out forwards;
   }
 </style>
