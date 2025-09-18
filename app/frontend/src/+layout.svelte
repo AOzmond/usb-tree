@@ -3,6 +3,7 @@
   import Header from "./lib/components/Header.svelte"
   import Tree from "./lib/components/Tree.svelte"
   import Log from "./lib/components/Log.svelte"
+  import Tooltip from "./lib/components/Tooltip.svelte"
 
   import { onMount } from "svelte"
 
@@ -17,6 +18,7 @@
     <Tree />
     <Log />
   </div>
+  <Tooltip />
 </div>
 
 <style lang="scss">
@@ -36,7 +38,6 @@
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
-    color: var(--color-text);
     background: var(--color-tree-bg);
   }
   .content {

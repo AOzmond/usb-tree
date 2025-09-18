@@ -11,7 +11,7 @@
   const isNormal = $derived(() => log.State === "normal")
 </script>
 
-<span class="row {log.State} ">
+<span class="row layout-row {log.State}">
   <div class="left">
     <div class="logstamp">
       <span
@@ -40,13 +40,6 @@
 </span>
 
 <style lang="scss">
-  .row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    color: var(--color-text);
-    align-items: flex-start;
-  }
   .left {
     display: flex;
     flex-direction: row;
@@ -66,14 +59,5 @@
   .right {
     white-space: nowrap;
     align-self: center;
-  }
-  .added {
-    color: var(--color-added);
-  }
-  .removed {
-    color: var(--color-removed);
-  }
-  .error {
-    color: orange;
   }
 </style>

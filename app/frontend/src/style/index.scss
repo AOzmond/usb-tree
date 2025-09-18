@@ -281,7 +281,9 @@ progress {
 }
 
 // END OF RESET
-
+button {
+  color: inherit;
+}
 html {
   overflow: hidden;
 }
@@ -304,4 +306,23 @@ html {
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+}
+
+.layout-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.added {
+  color: var(--color-added);
+}
+
+.removed {
+  color: var(--color-removed);
+}
+
+.error {
+  color: var(--color-error);
 }

@@ -64,7 +64,6 @@
     box-shadow: 0 1px var(--color-divider);
     height: 64px;
     background: var(--color-header-bg);
-    color: var(--color-text);
     width: 100%;
     display: flex;
     flex-direction: row;

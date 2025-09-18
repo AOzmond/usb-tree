@@ -22,7 +22,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     background: var(--color-log-bg);
-    color: var(--color-text);
     gap: 0.5rem;
     font-family: "JetBrains Mono", monospace;
   }

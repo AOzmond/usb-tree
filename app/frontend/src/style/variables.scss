@@ -8,6 +8,7 @@ $tree-bg-light: #ffffff;
 $log-bg-light: #dfe1e5;
 $added-green-light: #007f00;
 $removed-red-light: #7f0000;
+$error-orange-light: #ff8c00;
 
 /* Dark mode colors */
 $text-dark: #fff;
@@ -16,6 +17,7 @@ $tree-bg-dark: #000;
 $log-bg-dark: #281a33;
 $added-green-dark: #03a51a;
 $removed-red-dark: #c4001c;
+$error-orange-dark: #ffb347;
 
 :root {
   color-scheme: light;
@@ -25,7 +27,11 @@ $removed-red-dark: #c4001c;
   --color-log-bg: #{$log-bg-light};
   --color-added: #{$added-green-light};
   --color-removed: #{$removed-red-light};
+  --color-error: #{$error-orange-light};
   --color-divider: #{rgba($text-light, 0.15)};
+  --color-tooltip-bg: #f3f3f3;
+  --color-tooltip-text: #000;
+  --color-tooltip-border: rgba(0, 0, 0, 0.35);
 }
 
 :root[data-theme="dark"] {
@@ -36,5 +42,9 @@ $removed-red-dark: #c4001c;
   --color-log-bg: #{$log-bg-dark};
   --color-added: #{$added-green-dark};
   --color-removed: #{$removed-red-dark};
+  --color-error: #{$error-orange-dark};
   --color-divider: #{rgba($text-dark, 0.35)};
+  --color-tooltip-bg: #242424;
+  --color-tooltip-text: #fff;
+  --color-tooltip-border: rgba(255, 255, 255, 0.5);
 }

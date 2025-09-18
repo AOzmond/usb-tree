@@ -18,7 +18,6 @@
     resize: vertical;
     overflow: auto;
     background: var(--color-tree-bg);
-    color: var(--color-text);
     border-bottom: 1px solid var(--color-divider);
     font-family: "IBM Plex Sans", sans-serif;
   }
