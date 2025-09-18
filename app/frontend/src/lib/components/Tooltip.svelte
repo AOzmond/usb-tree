@@ -9,10 +9,15 @@
   const sanitizeHex = (value: string) => value.trim().replace(/^0x/i, "").toLowerCase()
   const defaultHref = "https://the-sz.com/products/usbid/"
   const buildSearchHref = (vendor: string, product: string) => {
-    if (vendor && product) {
-      return `${defaultHref}index.php?v=${sanitizeHex(vendor)}&p=${sanitizeHex(product)}&n=`
+    const params = new URLSearchParams()
+    if (vendor) {
+      params.set("v", sanitizeHex(vendor))
     }
-    return defaultHref
+    if (product) {
+      params.set("p", sanitizeHex(product))
+    }
+    const query = params.toString()
+    return query ? `${defaultHref}?${query}` : defaultHref
   }
   const buildIdLabel = (vendor: string, product: string) => (vendor && product ? `${vendor}:${product}` : vendor || product || "Unknown")
 

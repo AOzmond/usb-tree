@@ -60,7 +60,6 @@ export function Init(): void {
   EventsOff("logsUpdated");
   EventsOn("treeUpdated", (tree: TreeNode[]) => {
     deviceTree.set(tree);
-    console.log(deviceTree);
   });
   EventsOn("logsUpdated", (logs: Log[]) => {
     deviceLogs.set(logs);

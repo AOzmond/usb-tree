@@ -3,7 +3,6 @@
   import Added from "../../assets/svgs/added.svg?component"
   import Removed from "../../assets/svgs/removed.svg?component"
   import Normal from "../../assets/svgs/normal.svg?component"
-  import DownChevron from "../../assets/svgs/downchevron.svg?component"
   let { log } = $props()
 
   const isAdded = $derived(() => log.State === "added")
