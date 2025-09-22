@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
-import { Log, Device, TreeNode } from "./models";
-import { EventsOff, EventsOn } from "../../wailsjs/runtime/runtime.js";
+import { Log, TreeNode } from "./models";
+import { EventsOn } from "../../wailsjs/runtime/runtime.js";
 import { InitFrontend, Refresh } from "../../wailsjs/go/main/App";
 
 export const deviceTree = writable<TreeNode[]>([]);
@@ -15,43 +15,16 @@ function prefersDark(): boolean {
   );
 }
 
-function safeGetTheme(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  try {
-    return window.localStorage.getItem("theme");
-  } catch (error) {
-    console.warn("Unable to access localStorage for theme", error);
-    return null;
-  }
-}
-
 function resolvedTheme(): ThemeMode {
-  const saved = safeGetTheme();
-  if (saved === "light" || saved === "dark") {
-    return saved;
-  }
   return prefersDark() ? "dark" : "light";
 }
 
 export const theme = writable<ThemeMode>(resolvedTheme());
 
-function applyTheme(mode: ThemeMode): void {
+theme.subscribe((mode) => {
   if (typeof document !== "undefined") {
     document.documentElement.dataset.theme = mode;
   }
-  if (typeof window !== "undefined") {
-    try {
-      window.localStorage.setItem("theme", mode);
-    } catch (error) {
-      console.warn("Unable to persist theme to localStorage", error);
-    }
-  }
-}
-
-theme.subscribe((mode) => {
-  applyTheme(mode);
 });
 
 export function toggleTheme(): void {
@@ -59,8 +32,6 @@ export function toggleTheme(): void {
 }
 
 export function Init(): void {
-  EventsOff("treeUpdated");
-  EventsOff("logsUpdated");
   EventsOn("treeUpdated", (tree: TreeNode[]) => {
     deviceTree.set(tree);
   });

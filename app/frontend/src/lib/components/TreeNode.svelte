@@ -16,7 +16,7 @@
 
   const defaultHref = "https://the-sz.com/products/usbid/"
   const sanitizeHex = (value: string) => value.trim().replace(/^0x/i, "").toLowerCase()
-  function buildSearchHref (vendor: string, product: string) {
+  function buildSearchHref(vendor: string, product: string) {
     const params = new URLSearchParams()
     if (vendor) {
       params.set("v", sanitizeHex(vendor))
@@ -73,9 +73,15 @@
       class={`tree-node__chevron${isCollapsed ? " tree-node__chevron--collapsed" : ""}`}
       onclick={toggleCollapsed}
     />
-    <div class="tree-node__label">
+    <a
+      class="tree-node__label"
+      href={searchHref}
+      onclick={handleLinkClick}
+      tabindex="0"
+      aria-label="Open device info in browser"
+    >
       <span>{node.device.name}</span>
-    </div>
+    </a>
   </div>
   <div class="tree-node__speed">{formatSpeed(node.device.speed)}</div>
 </div>
@@ -108,12 +114,13 @@
   }
 
   .tree-node__label {
+    all: unset;
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
   }
 
-  .tree-node__chevron {
+  :global .tree-node__chevron {
     display: inline-flex;
     transition: transform 0.15s ease;
   }
@@ -134,4 +141,6 @@
   .tree-node--removed {
     color: var(--color-removed);
   }
+
+
 </style>

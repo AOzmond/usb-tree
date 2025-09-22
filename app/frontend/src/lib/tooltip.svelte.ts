@@ -1,22 +1,22 @@
 import type { Action } from "svelte/action";
 import { writable } from "svelte/store";
 
-export interface TooltipContent {
+export type TooltipContent = {
   bus: number | null;
   vendorId: string | null;
   productId: string | null;
-}
+};
 
-export interface TooltipPosition {
+export type TooltipPosition = {
   x: number;
   y: number;
-}
+};
 
-export interface TooltipState {
+export type TooltipState = {
   visible: boolean;
   content: TooltipContent | null;
   position: TooltipPosition | null;
-}
+};
 
 const initialState: TooltipState = {
   visible: false,

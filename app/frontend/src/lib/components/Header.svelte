@@ -106,23 +106,24 @@
     height: 40px;
     width: auto;
     stroke: var(--color-text);
-    fill: var(--color-header-bg);
   }
 
   .header :global(.header__theme-icon circle),
   .header :global(.header__theme-icon rect) {
-    transition: transform 0.25s ease, fill 0.25s ease, stroke 0.25s ease;
+    transition:
+      transform 0.25s ease,
+      fill 0.25s ease,
+      stroke 0.25s ease;
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .header :global(.header__theme-icon circle) {
-    fill: transparent;
+    fill: var(--color-text);
   }
 
   .header :global(.header__theme-button[aria-pressed="true"] .header__theme-icon circle) {
     transform: translateX(6px);
-    fill: var(--color-text);
   }
 
   .header :global(.header__refresh-icon) {
