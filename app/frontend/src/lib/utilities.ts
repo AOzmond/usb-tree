@@ -19,8 +19,8 @@ export const formatSpeed = (rawSpeed?: string): string => {
 
   if (value >= 1000) {
     const gbps = value / 1000;
-    return `${Number.isInteger(gbps) ? gbps : gbps} Gbps`;
+    return `${gbps} Gbps`;
   }
 
-  return `${Number.isInteger(value) ? value : value} Mbps`;
+  return `${value} Mbps`;
 };

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Init } from "./lib/state.svelte"
-  import Header from "./lib/components/Header.svelte"
-  import Tree from "./lib/components/Tree.svelte"
-  import Log from "./lib/components/Log.svelte"
-  import Tooltip from "./lib/components/Tooltip.svelte"
+  import { Init } from "$lib/state.svelte"
+  import Header from "$lib/components/Header.svelte"
+  import Tree from "$lib/components/Tree.svelte"
+  import Log from "$lib/components/Log.svelte"
+  import Tooltip from "$lib/components/Tooltip.svelte"
 
   import { onMount } from "svelte"
 
@@ -12,9 +12,9 @@
   })
 </script>
 
-<div class="layout">
+<div class="app">
   <Header />
-  <div class="content">
+  <div class="app__content">
     <Tree />
     <Log />
   </div>
@@ -22,17 +22,10 @@
 </div>
 
 <style lang="scss">
-  :global {
-    @import "./style/index.scss";
-  }
+
   @import "./style/variables.scss";
 
-  :global(body) {
-    background: var(--color-tree-bg);
-    color: var(--color-text);
-  }
-
-  .layout {
+  .app {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -40,7 +33,7 @@
     overflow: hidden;
     background: var(--color-tree-bg);
   }
-  .content {
+  .app__content {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

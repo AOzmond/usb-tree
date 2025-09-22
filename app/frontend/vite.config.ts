@@ -6,4 +6,9 @@ import svg from "@poppanator/sveltekit-svg";
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
   plugins: [svelte(), svg()],
+  resolve: {
+    alias: {
+      $lib: "/src/lib",
+    },
+  },
 });

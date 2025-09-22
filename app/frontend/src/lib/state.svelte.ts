@@ -7,12 +7,15 @@ export const deviceTree = writable<TreeNode[]>([]);
 export const deviceLogs = writable<Log[]>([]);
 export type ThemeMode = "light" | "dark";
 
-const prefersDark = (): boolean =>
-  typeof window !== "undefined" &&
-  typeof window.matchMedia === "function" &&
-  window.matchMedia("(prefers-color-scheme: dark)").matches;
+function prefersDark(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+}
 
-const safeGetTheme = (): string | null => {
+function safeGetTheme(): string | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -22,19 +25,19 @@ const safeGetTheme = (): string | null => {
     console.warn("Unable to access localStorage for theme", error);
     return null;
   }
-};
+}
 
-const resolvedTheme = (): ThemeMode => {
+function resolvedTheme(): ThemeMode {
   const saved = safeGetTheme();
   if (saved === "light" || saved === "dark") {
     return saved;
   }
   return prefersDark() ? "dark" : "light";
-};
+}
 
 export const theme = writable<ThemeMode>(resolvedTheme());
 
-const applyTheme = (mode: ThemeMode) => {
+function applyTheme(mode: ThemeMode): void {
   if (typeof document !== "undefined") {
     document.documentElement.dataset.theme = mode;
   }
@@ -45,15 +48,15 @@ const applyTheme = (mode: ThemeMode) => {
       console.warn("Unable to persist theme to localStorage", error);
     }
   }
-};
+}
 
 theme.subscribe((mode) => {
   applyTheme(mode);
 });
 
-export const toggleTheme = () => {
+export function toggleTheme(): void {
   theme.update((mode) => (mode === "light" ? "dark" : "light"));
-};
+}
 
 export function Init(): void {
   EventsOff("treeUpdated");

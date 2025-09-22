@@ -5,20 +5,15 @@
 
   let container: HTMLDivElement | null = $state(null)
   let autoScroll = $state(true)
-  let visibleLogs = $derived(($deviceLogs ?? []).filter(Boolean))
 
-  const scrollToBottom = () => {
+  function scrollToBottom() {
     if (!container) {
       return
     }
     container.scrollTop = container.scrollHeight
   }
 
-  onMount(() => {
-    scrollToBottom()
-  })
-
-  const handleScroll = () => {
+  function handleScroll() {
     if (!container) {
       return
     }
@@ -27,35 +22,37 @@
   }
 
   $effect(() => {
-    visibleLogs
+    $deviceLogs
     autoScroll
-    if (!autoScroll) {
-      return
+    if (autoScroll) {
+      scrollToBottom()
     }
+  })
+
+  onMount(() => {
     scrollToBottom()
   })
 </script>
 
-<div class="log-container" bind:this={container} onscroll={handleScroll}>
-  {#each visibleLogs as log}
-    {#if log != null}
+<div class="log-panel" bind:this={container} onscroll={handleScroll}>
+  {#each $deviceLogs as log}
       <LogRow {log} />
-    {/if}
   {/each}
 </div>
 
 <style lang="scss">
-  .log-container {
-    padding: 1rem 12px;
+  .log-panel {
+    padding: 12px;
     display: flex;
     flex-direction: column;
     min-height: 25%;
-    flex: 1 1 50%;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 50%;
     border-top: 1px solid var(--color-divider);
     overflow-y: auto;
     overflow-x: hidden;
     background: var(--color-log-bg);
     gap: 0.5rem;
-    font-family: "JetBrains Mono", monospace;
   }
 </style>

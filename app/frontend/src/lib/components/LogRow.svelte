@@ -1,62 +1,85 @@
 <script lang="ts">
   import { formatSpeed } from "../utilities"
-  import { Plus, Minus, Dot } from '@lucide/svelte'
-
+  import { Plus, Minus, Dot } from "@lucide/svelte"
 
   let { log } = $props()
 
-  const isAdded = $derived(() => log.State === "added")
-  const isRemoved = $derived(() => log.State === "removed")
-  const isNormal = $derived(() => log.State === "normal")
+  const iconByState = {
+    added: Plus,
+    removed: Minus,
+    normal: Dot,
+  } as const
+
+  const LogIcon = iconByState[log.State as keyof typeof iconByState] ?? Dot
+
 </script>
 
-<span class="row layout-row {log.State}">
-  <div class="left">
-    <div class="logstamp">
+<code class={`log-row log-row--${log.State}`}>
+  <div class="log-row__primary">
+    <div class="log-row__timestamp">
       <span
-        >{new Date(log.Time).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        })}
+        >{new Date(log.Time).toLocaleTimeString()}
       </span>
-      {#if isAdded()}
-        <Plus />
-      {:else if isRemoved()}
-        <Minus />
-      {:else if isNormal()}
-        <Dot />
-      {/if}
+      <LogIcon />
     </div>
-    <div class="logText">
+    <div class="log-row__text">
       {log.Text}
     </div>
   </div>
-  <div class="right">
+  <div class="log-row__speed">
     {formatSpeed(log.Speed)}
   </div>
-</span>
+</code>
 
 <style lang="scss">
-  .left {
+  .log-row {
     display: flex;
     flex-direction: row;
-    flex: 1 1 auto;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .log-row__primary {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
     min-width: 0;
     align-self: center;
+
     & > :first-child {
-      align-self: center;
       white-space: nowrap;
     }
   }
-  .logstamp {
+
+  .log-row__timestamp {
     display: flex;
     align-items: center;
+    gap: 0.4rem;
   }
 
-  .right {
+  .log-row__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .log-row__speed {
     white-space: nowrap;
     align-self: center;
+  }
+
+  .log-row--added {
+    color: var(--color-added);
+  }
+
+  .log-row--removed {
+    color: var(--color-removed);
+  }
+
+  .log-row--error {
+    color: var(--color-error);
   }
 </style>

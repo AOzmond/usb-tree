@@ -1,25 +1,13 @@
 <script lang="ts">
-  import { BrowserOpenURL } from "../../../wailsjs/runtime/runtime.js"
-  import { cancelTooltipHide, scheduleTooltipHide, tooltip } from "../tooltip.svelte"
+  import { tooltip } from "../tooltip.svelte"
   import type { TooltipState } from "../tooltip.svelte"
 
   let host: HTMLDivElement | null = $state(null)
 
   const formatBus = (value: number | null) => (value == null ? null : value.toString().padStart(3, "0"))
-  const sanitizeHex = (value: string) => value.trim().replace(/^0x/i, "").toLowerCase()
-  const defaultHref = "https://the-sz.com/products/usbid/"
-  const buildSearchHref = (vendor: string, product: string) => {
-    const params = new URLSearchParams()
-    if (vendor) {
-      params.set("v", sanitizeHex(vendor))
-    }
-    if (product) {
-      params.set("p", sanitizeHex(product))
-    }
-    const query = params.toString()
-    return query ? `${defaultHref}?${query}` : defaultHref
-  }
-  const buildIdLabel = (vendor: string, product: string) => (vendor && product ? `${vendor}:${product}` : vendor || product || "Unknown")
+
+  const buildIdLabel = (vendor: string, product: string) =>
+    vendor && product ? `${vendor}:${product}` : vendor || product || "Unknown"
 
   let tooltipState: TooltipState = $derived($tooltip)
   let active = $derived(Boolean(tooltipState.visible && tooltipState.content && tooltipState.position))
@@ -28,50 +16,30 @@
   let productLabel = $derived(tooltipState.content?.productId?.trim() ?? "")
   let busLabel = $derived(formatBus(tooltipState.content?.bus ?? null))
   let idLabel = $derived(buildIdLabel(vendorLabel, productLabel))
-  let searchHref = $derived(buildSearchHref(vendorLabel, productLabel))
-
-  //Ensures wails will open a new browser.
-  const handleLinkClick = (event: MouseEvent) => {
-    event.preventDefault()
-    BrowserOpenURL(searchHref)
-  }
 </script>
 
 <div class="tooltip-host" bind:this={host}>
   {#if active && position}
-    <div
-      class="tooltip"
-      role="tooltip"
-      style={`top: ${position.y}px; left: ${position.x}px;`}
-      onmouseenter={cancelTooltipHide}
-      onmouseleave={() => scheduleTooltipHide(80)}
-    >
+    <div class="tooltip" role="tooltip" style={`top: ${position.y}px; left: ${position.x}px;`}>
       <div class="tooltip__header">
         <span class="tooltip__summary">Bus {busLabel ?? "—"}</span>
         <span class="tooltip__id">ID {idLabel}</span>
       </div>
-      <a
-        class="tooltip__link"
-        href={searchHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        onclick={handleLinkClick}
-      >Click to search on online device database</a>
+      <span>Click to search on online device database</span>
     </div>
   {/if}
 </div>
 
 <style lang="scss">
   .tooltip-host {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 1000;
     pointer-events: none;
   }
 
   .tooltip {
-    position: fixed;
-    transform: translate(-50%, calc(-100% - 12px));
+    position: absolute;
     min-width: 14rem;
     max-width: 18rem;
     padding: 0.5rem 0.75rem;
