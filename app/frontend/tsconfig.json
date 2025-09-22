@@ -16,7 +16,6 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
-    "allowSyntheticDefaultImports": true,
     "paths": {
       "$lib/*": ["src/lib/*"]
     }

@@ -22,9 +22,10 @@ function resolvedTheme(): ThemeMode {
 export const theme = writable<ThemeMode>(resolvedTheme());
 
 theme.subscribe((mode) => {
-  if (typeof document !== "undefined") {
-    document.documentElement.dataset.theme = mode;
+  if (typeof document === "undefined" || typeof window === "undefined") {
+    return;
   }
+  document.documentElement.dataset.theme = mode;
 });
 
 export function toggleTheme(): void {
