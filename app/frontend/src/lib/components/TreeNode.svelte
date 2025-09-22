@@ -2,7 +2,7 @@
   import TreeNode from "./TreeNode.svelte"
   import { BrowserOpenURL } from "../../../wailsjs/runtime/runtime.js"
   import type { TreeNode as TreeNodeModel } from "../models"
-  import { tooltipTrigger } from "../tooltip.svelte"
+  import { tooltipTrigger } from "../tooltip-state.svelte"
   import { formatSpeed } from "../utilities"
   import { Plus, Minus, Dot, ChevronDown } from "@lucide/svelte"
 

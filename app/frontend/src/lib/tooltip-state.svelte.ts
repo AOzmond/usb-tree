@@ -56,7 +56,7 @@ export const defaultTooltipPosition = (
   const target = (event?.currentTarget as HTMLElement | null) ?? node;
   const rect = target.getBoundingClientRect();
   return {
-    x: rect.left,
+    x: rect.left + rect.width / 4,
     y: rect.top - 64,
   };
 };

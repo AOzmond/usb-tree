@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { tooltip } from "../tooltip.svelte"
-  import type { TooltipState } from "../tooltip.svelte"
+  import { tooltip } from "../tooltip-state.svelte"
+  import type { TooltipState } from "../tooltip-state.svelte"
 
   let host: HTMLDivElement | null = $state(null)
 
@@ -22,7 +22,7 @@
   {#if active && position}
     <div class="tooltip" role="tooltip" style={`top: ${position.y}px; left: ${position.x}px;`}>
       <div class="tooltip__header">
-        <span class="tooltip__summary">Bus {busLabel ?? "—"}</span>
+        <span class="tooltip__summary">Bus {busLabel}</span>
         <span class="tooltip__id">ID {idLabel}</span>
       </div>
       <span>Click to search on online device database</span>
