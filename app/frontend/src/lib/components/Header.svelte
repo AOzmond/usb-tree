@@ -33,7 +33,7 @@
 </script>
 
 <div class="header">
-  <span>Last change: {lastUpdatedTimestamp}</span>
+  <span><b>Last updated:</b> {lastUpdatedTimestamp}</span>
   <div class="header__actions">
     <button
       type="button"
