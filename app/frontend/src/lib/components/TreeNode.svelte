@@ -92,18 +92,20 @@
 {/if}
 
 <style lang="scss">
+@use '@carbon/styles/scss/spacing';
+
   .tree-node {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 0.2rem 0;
+    padding: spacing.$spacing-02 0;
   }
 
   .tree-node__info {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: spacing.$spacing-02;
   }
 
   .tree-node__info--button {
@@ -117,7 +119,7 @@
     all: unset;
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: spacing.$spacing-02;
   }
 
   :global .tree-node__chevron {

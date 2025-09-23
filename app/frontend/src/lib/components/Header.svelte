@@ -57,12 +57,14 @@
 </div>
 
 <style lang="scss">
+@use '@carbon/styles/scss/spacing';
+
   .header {
     margin-bottom: 1px;
     box-sizing: border-box;
-    padding: 0 12px;
+    padding: 0 spacing.$spacing-04;
     box-shadow: 0 1px var(--color-divider);
-    height: 64px;
+    height: spacing.$spacing-10;
     background: var(--color-header-bg);
     width: 100%;
     display: flex;
@@ -74,7 +76,7 @@
   }
 
   .header__actions {
-    height: 40px;
+    height: spacing.$spacing-08;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -82,19 +84,19 @@
 
   .header__theme-button,
   .header__refresh-button {
-    border-radius: 0.5rem;
+    border-radius: spacing.$spacing-03;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    height: 40px;
-    width: 40px;
+    height: spacing.$spacing-08;
+    width: spacing.$spacing-08;
   }
 
   .header__theme-button:focus-visible,
   .header__refresh-button:focus-visible {
-    outline: 2px solid var(--color-divider);
-    outline-offset: 2px;
+    outline: spacing.$spacing-01 solid var(--color-divider);
+    outline-offset: spacing.$spacing-01;
   }
 
   .header__theme-button:hover,
@@ -103,7 +105,7 @@
   }
 
   .header :global(svg) {
-    height: 40px;
+    height: spacing.$spacing-08;
     width: auto;
     stroke: var(--color-text);
   }
@@ -123,11 +125,11 @@
   }
 
   .header :global(.header__theme-button[aria-pressed="true"] .header__theme-icon circle) {
-    transform: translateX(6px);
+    transform: translateX(spacing.$spacing-03 - spacing.$spacing-01);
   }
 
   .header :global(.header__refresh-icon) {
-    height: 28px;
+    height: spacing.$spacing-07 - spacing.$spacing-02;
   }
 
   @keyframes spin {

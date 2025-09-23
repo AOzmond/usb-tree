@@ -32,6 +32,8 @@
 </code>
 
 <style lang="scss">
+@use '@carbon/styles/scss/spacing';
+
   .log-row {
     display: flex;
     flex-direction: row;
@@ -43,7 +45,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.5rem;
+    gap: spacing.$spacing-03;
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: auto;
@@ -58,7 +60,7 @@
   .log-row__timestamp {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: spacing.$spacing-03 - spacing.$spacing-01;
   }
 
   .log-row__text {

@@ -10,8 +10,10 @@
 </section>
 
 <style lang="scss">
+@use '@carbon/styles/scss/spacing';
+
   .device-tree {
-    padding: 0 12px;
+    padding: 0 spacing.$spacing-04;
     min-height: 25%;
     height: 50%;
     flex-grow: 0;

@@ -6,6 +6,7 @@ import "@fontsource-variable/jetbrains-mono";
 import "./style/reset.scss";
 import "./style/index.scss";
 import "./style/variables.scss";
+import "carbon-components-svelte/css/all.css";
 
 const app = mount(App, {
   target: document.getElementById("app")!,

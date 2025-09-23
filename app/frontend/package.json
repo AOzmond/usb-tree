@@ -22,8 +22,10 @@
     "vite": "^7.1.5"
   },
   "dependencies": {
+    "@carbon/styles": "^1.90.0",
     "@fontsource-variable/ibm-plex-sans": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
-    "@lucide/svelte": "^0.544.0"
+    "@lucide/svelte": "^0.544.0",
+    "carbon-components-svelte": "^0.89.7"
   }
 }

@@ -22,22 +22,16 @@
 </div>
 
 <style lang="scss">
-
   @import "./style/variables.scss";
-
   .app {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
     height: 100vh;
-    overflow: hidden;
+    color: var(--color-text);
     background: var(--color-tree-bg);
   }
   .app__content {
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    height: calc(100vh - 64px);
     background: var(--color-tree-bg);
     flex: 1 1 auto;
   }
