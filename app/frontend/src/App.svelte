@@ -24,7 +24,7 @@
 <style lang="scss">
   @import "./style/variables.scss";
   .app {
-    height: 100vh;
+    height: 100%;
     color: var(--color-text);
     background: var(--color-tree-bg);
   }

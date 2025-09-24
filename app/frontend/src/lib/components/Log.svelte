@@ -41,10 +41,10 @@
 </div>
 
 <style lang="scss">
-@use '@carbon/styles/scss/spacing';
+@use '../../style/variables.scss';
 
   .log-panel {
-    padding: spacing.$spacing-04;
+    padding: variables.$spacing-04;
     display: flex;
     flex-direction: column;
     min-height: 25%;
@@ -55,6 +55,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     background: var(--color-log-bg);
-    gap: spacing.$spacing-03;
+    gap: variables.$spacing-03;
   }
 </style>

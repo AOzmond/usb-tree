@@ -31,7 +31,7 @@
 </div>
 
 <style lang="scss">
-@use '@carbon/styles/scss/spacing';
+@use '../../style/variables.scss';
 
   .tooltip-host {
     position: absolute;
@@ -44,11 +44,11 @@
     position: absolute;
     min-width: 14rem;
     max-width: 18rem;
-    padding: spacing.$spacing-03 spacing.$spacing-04;
+    padding: variables.$spacing-03 variables.$spacing-04;
     background: var(--color-tooltip-bg);
     color: var(--color-tooltip-text);
     border: 1px solid var(--color-tooltip-border);
-    border-radius: spacing.$spacing-03 - spacing.$spacing-01;
+    border-radius: variables.$spacing-03 - variables.$spacing-01;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     font-size: 0.85rem;
     pointer-events: auto;
@@ -81,9 +81,9 @@
   .tooltip__header {
     display: flex;
     justify-content: space-between;
-    gap: spacing.$spacing-05;
+    gap: variables.$spacing-05;
     font-weight: 600;
-    margin-bottom: spacing.$spacing-02 + spacing.$spacing-01;
+    margin-bottom: variables.$spacing-02 + variables.$spacing-01;
     color: inherit;
   }
 

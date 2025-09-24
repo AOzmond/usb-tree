@@ -1,47 +1,34 @@
-/* Light mode colors */
-$text-light: #000;
-$header-bg-light: #f8f9fb;
-$tree-bg-light: #ffffff;
-$log-bg-light: #dfe1e5;
-$added-green-light: #007f00;
-$removed-red-light: #7f0000;
-$error-orange-light: #ff8c00;
+@forward "@carbon/styles/scss/spacing";
+@use "@carbon/styles/scss/theme" as carbonTheme;
+@use "@carbon/styles/scss/themes" as carbonThemes;
 
-/* Dark mode colors */
-$text-dark: #fff;
-$header-bg-dark: #281a33;
-$tree-bg-dark: #000;
-$log-bg-dark: #281a33;
-$added-green-dark: #03a51a;
-$removed-red-dark: #c4001c;
-$error-orange-dark: #ffb347;
-
-:root {
-  color-scheme: light;
-  --color-text: #{$text-light};
-  --color-header-bg: #{$header-bg-light};
-  --color-tree-bg: #{$tree-bg-light};
-  --color-log-bg: #{$log-bg-light};
-  --color-added: #{$added-green-light};
-  --color-removed: #{$removed-red-light};
-  --color-error: #{$error-orange-light};
-  --color-divider: #{rgba($text-light, 0.15)};
-  --color-tooltip-bg: #f3f3f3;
-  --color-tooltip-text: #000;
-  --color-tooltip-border: rgba(0, 0, 0, 0.35);
+@mixin apply-carbon-theme($token, $scheme) {
+  @include carbonTheme.theme($token);
+  color-scheme: $scheme;
 }
 
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --color-text: #{$text-dark};
-  --color-header-bg: #{$header-bg-dark};
-  --color-tree-bg: #{$tree-bg-dark};
-  --color-log-bg: #{$log-bg-dark};
-  --color-added: #{$added-green-dark};
-  --color-removed: #{$removed-red-dark};
-  --color-error: #{$error-orange-dark};
-  --color-divider: #{rgba($text-dark, 0.35)};
-  --color-tooltip-bg: #242424;
-  --color-tooltip-text: #fff;
-  --color-tooltip-border: rgba(255, 255, 255, 0.5);
+:root {
+  @include apply-carbon-theme(carbonThemes.$g100, dark);
+}
+
+:root[data-carbon-theme="g100"] {
+  @include apply-carbon-theme(carbonThemes.$g100, dark);
+}
+
+:root[data-carbon-theme="white"] {
+  @include apply-carbon-theme(carbonThemes.$white, light);
+}
+
+:root {
+  --color-text: var(--cds-text-primary);
+  --color-header-bg: var(--cds-layer);
+  --color-tree-bg: var(--cds-background);
+  --color-log-bg: var(--cds-layer);
+  --color-added: var(--cds-support-success);
+  --color-removed: var(--cds-support-error);
+  --color-error: var(--cds-support-warning);
+  --color-divider: var(--cds-border-subtle);
+  --color-tooltip-bg: var(--cds-layer);
+  --color-tooltip-text: var(--cds-text-primary);
+  --color-tooltip-border: var(--cds-border-strong);
 }

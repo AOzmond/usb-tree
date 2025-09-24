@@ -1,16 +1,33 @@
 <script lang="ts">
   import { Refresh } from "../../../wailsjs/go/main/App"
-  import { deviceLogs, theme, toggleTheme } from "../../lib/state.svelte"
+  import {
+    deviceLogs,
+    getNextTheme,
+    theme,
+    toggleTheme,
+    type CarbonTheme,
+  } from "../../lib/state.svelte"
   import { RefreshCcw, ToggleLeft } from "@lucide/svelte"
 
   function formatTimestamp(time: Date) {
     return new Date(time).toLocaleTimeString()
   }
 
+  const themeLabels: Record<CarbonTheme, string> = {
+    g100: "G100",
+    white: "White",
+  }
+
+
   let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : null)
   let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : null)
   let isRefreshing = $state(false)
   let refreshCompleted = $state(false)
+
+  let nextTheme = $derived(getNextTheme($theme))
+  let currentThemeLabel = $derived(themeLabels[$theme])
+  let nextThemeLabel = $derived(themeLabels[nextTheme])
+
 
   async function handleRefresh() {
     if (isRefreshing) {
@@ -39,8 +56,8 @@
       type="button"
       class="header__theme-button"
       onclick={toggleTheme}
-      aria-label={`Switch to ${$theme === "dark" ? "light" : "dark"} theme`}
-      aria-pressed={$theme === "dark"}
+      aria-label={`Switch to ${nextThemeLabel} theme (current ${currentThemeLabel})`}
+      title={`Switch to ${nextThemeLabel} theme`}
     >
       <ToggleLeft class="header__theme-icon" /></button
     >
@@ -57,14 +74,14 @@
 </div>
 
 <style lang="scss">
-@use '@carbon/styles/scss/spacing';
+@use '../../style/variables.scss';
 
   .header {
     margin-bottom: 1px;
     box-sizing: border-box;
-    padding: 0 spacing.$spacing-04;
+    padding: 0 variables.$spacing-04;
     box-shadow: 0 1px var(--color-divider);
-    height: spacing.$spacing-10;
+    height: variables.$spacing-10;
     background: var(--color-header-bg);
     width: 100%;
     display: flex;
@@ -76,7 +93,7 @@
   }
 
   .header__actions {
-    height: spacing.$spacing-08;
+    height: variables.$spacing-08;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -84,19 +101,18 @@
 
   .header__theme-button,
   .header__refresh-button {
-    border-radius: spacing.$spacing-03;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    height: spacing.$spacing-08;
-    width: spacing.$spacing-08;
+    height: variables.$spacing-08;
+    width: variables.$spacing-08;
   }
 
   .header__theme-button:focus-visible,
   .header__refresh-button:focus-visible {
-    outline: spacing.$spacing-01 solid var(--color-divider);
-    outline-offset: spacing.$spacing-01;
+    outline: variables.$spacing-01 solid var(--color-divider);
+    outline-offset: variables.$spacing-01;
   }
 
   .header__theme-button:hover,
@@ -105,7 +121,7 @@
   }
 
   .header :global(svg) {
-    height: spacing.$spacing-08;
+    height: variables.$spacing-08;
     width: auto;
     stroke: var(--color-text);
   }
@@ -124,12 +140,13 @@
     fill: var(--color-text);
   }
 
-  .header :global(.header__theme-button[aria-pressed="true"] .header__theme-icon circle) {
-    transform: translateX(spacing.$spacing-03 - spacing.$spacing-01);
+  .header
+    :global(.header__theme-button[data-theme-tone="dark"] .header__theme-icon circle) {
+    transform: translateX(variables.$spacing-03 - variables.$spacing-01);
   }
 
   .header :global(.header__refresh-icon) {
-    height: spacing.$spacing-07 - spacing.$spacing-02;
+    height: variables.$spacing-07 - variables.$spacing-02;
   }
 
   @keyframes spin {
