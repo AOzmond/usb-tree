@@ -47,10 +47,8 @@
     padding: variables.$spacing-04;
     display: flex;
     flex-direction: column;
-    min-height: 25%;
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 50%;
+    flex: 1 1 auto;
+    min-height: 0;
     border-top: 1px solid var(--color-divider);
     overflow-y: auto;
     overflow-x: hidden;
