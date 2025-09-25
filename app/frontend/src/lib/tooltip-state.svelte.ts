@@ -94,7 +94,7 @@ export const defaultTooltipPosition = (
   const y = placement === "top" ? preferredTop : rect.bottom + BOTTOM_OFFSET;
 
   return {
-    x: rect.left,
+    x: rect.left + 40,
     y,
     placement,
   };
