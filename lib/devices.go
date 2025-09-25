@@ -266,6 +266,9 @@ func sortDevices(devices []Device) []Device {
 }
 
 func addDeviceLog(device Device, logtime time.Time) {
+	if device.State == StateNormal {
+		return
+	}
 	logs = append(logs, Log{Time: logtime, Text: device.Name, State: device.State, Speed: device.Speed})
 }
 
