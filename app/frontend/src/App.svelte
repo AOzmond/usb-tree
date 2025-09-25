@@ -65,23 +65,6 @@
     background: var(--color-tree-bg);
   }
 
-  :global #main-content {
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    background: var(--color-tree-bg);
-    height: calc(100vh - 48px);
-  }
-
-  :global(.app__content-wrapper) {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    background: var(--color-tree-bg);
-  }
-
   .app__content {
     flex: 1 1 auto;
     display: flex;

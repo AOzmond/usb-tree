@@ -21,9 +21,9 @@
     autoScroll = distanceFromBottom <= 2
   }
 
+  // Scrolls log to bottom on Log change if autoScroll is true.
   $effect(() => {
     $deviceLogs
-    autoScroll
     if (autoScroll) {
       scrollToBottom()
     }
@@ -36,18 +36,20 @@
 
 <div class="log-panel" bind:this={container} onscroll={handleScroll}>
   {#each $deviceLogs as log}
-      <LogRow {log} />
+    <LogRow {log} />
   {/each}
 </div>
 
 <style lang="scss">
-@use '../../style/variables.scss';
+  @use "../../style/variables.scss";
 
   .log-panel {
     padding: variables.$spacing-04;
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
     min-height: 0;
     border-top: 1px solid var(--color-divider);
     overflow-y: auto;

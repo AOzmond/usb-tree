@@ -14,7 +14,9 @@
 
   .device-tree {
     padding: 0 variables.$spacing-04;
-    flex: 1 1 auto;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
     min-height: 0;
     overflow: auto;
     background: var(--color-tree-bg);

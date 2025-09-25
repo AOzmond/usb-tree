@@ -27,19 +27,19 @@
     if (isRefreshing) {
       return
     }
+
     isRefreshing = true
     if (refreshResetTimer) {
       clearTimeout(refreshResetTimer)
       refreshResetTimer = null
     }
-    try {
-      await Refresh()
-    } finally {
-      refreshResetTimer = setTimeout(() => {
-        isRefreshing = false
-        refreshResetTimer = null
-      }, 450)
-    }
+
+    Refresh()
+
+    refreshResetTimer = setTimeout(() => {
+      isRefreshing = false
+      refreshResetTimer = null
+    }, 450)
   }
 </script>
 
@@ -78,34 +78,4 @@
     font-weight: 400;
   }
 
-  :global svg > * {
-    fill: none;
-  }
-
-  :global(.header__theme-action :is(.bx--btn__icon, .lucide-icon) circle),
-  :global(.header__theme-action :is(.bx--btn__icon, .lucide-icon) rect) {
-    transition:
-      transform 0.25s ease,
-      fill 0.25s ease,
-      stroke 0.25s ease;
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-
-  :global(.header__theme-action[data-theme-tone="dark"] :is(.bx--btn__icon, .lucide-icon) circle) {
-    transform: translateX(variables.$spacing-03 - variables.$spacing-01);
-  }
-
-  :global(.header__refresh-action--spinning :is(.bx--btn__icon, .lucide-icon)) {
-    animation: spin 0.45s ease-in-out forwards;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(-360deg);
-    }
-  }
 </style>
