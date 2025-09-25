@@ -47,6 +47,10 @@
     hasChildren() ? ChevronDown : (iconByState[node.device.state as keyof typeof iconByState] ?? Dot)
   )
 
+  const iconClass = $derived(
+    hasChildren() ? "ChevronDown" : node.device.state ?? "Dot"
+  )
+
   const tooltipContent = $derived(() => ({
     bus: node.device?.bus ?? null,
     vendorId: node.device?.vendorId ?? null,
@@ -59,6 +63,7 @@
     }
     isCollapsed = !isCollapsed
   }
+  console.log()
 </script>
 
 <div
@@ -70,7 +75,7 @@
 >
   <div class="tree-node__info tree-node__info--button" aria-expanded={!isCollapsed}>
     <TreeIcon
-      class={`tree-node__chevron${isCollapsed ? " tree-node__chevron--collapsed" : ""}`}
+      class={`tree-node__chevron${isCollapsed ? " tree-node__chevron--collapsed" : ""} ${iconClass}`}
       onclick={toggleCollapsed}
     />
     <a
@@ -142,6 +147,14 @@
 
   .tree-node--removed {
     color: var(--color-removed);
+  }
+
+  :global .ChevronDown {
+    opacity: 0.8;
+  }
+
+  :global .normal {
+    opacity: 0.7;
   }
 
 

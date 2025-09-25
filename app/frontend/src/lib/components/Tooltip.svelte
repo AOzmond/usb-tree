@@ -27,7 +27,7 @@
       class:tooltip--bottom={isBottomPlacement}
       role="tooltip"
       style={`top: ${position.y}px; left: ${position.x}px;`}
-      on:pointerenter={() => hideTooltip()}
+      onpointerenter={() => hideTooltip()}
     >
       <div class="tooltip__header">
         <span class="tooltip__summary">Bus {busLabel}</span>

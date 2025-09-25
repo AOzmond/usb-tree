@@ -14,7 +14,7 @@
   }
 
   let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : null)
-  let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : "—")
+  let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : formatTimestamp(new Date()))
   let isRefreshing = $state(false)
   let refreshResetTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -70,7 +70,6 @@
 <style lang="scss">
   @use "../../style/variables.scss";
 
-
   .header__label {
     font-weight: 600;
   }
@@ -93,11 +92,7 @@
     transform-origin: center;
   }
 
-  :global(
-      .header__theme-action[data-theme-tone="dark"]
-      :is(.bx--btn__icon, .lucide-icon)
-      circle
-    ) {
+  :global(.header__theme-action[data-theme-tone="dark"] :is(.bx--btn__icon, .lucide-icon) circle) {
     transform: translateX(variables.$spacing-03 - variables.$spacing-01);
   }
 
