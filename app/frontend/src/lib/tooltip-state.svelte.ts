@@ -7,9 +7,12 @@ export type TooltipContent = {
   productId: string | null;
 };
 
+export type TooltipPlacement = "top" | "bottom";
+
 export type TooltipPosition = {
   x: number;
   y: number;
+  placement: TooltipPlacement;
 };
 
 export type TooltipState = {
@@ -30,16 +33,42 @@ export const tooltip = { subscribe: tooltipState.subscribe };
 
 let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 
+const clearHideTimeout = () => {
+  if (!hideTimeout) {
+    return;
+  }
+  clearTimeout(hideTimeout);
+  hideTimeout = null;
+};
+
+const resetState = () => {
+  tooltipState.set(initialState);
+};
+
 // showTooltip displays the tooltip with new content at the requested position
 export const showTooltip = (
   content: TooltipContent,
   position: TooltipPosition,
 ) => {
+  clearHideTimeout();
   tooltipState.set({
     visible: true,
     content,
     position,
   });
+};
+
+export const hideTooltip = (delay = 0) => {
+  clearHideTimeout();
+  if (delay <= 0) {
+    resetState();
+    return;
+  }
+
+  hideTimeout = setTimeout(() => {
+    resetState();
+    hideTimeout = null;
+  }, delay);
 };
 
 // TooltipActionOptions configure how the tooltipTrigger retrieves content and hides
@@ -49,15 +78,25 @@ export interface TooltipActionOptions {
 }
 
 // defaultTooltipPosition calculates the pointer-aligned tooltip coordinates
+const HEADER_CLEARANCE = 56;
+const TOP_OFFSET = 64;
+const BOTTOM_OFFSET = 10;
+
 export const defaultTooltipPosition = (
   node: HTMLElement,
   event?: PointerEvent,
-) => {
+): TooltipPosition => {
   const target = (event?.currentTarget as HTMLElement | null) ?? node;
   const rect = target.getBoundingClientRect();
+  const preferredTop = rect.top - TOP_OFFSET;
+  const placement: TooltipPlacement =
+    preferredTop < HEADER_CLEARANCE ? "bottom" : "top";
+  const y = placement === "top" ? preferredTop : rect.bottom + BOTTOM_OFFSET;
+
   return {
-    x: rect.left + rect.width / 4,
-    y: rect.top - 64,
+    x: rect.left,
+    y,
+    placement,
   };
 };
 
@@ -71,6 +110,12 @@ export const tooltipTrigger: Action<HTMLElement, TooltipActionOptions> = (
 
   const resolveContent = () => currentOptions?.getContent?.() ?? null;
 
+  const scheduleHide = () => {
+    const delay = currentOptions?.hideDelay ?? 0;
+    hideTooltip(delay);
+    isActive = false;
+  };
+
   const handlePointerEnter = (event: PointerEvent) => {
     const content = resolveContent();
     if (!content) {
@@ -81,7 +126,15 @@ export const tooltipTrigger: Action<HTMLElement, TooltipActionOptions> = (
     isActive = true;
   };
 
+  const handlePointerLeave = () => {
+    if (!isActive) {
+      return;
+    }
+    scheduleHide();
+  };
+
   node.addEventListener("pointerenter", handlePointerEnter);
+  node.addEventListener("pointerleave", handlePointerLeave);
 
   return {
     update(newOptions) {
@@ -89,6 +142,7 @@ export const tooltipTrigger: Action<HTMLElement, TooltipActionOptions> = (
     },
     destroy() {
       node.removeEventListener("pointerenter", handlePointerEnter);
+      node.removeEventListener("pointerleave", handlePointerLeave);
     },
   };
 };

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tooltip } from "../tooltip-state.svelte"
+  import { hideTooltip, tooltip } from "../tooltip-state.svelte"
   import type { TooltipState } from "../tooltip-state.svelte"
 
   let host: HTMLDivElement | null = $state(null)
@@ -12,6 +12,8 @@
   let tooltipState: TooltipState = $derived($tooltip)
   let active = $derived(Boolean(tooltipState.visible && tooltipState.content && tooltipState.position))
   let position = $derived(tooltipState.position)
+  let placement = $derived(position?.placement ?? "top")
+  let isBottomPlacement = $derived(placement === "bottom")
   let vendorLabel = $derived(tooltipState.content?.vendorId?.trim() ?? "")
   let productLabel = $derived(tooltipState.content?.productId?.trim() ?? "")
   let busLabel = $derived(formatBus(tooltipState.content?.bus ?? null))
@@ -20,7 +22,13 @@
 
 <div class="tooltip-host" bind:this={host}>
   {#if active && position}
-    <div class="tooltip" role="tooltip" style={`top: ${position.y}px; left: ${position.x}px;`}>
+    <div
+      class="tooltip"
+      class:tooltip--bottom={isBottomPlacement}
+      role="tooltip"
+      style={`top: ${position.y}px; left: ${position.x}px;`}
+      on:pointerenter={() => hideTooltip()}
+    >
       <div class="tooltip__header">
         <span class="tooltip__summary">Bus {busLabel}</span>
         <span class="tooltip__id">ID {idLabel}</span>
@@ -76,6 +84,20 @@
     top: calc(100% - 1px);
     border-width: 15px 19px 0 19px;
     border-color: var(--color-tooltip-bg) transparent transparent transparent;
+  }
+
+  .tooltip--bottom::before {
+    top: auto;
+    bottom: 100%;
+    border-width: 0 20px 16px 20px;
+    border-color: transparent transparent var(--color-tooltip-border) transparent;
+  }
+
+  .tooltip--bottom::after {
+    top: auto;
+    bottom: calc(100% - 1px);
+    border-width: 0 19px 15px 19px;
+    border-color: transparent transparent var(--color-tooltip-bg) transparent;
   }
 
   .tooltip__header {
