@@ -58,10 +58,11 @@
     />
     <HeaderGlobalAction
       class={`header__refresh-action${isRefreshing ? " header__refresh-action--spinning" : ""}`}
-      iconDescription="Refresh"
       aria-label="Refresh"
       icon={RefreshCcw}
       kind="primary"
+      iconDescription="Refresh"
+      tooltipAlignment="end"
       on:click={handleRefresh}
     />
   </HeaderUtilities>
