@@ -44,11 +44,11 @@
 </script>
 
 <Header id="header" class="header" uiShellAriaLabel="USB tree status">
-  <span class="header__label">Last updated:</span>
-  <span class="header__timestamp">{lastUpdatedTimestamp}</span>
-  <HeaderUtilities class="header__utilities">
+  <span class="label">Last updated:</span>
+  <span class="timestamp">{lastUpdatedTimestamp}</span>
+  <HeaderUtilities class="utilities">
     <HeaderGlobalAction
-      class="header__theme-action"
+      class="theme-action"
       data-theme-tone={themeTone}
       iconDescription="Dark mode"
       kind="primary"
@@ -57,7 +57,7 @@
       onclick={toggleTheme}
     />
     <HeaderGlobalAction
-      class={`header__refresh-action${isRefreshing ? " header__refresh-action--spinning" : ""}`}
+      class={`refresh-action${isRefreshing ? " refresh-action--spinning" : ""}`}
       aria-label="Refresh"
       icon={RefreshCcw}
       kind="primary"
@@ -71,19 +71,19 @@
 <style lang="scss">
   @use "variables.scss" as *;
 
-  .header__label {
+  .label {
     color: var(--color-header-text);
     padding-right: $spacing-02;
     font-weight: 600;
   }
 
-  .header__timestamp {
+  .timestamp {
     color: var(--color-header-text);
     font-weight: 400;
   }
 
-  :global .header__theme-action :is(.bx--btn__icon, .lucide-icon) circle,
-  :global .header__theme-action :is(.bx--btn__icon, .lucide-icon) rect {
+  :global .theme-action :is(.bx--btn__icon, .lucide-icon) circle,
+  :global .theme-action :is(.bx--btn__icon, .lucide-icon) rect {
     transition:
       transform 0.25s ease,
       fill 0.25s ease,
@@ -92,11 +92,11 @@
     transform-origin: center;
   }
 
-  :global .header__theme-action[data-theme-tone="dark"] :is(.bx--btn__icon, .lucide-icon) circle {
+  :global .theme-action[data-theme-tone="dark"] :is(.bx--btn__icon, .lucide-icon) circle {
     transform: translateX($spacing-03);
   }
 
-  :global .header__refresh-action--spinning :is(.bx--btn__icon, .lucide-icon) {
+  :global .refresh-action--spinning :is(.bx--btn__icon, .lucide-icon) {
     animation: spin 0.45s ease-in-out forwards;
   }
 </style>

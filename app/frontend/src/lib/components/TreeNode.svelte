@@ -67,19 +67,19 @@
 </script>
 
 <div
-  class={`tree-node tree-node--${node.device.state}`}
+  class={`tree-node ${node.device.state}`}
   style="margin-left: {indent}rem;"
   use:tooltipTrigger={{
     getContent: tooltipContent,
   }}
 >
-  <div class="tree-node__info tree-node__info--button" aria-expanded={!isCollapsed}>
+  <div class="info info--button" aria-expanded={!isCollapsed}>
     <TreeIcon
-      class={`tree-node__chevron${isCollapsed ? " tree-node__chevron--collapsed" : ""} ${iconClass}`}
+      class={`chevron${isCollapsed ? " chevron-collapsed" : ""} ${iconClass}`}
       onclick={toggleCollapsed}
     />
     <a
-      class="tree-node__label"
+      class="label"
       href={searchHref}
       onclick={handleLinkClick}
       aria-label="Open device info in browser"
@@ -87,7 +87,7 @@
       <span>{node.device.name}</span>
     </a>
   </div>
-  <div class="tree-node__speed">{formatSpeed(node.device.speed)}</div>
+  <div class="speed">{formatSpeed(node.device.speed)}</div>
 </div>
 {#if hasChildren() && !isCollapsed}
   {#each node.children as child}
@@ -106,20 +106,20 @@
     padding: $spacing-02 0;
   }
 
-  .tree-node__info {
+  .info {
     display: inline-flex;
     align-items: center;
     gap: $spacing-02;
   }
 
-  .tree-node__info--button {
+  .info--button {
     background: none;
     border: none;
     padding: 0;
     cursor: pointer;
   }
 
-  .tree-node__label {
+  .label {
     color: var(--txt-color);
     text-decoration: none;
     display: inline-flex;
@@ -127,33 +127,33 @@
     gap: $spacing-02;
   }
 
-  .tree-node__speed {
+  .speed {
     white-space: nowrap;
     align-self: flex-start;
   }
 
-  .tree-node--added {
+  .added {
     color: var(--color-added);
   }
 
-  .tree-node--removed {
+  .removed {
     color: var(--color-removed);
   }
 
-  :global .tree-node__chevron {
+  :global .chevron {
     display: inline-flex;
     transition: transform 0.15s ease;
   }
 
-  :global .tree-node__chevron--collapsed {
+  :global .chevron-collapsed {
     transform: rotate(-90deg);
   }
 
-  :global .tree-node__chevron.ChevronDown {
+  :global .chevron.ChevronDown {
     opacity: 0.8;
   }
 
-  :global .tree-node__chevron.normal {
+  :global .chevron.normal {
     opacity: 0.7;
   }
 </style>

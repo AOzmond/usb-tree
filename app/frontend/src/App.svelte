@@ -26,22 +26,22 @@
 
 <div class="app">
   <Header />
-  <Content id="main-content" class="app__content-wrapper">
-    <div class="app__content" class:app__content--resizing={$isResizing} bind:this={contentRegion}>
-      <div class="app__pane app__pane--tree" style={`flex: ${$treeRatio} 1 0%;`}>
+  <Content id="main-content" class="content-wrapper">
+    <div class="content" class:content--resizing={$isResizing} bind:this={contentRegion}>
+      <div class="pane pane--tree" style={`flex: ${$treeRatio} 1 0%;`}>
         <Tree />
       </div>
       <div
-        class="app__splitter"
+        class="splitter"
         role="separator"
         aria-orientation="horizontal"
         aria-label="Resize tree and log panes"
-        class:app__splitter--active={$isResizing}
+        class:splitter--active={$isResizing}
         onpointerdown={handlePointerDown}
       >
-        <span class="app__splitter-grip" aria-hidden="true"></span>
+        <span class="splitter-grip" aria-hidden="true"></span>
       </div>
-      <div class="app__pane app__pane--log" style={`flex: ${1 - $treeRatio} 1 0%;`}>
+      <div class="pane pane--log" style={`flex: ${1 - $treeRatio} 1 0%;`}>
         <Log />
       </div>
     </div>
@@ -64,19 +64,19 @@
     background: var(--color-tree-bg);
   }
 
-  .app__content {
+  .content {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
 
-  .app__content--resizing {
+  .content--resizing {
     cursor: row-resize;
     user-select: none;
   }
 
-  .app__pane {
+  .pane {
     flex: 1 1 0%;
     min-height: 0;
     display: flex;
@@ -84,7 +84,7 @@
     background: var(--color-tree-bg);
   }
 
-  .app__splitter {
+  .splitter {
     position: relative;
     display: flex;
     align-items: center;
@@ -95,7 +95,7 @@
     touch-action: none;
   }
 
-  .app__splitter-grip {
+  .splitter-grip {
     width: 100%;
     max-width: 160px;
     height: 2px;
@@ -104,13 +104,13 @@
     transition: background 0.2s ease;
   }
 
-  .app__splitter:hover .app__splitter-grip,
-  .app__splitter--active .app__splitter-grip,
-  .app__splitter:focus-visible .app__splitter-grip {
+  .splitter:hover .splitter-grip,
+  .splitter--active .splitter-grip,
+  .splitter:focus-visible .splitter-grip {
     background: var(--color-text);
   }
 
-  .app__splitter:focus-visible {
+  .splitter:focus-visible {
     outline: 2px solid var(--color-text);
     outline-offset: 2px;
   }

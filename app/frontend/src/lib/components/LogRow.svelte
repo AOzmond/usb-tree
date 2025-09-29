@@ -13,19 +13,19 @@
   const LogIcon = iconByState[log.State as keyof typeof iconByState] ?? Dot
 </script>
 
-<code class={`log-row log-row--${log.State}`}>
-  <div class="log-row__primary">
-    <div class="log-row__timestamp">
+<code class={`log-row ${log.State}`}>
+  <div class="primary">
+    <div class="timestamp">
       <span>
         {new Date(log.Time).toLocaleTimeString()}
       </span>
       <LogIcon />
     </div>
-    <div class="log-row__text">
+    <div class="text">
       {log.Text}
     </div>
   </div>
-  <div class="log-row__speed">
+  <div class="speed">
     {formatSpeed(log.Speed)}
   </div>
 </code>
@@ -40,7 +40,7 @@
     align-items: flex-start;
   }
 
-  .log-row__primary {
+  .primary {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -56,31 +56,31 @@
     }
   }
 
-  .log-row__timestamp {
+  .timestamp {
     display: flex;
     align-items: center;
     gap: $spacing-03 - $spacing-01;
   }
 
-  .log-row__text {
+  .text {
     flex: 1;
     min-width: 0;
   }
 
-  .log-row__speed {
+  .speed {
     white-space: nowrap;
     align-self: center;
   }
 
-  .log-row--added {
+  .added {
     color: var(--color-added);
   }
 
-  .log-row--removed {
+  .removed {
     color: var(--color-removed);
   }
 
-  .log-row--error {
+  .error {
     color: var(--color-error);
   }
 </style>

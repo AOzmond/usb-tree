@@ -24,14 +24,14 @@
   {#if active && position}
     <div
       class="tooltip"
-      class:tooltip--bottom={isBottomPlacement}
+      class:tooltip-bottom={isBottomPlacement}
       role="tooltip"
       style={`top: ${position.y}px; left: ${position.x}px;`}
       onpointerenter={() => hideTooltip()}
     >
-      <div class="tooltip__header">
-        <span class="tooltip__summary">Bus {busLabel}</span>
-        <span class="tooltip__id">ID {idLabel}</span>
+      <div class="header">
+        <span class="summary">Bus {busLabel}</span>
+        <span class="id">ID {idLabel}</span>
       </div>
       <span>Click to search on online device database</span>
     </div>
@@ -85,21 +85,21 @@
     border-color: var(--color-tooltip-bg) transparent transparent transparent;
   }
 
-  .tooltip--bottom::before {
+  .tooltip-bottom::before {
     top: auto;
     bottom: 100%;
     border-width: 0 20px 16px 20px;
     border-color: transparent transparent var(--color-tooltip-border) transparent;
   }
 
-  .tooltip--bottom::after {
+  .tooltip-bottom::after {
     top: auto;
     bottom: calc(100% - 1px);
     border-width: 0 19px 15px 19px;
     border-color: transparent transparent var(--color-tooltip-bg) transparent;
   }
 
-  .tooltip__header {
+  .header {
     display: flex;
     justify-content: space-between;
     gap: $spacing-05;
@@ -108,23 +108,23 @@
     color: inherit;
   }
 
-  .tooltip__summary {
+  .summary {
     white-space: nowrap;
   }
 
-  .tooltip__id {
+  .id {
     white-space: nowrap;
   }
 
-  .tooltip__link {
+  .link {
     display: block;
     font-size: 0.8rem;
     color: inherit;
     text-decoration: none;
   }
 
-  .tooltip__link:hover,
-  .tooltip__link:focus {
+  .link:hover,
+  .link:focus {
     text-decoration: underline;
   }
 </style>
