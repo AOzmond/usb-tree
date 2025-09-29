@@ -19,7 +19,9 @@
     flex-basis: auto;
     min-height: 0;
     overflow: auto;
-    background: var(--color-tree-bg);
-    border-bottom: 1px solid var(--color-divider);
+    background-color: var(--color-tree-bg);
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: var(--color-divider);
   }
 </style>

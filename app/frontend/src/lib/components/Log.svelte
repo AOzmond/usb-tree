@@ -51,7 +51,9 @@
     flex-shrink: 1;
     flex-basis: auto;
     min-height: 0;
-    border-top: 1px solid var(--color-divider);
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: var(--color-divider);
     overflow-y: auto;
     overflow-x: hidden;
     background: var(--color-log-bg);

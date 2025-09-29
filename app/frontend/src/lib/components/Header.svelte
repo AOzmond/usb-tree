@@ -84,10 +84,10 @@
 
   :global .theme-action :is(.bx--btn__icon, .lucide-icon) circle,
   :global .theme-action :is(.bx--btn__icon, .lucide-icon) rect {
-    transition:
-      transform 0.25s ease,
-      fill 0.25s ease,
-      stroke 0.25s ease;
+    transition-property: transform, fill, stroke;
+    transition-duration: 0.25s, 0.25s, 0.25s;
+    transition-timing-function: ease, ease, ease;
+    transition-delay: 0s, 0s, 0s;
     transform-box: fill-box;
     transform-origin: center;
   }
@@ -97,6 +97,13 @@
   }
 
   :global .refresh-action--spinning :is(.bx--btn__icon, .lucide-icon) {
-    animation: spin 0.45s ease-in-out forwards;
+    animation-name: spin;
+    animation-duration: 0.45s;
+    animation-timing-function: ease-in-out;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
   }
 </style>

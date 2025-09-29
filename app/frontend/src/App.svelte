@@ -28,7 +28,7 @@
   <Header />
   <Content id="main-content" class="content-wrapper">
     <div class="content" class:content--resizing={$isResizing} bind:this={contentRegion}>
-      <div class="pane pane--tree" style={`flex: ${$treeRatio} 1 0%;`}>
+      <div class="pane pane--tree" style={`flex-grow: ${$treeRatio};`}>
         <Tree />
       </div>
       <div
@@ -41,7 +41,7 @@
       >
         <span class="splitter-grip" aria-hidden="true"></span>
       </div>
-      <div class="pane pane--log" style={`flex: ${1 - $treeRatio} 1 0%;`}>
+      <div class="pane pane--log" style={`flex-grow: ${1 - $treeRatio};`}>
         <Log />
       </div>
     </div>
@@ -61,11 +61,13 @@
     flex-direction: column;
     min-height: 100vh;
     color: var(--color-text);
-    background: var(--color-tree-bg);
+    background-color: var(--color-tree-bg);
   }
 
   .content {
-    flex: 1 1 auto;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -77,11 +79,13 @@
   }
 
   .pane {
-    flex: 1 1 0%;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0%;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    background: var(--color-tree-bg);
+    background-color: var(--color-tree-bg);
   }
 
   .splitter {
@@ -91,7 +95,9 @@
     justify-content: center;
     padding: $spacing-02 0;
     cursor: row-resize;
-    flex: 0 0 auto;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
     touch-action: none;
   }
 
@@ -100,18 +106,23 @@
     max-width: 160px;
     height: 2px;
     border-radius: 999px;
-    background: var(--color-divider);
-    transition: background 0.2s ease;
+    background-color: var(--color-divider);
+    transition-property: background;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+    transition-delay: 0s;
   }
 
   .splitter:hover .splitter-grip,
   .splitter--active .splitter-grip,
   .splitter:focus-visible .splitter-grip {
-    background: var(--color-text);
+    background-color: var(--color-text);
   }
 
   .splitter:focus-visible {
-    outline: 2px solid var(--color-text);
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-text);
     outline-offset: 2px;
   }
 
@@ -122,8 +133,7 @@
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: auto;
-    background: var(--color-tree-bg);
+    background-color: var(--color-tree-bg);
     height: calc(100vh - 48px);
   }
-
 </style>

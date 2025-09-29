@@ -15,7 +15,6 @@
      */
     "allowJs": true,
     "checkJs": true,
-    "isolatedModules": true,
     "paths": {
       "$lib/*": ["src/lib/*"],
       "$style/*": ["src/style/*"],

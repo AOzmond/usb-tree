@@ -142,7 +142,10 @@
 
   :global .chevron {
     display: inline-flex;
-    transition: transform 0.15s ease;
+    transition-property: transform;
+    transition-duration: 0.15s;
+    transition-timing-function: ease;
+    transition-delay: 0s;
   }
 
   :global .chevron-collapsed {

@@ -63,7 +63,9 @@
   }
 
   .text {
-    flex: 1;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0%;
     min-width: 0;
   }
 
