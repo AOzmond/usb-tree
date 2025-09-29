@@ -1,3 +1,11 @@
+import { Plus, Minus, Dot } from "@lucide/svelte";
+
+export const iconByState = {
+  added: Plus,
+  removed: Minus,
+  normal: Dot,
+} as const;
+
 const SPEED_MAP: Record<string, number> = {
   low: 1.5,
   full: 12,

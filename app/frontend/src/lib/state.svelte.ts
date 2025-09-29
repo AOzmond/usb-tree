@@ -8,22 +8,13 @@ export const deviceLogs = writable<Log[]>([]);
 
 export type CarbonTheme = "g100" | "white";
 
-const CARBON_THEME_SEQUENCE: CarbonTheme[] = ["g100", "white"];
-const DARK_THEME: CarbonTheme = "g100";
-const DEFAULT_THEME: CarbonTheme = "g100";
-
-function resolvedTheme(): CarbonTheme {
-  return DEFAULT_THEME;
-}
-
-export const theme = writable<CarbonTheme>(resolvedTheme());
+export const theme = writable<CarbonTheme>("g100");
 
 export function getNextTheme(current: CarbonTheme): CarbonTheme {
-  const index = CARBON_THEME_SEQUENCE.indexOf(current);
-  if (index === -1) {
-    return DEFAULT_THEME;
+  if (current === "g100") {
+    return "white";
   }
-  return CARBON_THEME_SEQUENCE[(index + 1) % CARBON_THEME_SEQUENCE.length];
+  return "g100";
 }
 
 export function toggleTheme(): void {
@@ -52,7 +43,4 @@ theme.subscribe((mode) => {
   const root = document.documentElement;
   root.dataset.theme = mode;
   root.dataset.carbonTheme = mode;
-
-  const prefersDark = mode === DARK_THEME;
-  root.style.colorScheme = prefersDark ? "dark" : "light";
 });

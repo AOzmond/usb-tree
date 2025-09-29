@@ -41,10 +41,10 @@
 </div>
 
 <style lang="scss">
-  @use "../../style/variables.scss";
+  @use "variables.scss" as *;
 
   .log-panel {
-    padding: variables.$spacing-04;
+    padding: $spacing-04;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -55,6 +55,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     background: var(--color-log-bg);
-    gap: variables.$spacing-03;
+    gap: $spacing-03;
   }
 </style>

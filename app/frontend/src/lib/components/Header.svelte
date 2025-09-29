@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Refresh } from "../../../wailsjs/go/main/App"
-  import { deviceLogs, getNextTheme, theme, toggleTheme, type CarbonTheme } from "../../lib/state.svelte"
+  import { deviceLogs, getNextTheme, theme, toggleTheme, type CarbonTheme } from "$lib/state.svelte"
   import { Header, HeaderGlobalAction, HeaderUtilities } from "carbon-components-svelte"
   import { RefreshCcw, ToggleLeft } from "@lucide/svelte"
 
@@ -43,9 +43,9 @@
   }
 </script>
 
-<Header class="header" uiShellAriaLabel="USB tree status">
-  <span slot="company" class="header__label">Last updated:&nbsp;</span>
-  <span slot="platform" class="header__timestamp">{lastUpdatedTimestamp}</span>
+<Header id="header" class="header" uiShellAriaLabel="USB tree status">
+  <span class="header__label">Last updated:</span>
+  <span class="header__timestamp">{lastUpdatedTimestamp}</span>
   <HeaderUtilities class="header__utilities">
     <HeaderGlobalAction
       class="header__theme-action"
@@ -54,7 +54,7 @@
       kind="primary"
       icon={ToggleLeft}
       aria-label={`Switch to ${nextThemeLabel} theme (current ${currentThemeLabel})`}
-      on:click={toggleTheme}
+      onclick={toggleTheme}
     />
     <HeaderGlobalAction
       class={`header__refresh-action${isRefreshing ? " header__refresh-action--spinning" : ""}`}
@@ -63,20 +63,40 @@
       kind="primary"
       iconDescription="Refresh"
       tooltipAlignment="end"
-      on:click={handleRefresh}
+      onclick={handleRefresh}
     />
   </HeaderUtilities>
 </Header>
 
 <style lang="scss">
-  @use "../../style/variables.scss";
+  @use "variables.scss" as *;
 
   .header__label {
+    color: var(--color-header-text);
+    padding-right: $spacing-02;
     font-weight: 600;
   }
 
   .header__timestamp {
+    color: var(--color-header-text);
     font-weight: 400;
   }
 
+  :global .header__theme-action :is(.bx--btn__icon, .lucide-icon) circle,
+  :global .header__theme-action :is(.bx--btn__icon, .lucide-icon) rect {
+    transition:
+      transform 0.25s ease,
+      fill 0.25s ease,
+      stroke 0.25s ease;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  :global .header__theme-action[data-theme-tone="dark"] :is(.bx--btn__icon, .lucide-icon) circle {
+    transform: translateX($spacing-03);
+  }
+
+  :global .header__refresh-action--spinning :is(.bx--btn__icon, .lucide-icon) {
+    animation: spin 0.45s ease-in-out forwards;
+  }
 </style>

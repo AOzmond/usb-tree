@@ -1,10 +1,10 @@
 <script lang="ts">
   import TreeNode from "./TreeNode.svelte"
   import { tooltipTrigger } from "../tooltip-state.svelte"
-  import { formatSpeed } from "../utilities"
+  import { formatSpeed, iconByState } from "../utilities"
   import type { TreeNode as TreeNodeModel } from "../models"
   import { BrowserOpenURL } from "../../../wailsjs/runtime/runtime.js"
-  import { Plus, Minus, Dot, ChevronDown } from "@lucide/svelte"
+  import { ChevronDown } from "@lucide/svelte"
 
   type Props = {
     node: TreeNodeModel
@@ -20,14 +20,10 @@
   const hasChildren = $derived(() => (node.children?.length ?? 0) > 0)
   const iconClass = $derived(hasChildren() ? "ChevronDown" : (node.device.state ?? "Dot"))
 
-  const iconByState = {
-    added: Plus,
-    removed: Minus,
-    normal: Dot,
-  } as const
-
   const TreeIcon = $derived(
-    hasChildren() ? ChevronDown : (iconByState[node.device.state as keyof typeof iconByState] ?? Dot)
+    hasChildren()
+      ? ChevronDown
+      : (iconByState[node.device.state as keyof typeof iconByState] ?? iconByState.normal)
   )
 
   const tooltipContent = $derived(() => ({
@@ -86,7 +82,6 @@
       class="tree-node__label"
       href={searchHref}
       onclick={handleLinkClick}
-      tabindex="0"
       aria-label="Open device info in browser"
     >
       <span>{node.device.name}</span>
@@ -101,20 +96,20 @@
 {/if}
 
 <style lang="scss">
-  @use "../../style/variables.scss";
+  @use "variables.scss" as *;
 
   .tree-node {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
-    padding: variables.$spacing-02 0;
+    padding: $spacing-02 0;
   }
 
   .tree-node__info {
     display: inline-flex;
     align-items: center;
-    gap: variables.$spacing-02;
+    gap: $spacing-02;
   }
 
   .tree-node__info--button {
@@ -125,10 +120,11 @@
   }
 
   .tree-node__label {
-    all: unset;
+    color: var(--txt-color);
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: variables.$spacing-02;
+    gap: $spacing-02;
   }
 
   .tree-node__speed {
@@ -144,4 +140,20 @@
     color: var(--color-removed);
   }
 
+  :global .tree-node__chevron {
+    display: inline-flex;
+    transition: transform 0.15s ease;
+  }
+
+  :global .tree-node__chevron--collapsed {
+    transform: rotate(-90deg);
+  }
+
+  :global .tree-node__chevron.ChevronDown {
+    opacity: 0.8;
+  }
+
+  :global .tree-node__chevron.normal {
+    opacity: 0.7;
+  }
 </style>

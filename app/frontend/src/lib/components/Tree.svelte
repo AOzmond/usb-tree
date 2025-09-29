@@ -10,10 +10,10 @@
 </section>
 
 <style lang="scss">
-  @use "../../style/variables.scss";
+  @use "variables.scss" as *;
 
   .device-tree {
-    padding: 0 variables.$spacing-04;
+    padding: 0 $spacing-04;
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: auto;

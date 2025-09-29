@@ -13,7 +13,7 @@
     isResizing,
     setContentRegion,
     treeRatio,
-  } from "$lib/splitLayout"
+  } from "$lib/split-layout"
 
   let contentRegion: HTMLDivElement | null = null
 
@@ -26,7 +26,7 @@
 
 <div class="app">
   <Header />
-  <Content class="app__content-wrapper">
+  <Content id="main-content" class="app__content-wrapper">
     <div class="app__content" class:app__content--resizing={$isResizing} bind:this={contentRegion}>
       <div class="app__pane app__pane--tree" style={`flex: ${$treeRatio} 1 0%;`}>
         <Tree />
@@ -36,9 +36,8 @@
         role="separator"
         aria-orientation="horizontal"
         aria-label="Resize tree and log panes"
-        tabindex="0"
         class:app__splitter--active={$isResizing}
-        on:pointerdown={handlePointerDown}
+        onpointerdown={handlePointerDown}
       >
         <span class="app__splitter-grip" aria-hidden="true"></span>
       </div>
@@ -56,7 +55,7 @@
 />
 
 <style lang="scss">
-  @use "./style/variables.scss" as variables;
+  @use "./style/variables.scss" as *;
   .app {
     display: flex;
     flex-direction: column;
@@ -90,7 +89,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: variables.$spacing-02 0;
+    padding: $spacing-02 0;
     cursor: row-resize;
     flex: 0 0 auto;
     touch-action: none;
@@ -115,4 +114,16 @@
     outline: 2px solid var(--color-text);
     outline-offset: 2px;
   }
+
+  :global #main-content {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+    background: var(--color-tree-bg);
+    height: calc(100vh - 48px);
+  }
+
 </style>

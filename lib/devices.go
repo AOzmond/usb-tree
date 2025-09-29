@@ -162,6 +162,9 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 	// Search for removed devices to update changed.
 	for key := range lastMergedMap {
 		if _, exists := mergedMap[key]; !exists {
+			device := lastMergedMap[key]
+			device.State = StateRemoved
+			addDeviceLog(device, logtime)
 			changed = true
 		}
 	}
@@ -266,7 +269,7 @@ func sortDevices(devices []Device) []Device {
 }
 
 func addDeviceLog(device Device, logtime time.Time) {
-	if device.State == StateNormal {
+	if lastMergedMap == nil {
 		return
 	}
 	logs = append(logs, Log{Time: logtime, Text: device.Name, State: device.State, Speed: device.Speed})

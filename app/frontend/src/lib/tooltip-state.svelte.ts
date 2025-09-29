@@ -27,9 +27,9 @@ const initialState: TooltipState = {
   position: null,
 };
 
-const HEADER_CLEARANCE = 56;
-const TOP_OFFSET = 64;
-const BOTTOM_OFFSET = 10;
+const HEADER_CLEARANCE = 56; //px
+const TOP_OFFSET = 64; //px
+const BOTTOM_OFFSET = 10; //px
 
 const tooltipState = writable<TooltipState>(initialState);
 
@@ -62,19 +62,16 @@ export function showTooltip(
   });
 }
 
-export function hideTooltip(delay = 0): void {
+export function hideTooltip(): void {
   clearHideTimeout();
-  if (delay <= 0) {
-    resetState();
-    return;
-  }
+  resetState();
 
   function completeHide(): void {
     resetState();
     hideTimeout = null;
   }
 
-  hideTimeout = setTimeout(completeHide, delay);
+  hideTimeout = setTimeout(completeHide);
 }
 
 // TooltipActionOptions configure how the tooltipTrigger retrieves content and hides
@@ -114,12 +111,6 @@ export function tooltipTrigger(
     return currentOptions?.getContent?.() ?? null;
   }
 
-  function scheduleHide(): void {
-    const delay = currentOptions?.hideDelay ?? 0;
-    hideTooltip(delay);
-    isActive = false;
-  }
-
   function handlePointerEnter(event: PointerEvent): void {
     const content = resolveContent();
     if (!content) {
@@ -134,7 +125,8 @@ export function tooltipTrigger(
     if (!isActive) {
       return;
     }
-    scheduleHide();
+    hideTooltip();
+    isActive = false;
   }
 
   node.addEventListener("pointerenter", handlePointerEnter);
