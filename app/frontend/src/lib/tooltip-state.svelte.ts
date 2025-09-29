@@ -1,144 +1,137 @@
-import type { Action } from "svelte/action";
-import { writable } from "svelte/store";
+import type { Action } from "svelte/action"
+import { writable } from "svelte/store"
 
 export type TooltipContent = {
-  bus: number | null;
-  vendorId: string | null;
-  productId: string | null;
-};
+  bus: number | null
+  vendorId: string | null
+  productId: string | null
+}
 
-export type TooltipPlacement = "top" | "bottom";
+export type TooltipPlacement = "top" | "bottom"
 
 export type TooltipPosition = {
-  x: number;
-  y: number;
-  placement: TooltipPlacement;
-};
+  x: number
+  y: number
+  placement: TooltipPlacement
+}
 
 export type TooltipState = {
-  visible: boolean;
-  content: TooltipContent | null;
-  position: TooltipPosition | null;
-};
+  visible: boolean
+  content: TooltipContent | null
+  position: TooltipPosition | null
+}
 
 const initialState: TooltipState = {
   visible: false,
   content: null,
   position: null,
-};
+}
 
-const HEADER_CLEARANCE = 56; // px
-const TOP_OFFSET = 64; // px
-const BOTTOM_OFFSET = 10; // px
+const HEADER_CLEARANCE = 56 // px
+const TOP_OFFSET = 64 // px
+const BOTTOM_OFFSET = 10 // px
 
-const tooltipState = writable<TooltipState>(initialState);
+const tooltipState = writable<TooltipState>(initialState)
 
-export const tooltip = { subscribe: tooltipState.subscribe };
+export const tooltip = { subscribe: tooltipState.subscribe }
 
-let hideTimeout: ReturnType<typeof setTimeout> | null = null;
+let hideTimeout: ReturnType<typeof setTimeout> | null = null
 
 function clearHideTimeout(): void {
   if (!hideTimeout) {
-    return;
+    return
   }
-  clearTimeout(hideTimeout);
-  hideTimeout = null;
+  clearTimeout(hideTimeout)
+  hideTimeout = null
 }
 
 function resetState(): void {
-  tooltipState.set(initialState);
+  tooltipState.set(initialState)
 }
 
 // showTooltip displays the tooltip with new content at the requested position
-export function showTooltip(
-  content: TooltipContent,
-  position: TooltipPosition,
-): void {
-  clearHideTimeout();
+export function showTooltip(content: TooltipContent, position: TooltipPosition): void {
+  clearHideTimeout()
   tooltipState.set({
     visible: true,
     content,
     position,
-  });
+  })
 }
 
 export function hideTooltip(): void {
-  clearHideTimeout();
-  resetState();
+  clearHideTimeout()
+  resetState()
 
   function completeHide(): void {
-    resetState();
-    hideTimeout = null;
+    resetState()
+    hideTimeout = null
   }
 
-  hideTimeout = setTimeout(completeHide);
+  hideTimeout = setTimeout(completeHide)
 }
 
 // TooltipActionOptions configure how the tooltipTrigger retrieves content and hides
 export interface TooltipActionOptions {
-  getContent: () => TooltipContent | null;
-  hideDelay?: number;
+  getContent: () => TooltipContent | null
+  hideDelay?: number
 }
 
 // defaultTooltipPosition calculates the pointer-aligned tooltip coordinates
-export function defaultTooltipPosition(
-  node: HTMLElement,
-  event?: PointerEvent,
-): TooltipPosition {
-  const target = (event?.currentTarget as HTMLElement | null) ?? node;
-  const rect = target.getBoundingClientRect();
-  const preferredTop = rect.top - TOP_OFFSET;
-  const placement: TooltipPlacement =
-    preferredTop < HEADER_CLEARANCE ? "bottom" : "top";
-  const y = placement === "top" ? preferredTop : rect.bottom + BOTTOM_OFFSET;
+export function defaultTooltipPosition(node: HTMLElement, event?: PointerEvent): TooltipPosition {
+  const target = (event?.currentTarget as HTMLElement | null) ?? node
+  const rect = target.getBoundingClientRect()
+  const preferredTop = rect.top - TOP_OFFSET
+  const placement: TooltipPlacement = preferredTop < HEADER_CLEARANCE ? "bottom" : "top"
+  const y = placement === "top" ? preferredTop : rect.bottom + BOTTOM_OFFSET
 
   return {
     x: rect.left + 40,
     y,
     placement,
-  };
+  }
 }
 
 // tooltipTrigger wires pointer events to the tooltip lifecycle
 export function tooltipTrigger(
   node: HTMLElement,
-  options: TooltipActionOptions,
+  options: TooltipActionOptions
 ): ReturnType<Action<HTMLElement, TooltipActionOptions>> {
-  let currentOptions = options;
-  let isActive = false;
+  let currentOptions = options
+  let isActive = false
 
   function resolveContent(): TooltipContent | null {
-    return currentOptions?.getContent?.() ?? null;
+    return currentOptions?.getContent?.() ?? null
   }
 
   function handlePointerEnter(event: PointerEvent): void {
-    const content = resolveContent();
+    const content = resolveContent()
     if (!content) {
-      isActive = false;
-      return;
+      isActive = false
+      return
     }
-    showTooltip(content, defaultTooltipPosition(node, event));
-    isActive = true;
+    showTooltip(content, defaultTooltipPosition(node, event))
+    isActive = true
   }
 
   function handlePointerLeave(): void {
     if (!isActive) {
-      return;
+      return
     }
-    hideTooltip();
-    isActive = false;
+    hideTooltip()
+    isActive = false
   }
 
-  node.addEventListener("pointerenter", handlePointerEnter);
-  node.addEventListener("pointerleave", handlePointerLeave);
+  node.addEventListener("pointerenter", handlePointerEnter)
+  node.addEventListener("pointerleave", handlePointerLeave)
 
   return {
     update(newOptions) {
-      currentOptions = newOptions;
+      currentOptions = newOptions
     },
     destroy() {
-      node.removeEventListener("pointerenter", handlePointerEnter);
-      node.removeEventListener("pointerleave", handlePointerLeave);
+      node.removeEventListener("pointerenter", handlePointerEnter)
+      node.removeEventListener("pointerleave", handlePointerLeave)
     },
-  };
+  }
 }

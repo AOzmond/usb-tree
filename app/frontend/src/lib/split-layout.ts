@@ -1,60 +1,60 @@
-import { get, writable } from "svelte/store";
+import { get, writable } from "svelte/store"
 
-export const MIN_RATIO = 0.25;
-export const MAX_RATIO = 0.75;
+export const MIN_RATIO = 0.25
+export const MAX_RATIO = 0.75
 
-export const treeRatio = writable(0.75);
-export const isResizing = writable(false);
+export const treeRatio = writable(0.75)
+export const isResizing = writable(false)
 
-let contentRegion: HTMLDivElement | null = null;
+let contentRegion: HTMLDivElement | null = null
 
 export function setContentRegion(node: HTMLDivElement | null): void {
-  contentRegion = node;
+  contentRegion = node
 }
 
 function clampRatio(value: number): number {
-  return Math.min(MAX_RATIO, Math.max(MIN_RATIO, value));
+  return Math.min(MAX_RATIO, Math.max(MIN_RATIO, value))
 }
 
 function updateRatio(clientY: number): void {
   if (!contentRegion) {
-    return;
+    return
   }
 
-  const rect = contentRegion.getBoundingClientRect();
+  const rect = contentRegion.getBoundingClientRect()
   if (rect.height === 0) {
-    return;
+    return
   }
 
-  const ratio = (clientY - rect.top) / rect.height;
-  treeRatio.set(clampRatio(ratio));
+  const ratio = (clientY - rect.top) / rect.height
+  treeRatio.set(clampRatio(ratio))
 }
 
 export function handlePointerDown(event: PointerEvent): void {
   if (event.button !== 0 && event.pointerType === "mouse") {
-    return;
+    return
   }
 
-  isResizing.set(true);
-  (event.currentTarget as HTMLElement | null)?.focus();
-  updateRatio(event.clientY);
-  event.preventDefault();
+  isResizing.set(true)
+  ;(event.currentTarget as HTMLElement | null)?.focus()
+  updateRatio(event.clientY)
+  event.preventDefault()
 }
 
 export function handleWindowPointerMove(event: PointerEvent): void {
   if (!get(isResizing)) {
-    return;
+    return
   }
 
-  updateRatio(event.clientY);
-  event.preventDefault();
+  updateRatio(event.clientY)
+  event.preventDefault()
 }
 
 export function handleWindowPointerUp(event: PointerEvent): void {
   if (!get(isResizing)) {
-    return;
+    return
   }
 
-  isResizing.set(false);
-  event.preventDefault();
+  isResizing.set(false)
+  event.preventDefault()
 }

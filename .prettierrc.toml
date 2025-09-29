@@ -11,9 +11,3 @@ proseWrap = 'always'
   files = "*.{yaml,yml}"
   [overrides.options]
   proseWrap = "preserve"
-
-[[overrides]]
-  files = "*.svelte"
-  [overrides.options]
-  parser = "svelte"
-  proseWrap = "preserve"

@@ -1,9 +1,9 @@
-import { defineConfig } from "vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
-import svg from "@poppanator/sveltekit-svg";
-import { fileURLToPath } from "url";
-import { dirname, resolve } from "path";
-const projectRootDir = dirname(fileURLToPath(import.meta.url));
+import { defineConfig } from "vite"
+import { svelte } from "@sveltejs/vite-plugin-svelte"
+import svg from "@poppanator/sveltekit-svg"
+import { fileURLToPath } from "url"
+import { dirname, resolve } from "path"
+const projectRootDir = dirname(fileURLToPath(import.meta.url))
 
 // https://vitejs.dev/config/
 /** @type {import('vite').UserConfig} */
@@ -16,4 +16,4 @@ export default defineConfig({
       $wailsjs: resolve(projectRootDir, "wailsjs"),
     },
   },
-});
+})
