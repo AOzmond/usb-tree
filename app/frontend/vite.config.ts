@@ -13,6 +13,7 @@ export default defineConfig({
     alias: {
       $style: resolve(projectRootDir, "src/style"),
       $lib: resolve(projectRootDir, "src/lib"),
+      $wailsjs: resolve(projectRootDir, "wailsjs"),
     },
   },
 });

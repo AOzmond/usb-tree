@@ -1,9 +1,9 @@
 <script lang="ts">
   import TreeNode from "./TreeNode.svelte"
-  import { tooltipTrigger } from "../tooltip-state.svelte"
-  import { formatSpeed, iconByState } from "../utilities"
-  import type { TreeNode as TreeNodeModel } from "../models"
-  import { BrowserOpenURL } from "../../../wailsjs/runtime/runtime.js"
+  import { tooltipTrigger } from "$lib/tooltip-state.svelte"
+  import { formatSpeed, iconByState } from "$lib/utilities"
+  import type { TreeNode as TreeNodeModel } from "$lib/models"
+  import { BrowserOpenURL } from "$wailsjs/runtime/runtime.js"
   import { ChevronDown } from "@lucide/svelte"
 
   type Props = {

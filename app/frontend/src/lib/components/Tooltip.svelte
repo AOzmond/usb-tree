@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { hideTooltip, tooltip } from "../tooltip-state.svelte"
-  import type { TooltipState } from "../tooltip-state.svelte"
+  import { hideTooltip, tooltip } from "$lib/tooltip-state.svelte"
+  import type { TooltipState } from "$lib/tooltip-state.svelte"
 
   let host: HTMLDivElement | null = $state(null)
 

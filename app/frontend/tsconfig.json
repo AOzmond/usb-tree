@@ -18,7 +18,8 @@
     "isolatedModules": true,
     "paths": {
       "$lib/*": ["src/lib/*"],
-      "$style/*": ["src/style/*"]
+      "$style/*": ["src/style/*"],
+      "$wailsjs/*": ["wailsjs/*"]
     }
   },
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],

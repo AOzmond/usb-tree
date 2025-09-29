@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatSpeed } from "../utilities"
+  import { formatSpeed } from "$lib/utilities"
   import { Plus, Minus, Dot } from "@lucide/svelte"
 
   let { log } = $props()

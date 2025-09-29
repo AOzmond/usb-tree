@@ -12,6 +12,7 @@ export default {
     alias: {
       $style: "src/style",
       $lib: "src/lib",
+      $wailsjs: "wailsjs",
     },
   },
 };

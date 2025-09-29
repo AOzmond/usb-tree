@@ -1,6 +1,6 @@
 <script>
-  import TreeNode from "../../lib/components/TreeNode.svelte"
-  import { deviceTree } from "../../lib/state.svelte"
+  import TreeNode from "$lib/components/TreeNode.svelte"
+  import { deviceTree } from "$lib/state.svelte"
 </script>
 
 <section class="device-tree">
