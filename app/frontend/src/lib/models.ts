@@ -1,4 +1,4 @@
-//Models for go types.
+// Models for go types.
 export class Device {
   path: number[];
   name: string;

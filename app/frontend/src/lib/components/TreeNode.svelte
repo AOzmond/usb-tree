@@ -32,7 +32,7 @@
     productId: node.device?.productId ?? null,
   }))
 
-  //Ensures wails will open a new browser.
+  // Ensures wails will open a new browser.
   function handleLinkClick(event: MouseEvent) {
     event.preventDefault()
     BrowserOpenURL(searchHref)

@@ -27,9 +27,9 @@ const initialState: TooltipState = {
   position: null,
 };
 
-const HEADER_CLEARANCE = 56; //px
-const TOP_OFFSET = 64; //px
-const BOTTOM_OFFSET = 10; //px
+const HEADER_CLEARANCE = 56; // px
+const TOP_OFFSET = 64; // px
+const BOTTOM_OFFSET = 10; // px
 
 const tooltipState = writable<TooltipState>(initialState);
 

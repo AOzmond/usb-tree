@@ -55,7 +55,7 @@
 />
 
 <style lang="scss">
-  @use "./style/variables.scss" as *;
+  @use "variables.scss" as *;
   .app {
     display: flex;
     flex-direction: column;

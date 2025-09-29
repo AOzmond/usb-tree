@@ -13,7 +13,7 @@ const SPEED_MAP: Record<string, number> = {
   super: 5000,
 };
 
-export const formatSpeed = (rawSpeed?: string): string => {
+export function formatSpeed(rawSpeed?: string): string {
   if (!rawSpeed) {
     return "unknown";
   }
@@ -31,4 +31,4 @@ export const formatSpeed = (rawSpeed?: string): string => {
   }
 
   return `${value} Mbps`;
-};
+}

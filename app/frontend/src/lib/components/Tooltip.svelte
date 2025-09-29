@@ -4,10 +4,13 @@
 
   let host: HTMLDivElement | null = $state(null)
 
-  const formatBus = (value: number | null) => (value == null ? null : value.toString().padStart(3, "0"))
+  function formatBus(value: number | null) {
+    return value == null ? null : value.toString().padStart(3, "0")
+  }
 
-  const buildIdLabel = (vendor: string, product: string) =>
-    vendor && product ? `${vendor}:${product}` : vendor || product || "Unknown"
+  function buildIdLabel(vendor: string, product: string) {
+    return vendor && product ? `${vendor}:${product}` : vendor || product || "Unknown"
+  }
 
   let tooltipState: TooltipState = $derived($tooltip)
   let active = $derived(Boolean(tooltipState.visible && tooltipState.content && tooltipState.position))
