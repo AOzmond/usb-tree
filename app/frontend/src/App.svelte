@@ -49,9 +49,9 @@
   <Tooltip />
 </div>
 <svelte:window
-  on:pointermove={handleWindowPointerMove}
-  on:pointerup={handleWindowPointerUp}
-  on:pointercancel={handleWindowPointerUp}
+  onpointermove={handleWindowPointerMove}
+  onpointerup={handleWindowPointerUp}
+  onpointercancel={handleWindowPointerUp}
 />
 
 <style lang="scss">
