@@ -15,3 +15,11 @@ repos:
       - id: golint
       - id: staticcheck
       - id: golangci-lint
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Run Prettier
+        entry: npx prettier --write --ignore-unknown
+        language: system
+        types: [text]
+        files: \.(js|jsx|ts|tsx|json|css|scss|md|yaml|yml|html)$
