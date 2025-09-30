@@ -1,7 +1,9 @@
 <script lang="ts">
   import { Refresh } from "$wailsjs/go/main/App"
   import { deviceLogs, getNextTheme, theme, toggleTheme, type CarbonTheme } from "$lib/state.svelte"
+
   import { Header, HeaderGlobalAction, HeaderUtilities } from "carbon-components-svelte"
+
   import { RefreshCcw, ToggleLeft } from "@lucide/svelte"
 
   function formatTimestamp(time: Date) {

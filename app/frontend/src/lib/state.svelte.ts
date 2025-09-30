@@ -1,4 +1,5 @@
 import { writable } from "svelte/store"
+
 import { Log, TreeNode } from "$lib/models"
 import { EventsOn } from "$wailsjs/runtime/runtime.js"
 import { InitFrontend, Refresh } from "$wailsjs/go/main/App"

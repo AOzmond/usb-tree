@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { onMount } from "svelte"
+  import { Content } from "carbon-components-svelte"
+
   import { Init } from "$lib/state.svelte"
   import Header from "$lib/components/Header.svelte"
   import Tree from "$lib/components/Tree.svelte"
   import Log from "$lib/components/Log.svelte"
   import Tooltip from "$lib/components/Tooltip.svelte"
-  import { Content } from "carbon-components-svelte"
-  import { onMount } from "svelte"
   import {
     handlePointerDown,
     handleWindowPointerMove,

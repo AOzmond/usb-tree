@@ -18,7 +18,7 @@ repos:
   - repo: local
     hooks:
       - id: prettier
-        name: Run Prettier
+        name: Prettier
         entry: npx prettier --write --ignore-unknown
         language: system
         types: [text]

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte"
+
   import { deviceLogs } from "$lib/state.svelte"
-  import LogRow from "./LogRow.svelte"
+  import LogRow from "$lib/components/LogRow.svelte"
 
   let container: HTMLDivElement | null = $state(null)
   let autoScroll = $state(true)
