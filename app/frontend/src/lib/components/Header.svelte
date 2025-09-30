@@ -87,9 +87,9 @@
   :global .theme-action :is(.bx--btn__icon, .lucide-icon) circle,
   :global .theme-action :is(.bx--btn__icon, .lucide-icon) rect {
     transition-property: transform, fill, stroke;
-    transition-duration: 0.25s, 0.25s, 0.25s;
-    transition-timing-function: ease, ease, ease;
-    transition-delay: 0s, 0s, 0s;
+    transition-duration: 0.25s;
+    transition-timing-function: ease;
+    transition-delay: 0s;
     transform-box: fill-box;
     transform-origin: center;
   }

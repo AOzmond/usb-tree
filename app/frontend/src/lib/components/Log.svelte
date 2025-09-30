@@ -51,7 +51,6 @@
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: auto;
-    min-height: 0;
     border-top-width: 1px;
     border-top-style: solid;
     border-top-color: var(--color-divider);

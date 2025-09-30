@@ -60,7 +60,7 @@
   .timestamp {
     display: flex;
     align-items: center;
-    gap: $spacing-03 - $spacing-01;
+    gap: $spacing-03;
   }
 
   .text {
