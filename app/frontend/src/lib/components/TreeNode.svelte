@@ -75,7 +75,7 @@
     getContent: tooltipContent,
   }}
 >
-  <div class="info info--button" aria-expanded={!isCollapsed}>
+  <div class="info" aria-expanded={!isCollapsed}>
     <TreeIcon
       class={`chevron${isCollapsed ? " chevron-collapsed" : ""} ${iconClass}`}
       onclick={toggleCollapsed}
@@ -112,13 +112,6 @@
     display: inline-flex;
     align-items: center;
     gap: $spacing-02;
-  }
-
-  .info--button {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
   }
 
   .label {
