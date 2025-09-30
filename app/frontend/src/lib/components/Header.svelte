@@ -108,4 +108,8 @@
     animation-fill-mode: forwards;
     animation-play-state: running;
   }
+
+  :global #header {
+    padding: $spacing-03;
+  }
 </style>
