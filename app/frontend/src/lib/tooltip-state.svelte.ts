@@ -36,23 +36,12 @@ const tooltipState = writable<TooltipState>(initialState)
 
 export const tooltip = { subscribe: tooltipState.subscribe }
 
-let hideTimeout: ReturnType<typeof setTimeout> | null = null
-
-function clearHideTimeout(): void {
-  if (!hideTimeout) {
-    return
-  }
-  clearTimeout(hideTimeout)
-  hideTimeout = null
-}
-
 function resetState(): void {
   tooltipState.set(initialState)
 }
 
 // showTooltip displays the tooltip with new content at the requested position
 export function showTooltip(content: TooltipContent, position: TooltipPosition): void {
-  clearHideTimeout()
   tooltipState.set({
     visible: true,
     content,
@@ -61,15 +50,7 @@ export function showTooltip(content: TooltipContent, position: TooltipPosition):
 }
 
 export function hideTooltip(): void {
-  clearHideTimeout()
   resetState()
-
-  function completeHide(): void {
-    resetState()
-    hideTimeout = null
-  }
-
-  hideTimeout = setTimeout(completeHide)
 }
 
 // TooltipActionOptions configure how the tooltipTrigger retrieves content and hides
