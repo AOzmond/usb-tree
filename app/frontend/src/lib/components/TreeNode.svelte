@@ -19,7 +19,7 @@
   const defaultHref = "https://the-sz.com/products/usbid/"
 
   const hasChildren = $derived(() => (node.children?.length ?? 0) > 0)
-  const iconClass = $derived(hasChildren() ? "ChevronDown" : (node.device.state ?? "Dot"))
+  const iconClass = $derived(hasChildren() ? "Chevron" : (node.device.state ?? "Dot"))
 
   const TreeIcon = $derived(
     hasChildren()
@@ -68,17 +68,14 @@
 </script>
 
 <div
-  class={`tree-node ${node.device.state}`}
+  class={`tree-node ${iconClass}`}
   style="margin-left: {indent}rem;"
   use:tooltipTrigger={{
     getContent: tooltipContent,
   }}
 >
   <div class="info" aria-expanded={!isCollapsed}>
-    <TreeIcon
-      class={`chevron${isCollapsed ? " chevron-collapsed" : ""} ${iconClass}`}
-      onclick={toggleCollapsed}
-    />
+    <TreeIcon class={`chevron${isCollapsed ? " chevron-collapsed" : ""} `} onclick={toggleCollapsed} />
     <a class="label" href={searchHref} onclick={handleLinkClick} aria-label="Open device info in browser">
       <span>{node.device.name}</span>
     </a>
@@ -100,33 +97,32 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: $spacing-02 0;
-  }
 
-  .info {
-    display: inline-flex;
-    align-items: center;
-    gap: $spacing-02;
-  }
+    .info {
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-02;
 
-  .label {
-    color: var(--txt-color);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: $spacing-02;
-  }
+      .label {
+        color: var(--txt-color);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-02;
+      }
+    }
+    .speed {
+      white-space: nowrap;
+      align-self: flex-start;
+    }
 
-  .speed {
-    white-space: nowrap;
-    align-self: flex-start;
-  }
+    &.added {
+      color: var(--color-added);
+    }
 
-  .added {
-    color: var(--color-added);
-  }
-
-  .removed {
-    color: var(--color-removed);
+    &.removed {
+      color: var(--color-removed);
+    }
   }
 
   :global(.chevron) {
@@ -143,6 +139,7 @@
 
   :global(.chevron) {
     opacity: 0.8;
+    cursor: pointer;
   }
 
   :global(.chevron.normal) {

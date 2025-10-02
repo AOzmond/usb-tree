@@ -27,7 +27,7 @@
   {#if active}
     <div
       class="tooltip"
-      class:tooltip-bottom={isBottomPlacement}
+      class:bottom={isBottomPlacement}
       role="tooltip"
       style={`top: ${position!.y}px; left: ${position!.x}px;`}
       onpointerenter={() => hideTooltip()}
@@ -64,82 +64,82 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     font-size: 0.85rem;
     pointer-events: auto;
-  }
 
-  .tooltip::before,
-  .tooltip::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-style: solid;
-  }
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
 
-  .tooltip::before {
-    top: 100%;
-    border-top-width: 16px;
-    border-right-width: 20px;
-    border-bottom-width: 0;
-    border-left-width: 20px;
-    border-top-color: var(--color-tooltip-border);
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-    z-index: -1;
-  }
+    &::before {
+      top: 100%;
+      border-top-width: 16px;
+      border-right-width: 20px;
+      border-bottom-width: 0;
+      border-left-width: 20px;
+      border-top-color: var(--color-tooltip-border);
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+      border-left-color: transparent;
+      z-index: -1;
+    }
 
-  .tooltip::after {
-    top: calc(100% - 1px);
-    border-top-width: 15px;
-    border-right-width: 19px;
-    border-bottom-width: 0;
-    border-left-width: 19px;
-    border-top-color: var(--color-tooltip-bg);
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-  }
+    &::after {
+      top: calc(100% - 1px);
+      border-top-width: 15px;
+      border-right-width: 19px;
+      border-bottom-width: 0;
+      border-left-width: 19px;
+      border-top-color: var(--color-tooltip-bg);
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+      border-left-color: transparent;
+    }
 
-  .tooltip-bottom::before {
-    top: auto;
-    bottom: 100%;
-    border-top-width: 0;
-    border-right-width: 20px;
-    border-bottom-width: 16px;
-    border-left-width: 20px;
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-bottom-color: var(--color-tooltip-border);
-    border-left-color: transparent;
-  }
+    &.bottom::before {
+      top: auto;
+      bottom: 100%;
+      border-top-width: 0;
+      border-right-width: 20px;
+      border-bottom-width: 16px;
+      border-left-width: 20px;
+      border-top-color: transparent;
+      border-right-color: transparent;
+      border-bottom-color: var(--color-tooltip-border);
+      border-left-color: transparent;
+    }
 
-  .tooltip-bottom::after {
-    top: auto;
-    bottom: calc(100% - 1px);
-    border-top-width: 0;
-    border-right-width: 19px;
-    border-bottom-width: 15px;
-    border-left-width: 19px;
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-bottom-color: var(--color-tooltip-bg);
-    border-left-color: transparent;
-  }
+    &.bottom::after {
+      top: auto;
+      bottom: calc(100% - 1px);
+      border-top-width: 0;
+      border-right-width: 19px;
+      border-bottom-width: 15px;
+      border-left-width: 19px;
+      border-top-color: transparent;
+      border-right-color: transparent;
+      border-bottom-color: var(--color-tooltip-bg);
+      border-left-color: transparent;
+    }
 
-  .header {
-    display: flex;
-    justify-content: space-between;
-    row-gap: $spacing-05;
-    column-gap: $spacing-05;
-    font-weight: 600;
-    margin-bottom: $spacing-03;
-    color: inherit;
-  }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      row-gap: $spacing-05;
+      column-gap: $spacing-05;
+      font-weight: 600;
+      margin-bottom: $spacing-03;
+      color: inherit;
+    }
 
-  .summary,
-  .id {
-    white-space: nowrap;
+    .summary,
+    .id {
+      white-space: nowrap;
+    }
   }
 </style>

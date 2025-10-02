@@ -1,8 +1,7 @@
 import { defineConfig } from "vite"
 import { svelte } from "@sveltejs/vite-plugin-svelte"
 import svg from "@poppanator/sveltekit-svg"
-import { fileURLToPath } from "url"
-import { dirname, resolve } from "path"
+import { resolve } from "path"
 
 const projectRootDir = import.meta.dirname
 

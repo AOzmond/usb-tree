@@ -72,21 +72,20 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-  }
 
-  .content-resizing {
-    cursor: row-resize;
-    user-select: none;
-  }
-
-  .pane {
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 0;
-    min-height: 25%;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--color-tree-bg);
+    &.content-resizing {
+      cursor: row-resize;
+      user-select: none;
+    }
+    .pane {
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: 0;
+      min-height: 25%;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--color-tree-bg);
+    }
   }
 
   .splitter {
@@ -100,6 +99,13 @@
     flex-shrink: 0;
     flex-basis: auto;
     touch-action: none;
+
+    &:focus-visible {
+      outline-width: 2px;
+      outline-style: solid;
+      outline-color: var(--color-text);
+      outline-offset: 2px;
+    }
   }
 
   .splitter-grip {
@@ -117,13 +123,6 @@
   .splitter-active .splitter-grip,
   .splitter:focus-visible .splitter-grip {
     background-color: var(--color-text);
-  }
-
-  .splitter:focus-visible {
-    outline-width: 2px;
-    outline-style: solid;
-    outline-color: var(--color-text);
-    outline-offset: 2px;
   }
 
   :global(#main-content) {

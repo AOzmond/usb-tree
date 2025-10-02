@@ -33,47 +33,47 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
-  }
 
-  .left {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: $spacing-03;
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: auto;
-    align-self: center;
-  }
+    &.added {
+      color: var(--color-added);
+    }
 
-  .timeStateWrapper {
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: $spacing-03;
-  }
+    &.removed {
+      color: var(--color-removed);
+    }
 
-  .text {
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 0%;
-    min-width: 0;
-  }
+    &.error {
+      color: var(--color-error);
+    }
 
-  .speed {
-    white-space: nowrap;
-    align-self: center;
-  }
+    .left {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: $spacing-03;
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: auto;
+      align-self: center;
 
-  .added {
-    color: var(--color-added);
-  }
+      .timeStateWrapper {
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: $spacing-03;
+      }
 
-  .removed {
-    color: var(--color-removed);
-  }
+      .text {
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 0%;
+        min-width: 0;
+      }
+    }
 
-  .error {
-    color: var(--color-error);
+    .speed {
+      white-space: nowrap;
+      align-self: center;
+    }
   }
 </style>
