@@ -12,7 +12,7 @@
     white: "White",
   }
 
-  const refreshClass = $derived(isRefreshing ? " refresh-action-spinning" : "")
+  const refreshClass = $derived(isRefreshing ? "spinning" : "")
 
   let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : undefined)
   let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : formatTimestamp(new Date()))
@@ -94,7 +94,7 @@
     transform: translateX($spacing-03);
   }
 
-  :global(.refresh-action-spinning :is(.bx--btn__icon, .lucide-icon)) {
+  :global(.spinning :is(.bx--btn__icon, .lucide-icon)) {
     animation-name: spin;
     animation-duration: 0.45s;
     animation-timing-function: ease-in-out;
