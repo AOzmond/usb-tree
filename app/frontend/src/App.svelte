@@ -16,7 +16,7 @@
     treeRatio,
   } from "$lib/split-layout"
 
-  let contentRegion: HTMLDivElement | null = null
+  let contentRegion: HTMLDivElement
 
   $: setContentRegion(contentRegion)
 
