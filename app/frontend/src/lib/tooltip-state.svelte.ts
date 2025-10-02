@@ -74,7 +74,7 @@ export function hideTooltip(): void {
 
 // TooltipActionOptions configure how the tooltipTrigger retrieves content and hides
 export interface TooltipActionOptions {
-  getContent: () => TooltipContent | null
+  getContent: () => TooltipContent
 }
 
 // TooltipPosition calculates the pointer-aligned tooltip coordinates
@@ -100,8 +100,8 @@ export function tooltipTrigger(
   let currentOptions = options
   let isActive = false
 
-  function resolveContent(): TooltipContent | null {
-    return currentOptions?.getContent?.() ?? null
+  function resolveContent(): TooltipContent {
+    return currentOptions.getContent()
   }
 
   function handlePointerEnter(event: PointerEvent): void {
