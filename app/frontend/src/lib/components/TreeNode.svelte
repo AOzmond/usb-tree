@@ -28,9 +28,9 @@
   )
 
   const tooltipContent = $derived(() => ({
-    bus: node.device?.bus ?? null,
-    vendorId: node.device?.vendorId ?? null,
-    productId: node.device?.productId ?? null,
+    bus: node.device?.bus ?? undefined,
+    vendorId: node.device?.vendorId ?? undefined,
+    productId: node.device?.productId ?? undefined,
   }))
 
   // Ensures wails will open a new browser.
@@ -141,7 +141,7 @@
     transform: rotate(-90deg);
   }
 
-  :global(.chevron.ChevronDown) {
+  :global(.chevron) {
     opacity: 0.8;
   }
 

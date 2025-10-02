@@ -12,7 +12,7 @@
     white: "White",
   }
 
-  let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : null)
+  let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : undefined)
   let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : formatTimestamp(new Date()))
   let isRefreshing = $state(false)
   let refreshResetTimer: ReturnType<typeof setTimeout> | null = null
@@ -56,7 +56,7 @@
       onclick={toggleTheme}
     />
     <HeaderGlobalAction
-      class={`refresh-action${isRefreshing ? " refresh-action--spinning" : ""}`}
+      class={`refresh-action${isRefreshing ? " refresh-action-spinning" : ""}`}
       aria-label="Refresh"
       icon={RefreshCcw}
       kind="primary"
@@ -83,7 +83,7 @@
 
   :global(.theme-action :is(.bx--btn__icon, .lucide-icon) circle),
   :global(.theme-action :is(.bx--btn__icon, .lucide-icon) rect) {
-    transition-duration: 0.25s;
+    transition-duration: 0.15s;
     transition-timing-function: ease;
     transition-delay: 0s;
     transform-box: fill-box;
@@ -94,7 +94,7 @@
     transform: translateX($spacing-03);
   }
 
-  :global(.refresh-action--spinning :is(.bx--btn__icon, .lucide-icon)) {
+  :global(.refresh-action-spinning :is(.bx--btn__icon, .lucide-icon)) {
     animation-name: spin;
     animation-duration: 0.45s;
     animation-timing-function: ease-in-out;

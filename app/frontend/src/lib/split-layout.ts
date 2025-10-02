@@ -6,9 +6,9 @@ export const MAX_RATIO = 0.75
 export const treeRatio = writable(0.75)
 export const isResizing = writable(false)
 
-let contentRegion: HTMLDivElement | null = null
+let contentRegion: HTMLDivElement | undefined
 
-export function setContentRegion(node: HTMLDivElement | null): void {
+export function setContentRegion(node: HTMLDivElement): void {
   contentRegion = node
 }
 

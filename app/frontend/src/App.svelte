@@ -28,8 +28,8 @@
 <div class="app">
   <Header />
   <Content id="main-content" class="content-wrapper">
-    <div class="content" class:content--resizing={$isResizing} bind:this={contentRegion}>
-      <div class="pane pane--tree" style={`flex-grow: ${$treeRatio};`}>
+    <div class="content" class:content-resizing={$isResizing} bind:this={contentRegion}>
+      <div class="pane pane-tree" style={`flex-grow: ${$treeRatio};`}>
         <Tree />
       </div>
       <div
@@ -42,7 +42,7 @@
       >
         <span class="splitter-grip" aria-hidden="true"></span>
       </div>
-      <div class="pane pane--log" style={`flex-grow: ${1 - $treeRatio};`}>
+      <div class="pane pane-log" style={`flex-grow: ${1 - $treeRatio};`}>
         <Log />
       </div>
     </div>
@@ -74,7 +74,7 @@
     min-height: 0;
   }
 
-  .content--resizing {
+  .content-resizing {
     cursor: row-resize;
     user-select: none;
   }
@@ -108,13 +108,13 @@
     height: 2px;
     border-radius: 999px;
     background-color: var(--color-divider);
-    transition-duration: 0.2s;
+    transition-duration: 0.15s;
     transition-timing-function: ease;
     transition-delay: 0s;
   }
 
   .splitter:hover .splitter-grip,
-  .splitter--active .splitter-grip,
+  .splitter-active .splitter-grip,
   .splitter:focus-visible .splitter-grip {
     background-color: var(--color-text);
   }

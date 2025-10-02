@@ -2,7 +2,7 @@
   import { hideTooltip, tooltip } from "$lib/tooltip-state.svelte"
   import type { TooltipState } from "$lib/tooltip-state.svelte"
 
-  let host: HTMLDivElement | null = $state(null)
+  let host: HTMLDivElement | undefined = $state(undefined)
 
   function formatBus(value: number | null) {
     return value == null ? null : value.toString().padStart(3, "0")

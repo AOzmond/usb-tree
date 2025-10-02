@@ -4,7 +4,7 @@
   import { deviceLogs } from "$lib/state.svelte"
   import LogRow from "$lib/components/LogRow.svelte"
 
-  let container: HTMLDivElement | null = $state(null)
+  let container: HTMLDivElement | undefined = $state(undefined)
   let autoScroll = $state(true)
 
   function scrollToBottom() {
