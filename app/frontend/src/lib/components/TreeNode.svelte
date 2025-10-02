@@ -138,12 +138,12 @@
     transform: rotate(-90deg);
   }
 
-  :global(.chevron) {
+  :global(.chevron svg) {
     opacity: 0.8;
     cursor: pointer;
   }
 
-  :global(.chevron.normal) {
+  :global(.normal svg) {
     opacity: 0.7;
   }
 </style>
