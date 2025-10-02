@@ -6,8 +6,15 @@ semi = false
 singleQuote = false
 endOfLine = "lf"
 proseWrap = 'always'
+plugins = ["prettier-plugin-svelte"]
 
 [[overrides]]
   files = "*.{yaml,yml}"
   [overrides.options]
+  proseWrap = "preserve"
+
+[[overrides]]
+  files = "*.svelte"
+  [overrides.options]
+  parser = "svelte"
   proseWrap = "preserve"

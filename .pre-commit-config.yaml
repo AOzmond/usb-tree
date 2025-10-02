@@ -19,7 +19,7 @@ repos:
     hooks:
       - id: prettier
         name: Prettier
-        entry: npx prettier --write --ignore-unknown
+        entry: bunx prettier --write --ignore-unknown
         language: system
         types: [text]
-        files: \.(js|jsx|ts|tsx|json|css|scss|md|yaml|yml|html)$
+        files: \.(js|jsx|ts|tsx|json|css|scss|md|yaml|yml|html|svelte)$

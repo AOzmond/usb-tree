@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { Content } from "carbon-components-svelte";
+  import { Content } from "carbon-components-svelte"
 
   import { Init } from "$lib/state.svelte"
   import Header from "$lib/components/Header.svelte"
