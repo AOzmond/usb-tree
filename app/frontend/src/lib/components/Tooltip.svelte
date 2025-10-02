@@ -9,7 +9,7 @@
   }
 
   function buildIdLabel(vendor: string, product: string) {
-    return vendor && product ? `${vendor}:${product}` : vendor || product || "Unknown"
+    return `${vendor}:${product}`
   }
 
   let tooltipState: TooltipState = $derived($tooltip)
@@ -138,8 +138,8 @@
     color: inherit;
   }
 
-  .summary, .id {
+  .summary,
+  .id {
     white-space: nowrap;
   }
-
 </style>
