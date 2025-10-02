@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { Content } from "carbon-components-svelte"
+  import { Content } from "carbon-components-svelte";
 
   import { Init } from "$lib/state.svelte"
   import Header from "$lib/components/Header.svelte"
@@ -108,7 +108,6 @@
     height: 2px;
     border-radius: 999px;
     background-color: var(--color-divider);
-    transition-property: background;
     transition-duration: 0.2s;
     transition-timing-function: ease;
     transition-delay: 0s;
@@ -135,6 +134,6 @@
     flex-shrink: 1;
     flex-basis: auto;
     background-color: var(--color-tree-bg);
-    height: calc(100vh - 48px);
+    height: calc(100vh - $headerHeight);
   }
 </style>

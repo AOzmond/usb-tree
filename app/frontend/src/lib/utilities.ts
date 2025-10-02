@@ -6,6 +6,11 @@ export const iconByState = {
   normal: Dot,
 } as const
 
+export function formatTimestamp(time: Date) {
+  return new Date(time).toLocaleTimeString()
+}
+
+// Values in Mbps
 const SPEED_MAP: Record<string, number> = {
   low: 1.5,
   full: 12,

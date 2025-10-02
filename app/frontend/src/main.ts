@@ -7,7 +7,7 @@ import "carbon-components-svelte/css/all.css"
 
 import "$style/reset.scss"
 import "$style/index.scss"
-import "$style/variables.scss"
+import "$style/theme.scss"
 
 const app = mount(App, {
   target: document.getElementById("app")!,

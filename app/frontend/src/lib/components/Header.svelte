@@ -1,14 +1,11 @@
 <script lang="ts">
   import { Refresh } from "$wailsjs/go/main/App"
   import { deviceLogs, getNextTheme, theme, toggleTheme, type CarbonTheme } from "$lib/state.svelte"
+  import { formatTimestamp } from "$lib/utilities"
 
   import { Header, HeaderGlobalAction, HeaderUtilities } from "carbon-components-svelte"
 
   import { RefreshCcw, ToggleLeft } from "@lucide/svelte"
-
-  function formatTimestamp(time: Date) {
-    return new Date(time).toLocaleTimeString()
-  }
 
   const themeLabels: Record<CarbonTheme, string> = {
     g100: "G100",
@@ -84,9 +81,8 @@
     font-weight: 400;
   }
 
-  :global .theme-action :is(.bx--btn__icon, .lucide-icon) circle,
-  :global .theme-action :is(.bx--btn__icon, .lucide-icon) rect {
-    transition-property: transform, fill, stroke;
+  :global(.theme-action :is(.bx--btn__icon, .lucide-icon) circle),
+  :global(.theme-action :is(.bx--btn__icon, .lucide-icon) rect) {
     transition-duration: 0.25s;
     transition-timing-function: ease;
     transition-delay: 0s;

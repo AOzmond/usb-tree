@@ -3,7 +3,7 @@ import { get, writable } from "svelte/store"
 export const MIN_RATIO = 0.25
 export const MAX_RATIO = 0.75
 
-export const treeRatio = writable(0.5)
+export const treeRatio = writable(0.75)
 export const isResizing = writable(false)
 
 let contentRegion: HTMLDivElement | null = null

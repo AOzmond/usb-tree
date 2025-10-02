@@ -5,7 +5,6 @@
   import type { TreeNode as TreeNodeModel } from "$lib/models"
   import { BrowserOpenURL } from "$wailsjs/runtime/runtime.js"
 
-
   import { ChevronDown } from "@lucide/svelte"
 
   type Props = {
@@ -80,12 +79,7 @@
       class={`chevron${isCollapsed ? " chevron-collapsed" : ""} ${iconClass}`}
       onclick={toggleCollapsed}
     />
-    <a
-      class="label"
-      href={searchHref}
-      onclick={handleLinkClick}
-      aria-label="Open device info in browser"
-    >
+    <a class="label" href={searchHref} onclick={handleLinkClick} aria-label="Open device info in browser">
       <span>{node.device.name}</span>
     </a>
   </div>

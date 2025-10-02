@@ -30,6 +30,7 @@ const initialState: TooltipState = {
 const HEADER_CLEARANCE = 56 // px
 const TOP_OFFSET = 64 // px
 const BOTTOM_OFFSET = 10 // px
+const LEFT_OFFSET = 40 // px
 
 const tooltipState = writable<TooltipState>(initialState)
 
@@ -74,11 +75,10 @@ export function hideTooltip(): void {
 // TooltipActionOptions configure how the tooltipTrigger retrieves content and hides
 export interface TooltipActionOptions {
   getContent: () => TooltipContent | null
-  hideDelay?: number
 }
 
-// defaultTooltipPosition calculates the pointer-aligned tooltip coordinates
-export function defaultTooltipPosition(node: HTMLElement, event?: PointerEvent): TooltipPosition {
+// TooltipPosition calculates the pointer-aligned tooltip coordinates
+export function TooltipPosition(node: HTMLElement, event?: PointerEvent): TooltipPosition {
   const target = (event?.currentTarget as HTMLElement | null) ?? node
   const rect = target.getBoundingClientRect()
   const preferredTop = rect.top - TOP_OFFSET
@@ -86,7 +86,7 @@ export function defaultTooltipPosition(node: HTMLElement, event?: PointerEvent):
   const y = placement === "top" ? preferredTop : rect.bottom + BOTTOM_OFFSET
 
   return {
-    x: rect.left + 40,
+    x: rect.left + LEFT_OFFSET,
     y,
     placement,
   }
@@ -110,7 +110,7 @@ export function tooltipTrigger(
       isActive = false
       return
     }
-    showTooltip(content, defaultTooltipPosition(node, event))
+    showTooltip(content, TooltipPosition(node, event))
     isActive = true
   }
 

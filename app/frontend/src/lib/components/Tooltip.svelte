@@ -19,17 +19,17 @@
   let isBottomPlacement = $derived(placement === "bottom")
   let vendorLabel = $derived(tooltipState.content?.vendorId?.trim() ?? "")
   let productLabel = $derived(tooltipState.content?.productId?.trim() ?? "")
-  let busLabel = $derived(formatBus(tooltipState.content?.bus ?? null))
+  let busLabel = $derived(formatBus(tooltipState.content?.bus ?? null) ?? "")
   let idLabel = $derived(buildIdLabel(vendorLabel, productLabel))
 </script>
 
 <div class="tooltip-host" bind:this={host}>
-  {#if active && position}
+  {#if active}
     <div
       class="tooltip"
       class:tooltip-bottom={isBottomPlacement}
       role="tooltip"
-      style={`top: ${position.y}px; left: ${position.x}px;`}
+      style={`top: ${position!.y}px; left: ${position!.x}px;`}
       onpointerenter={() => hideTooltip()}
     >
       <div class="header">
@@ -138,23 +138,8 @@
     color: inherit;
   }
 
-  .summary {
+  .summary, .id {
     white-space: nowrap;
   }
 
-  .id {
-    white-space: nowrap;
-  }
-
-  .link {
-    display: block;
-    font-size: 0.8rem;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .link:hover,
-  .link:focus {
-    text-decoration: underline;
-  }
 </style>

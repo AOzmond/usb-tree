@@ -1,24 +1,18 @@
 <script lang="ts">
-  import { formatSpeed } from "$lib/utilities"
+  import { iconByState, formatSpeed, formatTimestamp } from "$lib/utilities"
 
   import { Plus, Minus, Dot } from "@lucide/svelte"
 
   let { log } = $props()
 
-  const iconByState = {
-    added: Plus,
-    removed: Minus,
-    normal: Dot,
-  } as const
-
   const LogIcon = iconByState[log.State as keyof typeof iconByState] ?? Dot
 </script>
 
 <code class={`log-row ${log.State}`}>
-  <div class="primary">
+  <div class="left">
     <div class="timestamp">
       <span>
-        {new Date(log.Time).toLocaleTimeString()}
+        {formatTimestamp(log.Time)}
       </span>
       <LogIcon />
     </div>
@@ -41,7 +35,7 @@
     align-items: flex-start;
   }
 
-  .primary {
+  .left {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -49,15 +43,11 @@
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: auto;
-    min-width: 0;
     align-self: center;
-
-    & > :first-child {
-      white-space: nowrap;
-    }
   }
 
   .timestamp {
+    white-space: nowrap;
     display: flex;
     align-items: center;
     gap: $spacing-03;

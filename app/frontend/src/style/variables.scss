@@ -1,34 +1,3 @@
 @forward "@carbon/styles/scss/spacing";
-@use "@carbon/styles/scss/theme" as carbonTheme;
-@use "@carbon/styles/scss/themes" as carbonThemes;
 
-@mixin apply-carbon-theme($token, $scheme) {
-  @include carbonTheme.theme($token);
-  color-scheme: $scheme;
-}
-
-:root {
-  @include apply-carbon-theme(carbonThemes.$g100, dark);
-}
-
-:root[data-carbon-theme="g100"] {
-  @include apply-carbon-theme(carbonThemes.$g100, dark);
-}
-
-:root[data-carbon-theme="white"] {
-  @include apply-carbon-theme(carbonThemes.$white, light);
-}
-
-:root {
-  --color-text: var(--cds-text-primary);
-  --color-header-text: #f4f4f4;
-  --color-tree-bg: var(--cds-background);
-  --color-log-bg: var(--cds-layer);
-  --color-added: var(--cds-support-success);
-  --color-removed: var(--cds-support-error);
-  --color-error: var(--cds-support-warning);
-  --color-divider: var(--cds-border-subtle);
-  --color-tooltip-bg: var(--cds-layer);
-  --color-tooltip-text: var(--cds-text-primary);
-  --color-tooltip-border: var(--cds-border-strong);
-}
+$headerHeight: 48px;
