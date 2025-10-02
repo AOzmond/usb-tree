@@ -36,7 +36,6 @@ export function handlePointerDown(event: PointerEvent): void {
   }
 
   isResizing.set(true)
-  ;(event.currentTarget as HTMLElement | null)?.focus()
   updateRatio(event.clientY)
   event.preventDefault()
 }
