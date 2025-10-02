@@ -129,7 +129,7 @@
     color: var(--color-removed);
   }
 
-  :global .chevron {
+  :global(.chevron) {
     display: inline-flex;
     transition-property: transform;
     transition-duration: 0.15s;
@@ -137,15 +137,15 @@
     transition-delay: 0s;
   }
 
-  :global .chevron-collapsed {
+  :global(.chevron-collapsed) {
     transform: rotate(-90deg);
   }
 
-  :global .chevron.ChevronDown {
+  :global(.chevron.ChevronDown) {
     opacity: 0.8;
   }
 
-  :global .chevron.normal {
+  :global(.chevron.normal) {
     opacity: 0.7;
   }
 </style>

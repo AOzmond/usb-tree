@@ -126,7 +126,7 @@
     outline-offset: 2px;
   }
 
-  :global #main-content {
+  :global(#main-content) {
     padding: 0;
     display: flex;
     flex-direction: column;

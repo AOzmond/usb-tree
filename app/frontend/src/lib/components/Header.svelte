@@ -90,11 +90,11 @@
     transform-origin: center;
   }
 
-  :global .theme-action[data-theme-tone="dark"] :is(.bx--btn__icon, .lucide-icon) circle {
+  :global(.theme-action[data-theme-tone="dark"] :is(.bx--btn__icon, .lucide-icon) circle) {
     transform: translateX($spacing-03);
   }
 
-  :global .refresh-action--spinning :is(.bx--btn__icon, .lucide-icon) {
+  :global(.refresh-action--spinning :is(.bx--btn__icon, .lucide-icon)) {
     animation-name: spin;
     animation-duration: 0.45s;
     animation-timing-function: ease-in-out;
@@ -105,7 +105,7 @@
     animation-play-state: running;
   }
 
-  :global #header {
+  :global(#header) {
     padding: $spacing-03;
   }
 </style>
