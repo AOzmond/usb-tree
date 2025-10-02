@@ -12,6 +12,8 @@
     white: "White",
   }
 
+  const refreshClass = $derived(isRefreshing ? " refresh-action-spinning" : "")
+
   let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : undefined)
   let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : formatTimestamp(new Date()))
   let isRefreshing = $state(false)
@@ -56,7 +58,7 @@
       onclick={toggleTheme}
     />
     <HeaderGlobalAction
-      class={`refresh-action${isRefreshing ? " refresh-action-spinning" : ""}`}
+      class={`refresh-action ${refreshClass}`}
       aria-label="Refresh"
       icon={RefreshCcw}
       kind="primary"
@@ -83,9 +85,7 @@
 
   :global(.theme-action :is(.bx--btn__icon, .lucide-icon) circle),
   :global(.theme-action :is(.bx--btn__icon, .lucide-icon) rect) {
-    transition-duration: 0.15s;
-    transition-timing-function: ease;
-    transition-delay: 0s;
+    transition: 0.15s ease 0s;
     transform-box: fill-box;
     transform-origin: center;
   }

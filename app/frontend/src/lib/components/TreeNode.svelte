@@ -20,6 +20,7 @@
 
   const hasChildren = $derived(() => (node.children?.length ?? 0) > 0)
   const iconClass = $derived(hasChildren() ? "Chevron" : (node.device.state ?? "Dot"))
+  const collapsedClass = $derived(isCollapsed ? "collapsed" : "")
 
   const TreeIcon = $derived(
     hasChildren()
@@ -75,7 +76,7 @@
   }}
 >
   <div class="info" aria-expanded={!isCollapsed}>
-    <TreeIcon class={`chevron${isCollapsed ? " chevron-collapsed" : ""} `} onclick={toggleCollapsed} />
+    <TreeIcon class={`chevron ${collapsedClass}`} onclick={toggleCollapsed} />
     <a class="label" href={searchHref} onclick={handleLinkClick} aria-label="Open device info in browser">
       <span>{node.device.name}</span>
     </a>
@@ -133,7 +134,7 @@
     transition-delay: 0s;
   }
 
-  :global(.chevron-collapsed) {
+  :global(.collapsed) {
     transform: rotate(-90deg);
   }
 
