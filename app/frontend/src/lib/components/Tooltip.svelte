@@ -4,8 +4,8 @@
 
   let host: HTMLDivElement | undefined = $state(undefined)
 
-  function formatBus(value: number | null) {
-    return value == null ? null : value.toString().padStart(3, "0")
+  function formatBus(value: number | undefined) {
+    return value == undefined ? undefined : value.toString().padStart(3, "0")
   }
 
   function buildIdLabel(vendor: string, product: string) {
@@ -19,7 +19,7 @@
   let isBottomPlacement = $derived(placement === "bottom")
   let vendorLabel = $derived(tooltipState.content?.vendorId?.trim() ?? "")
   let productLabel = $derived(tooltipState.content?.productId?.trim() ?? "")
-  let busLabel = $derived(formatBus(tooltipState.content?.bus ?? null) ?? "")
+  let busLabel = $derived(formatBus(tooltipState.content?.bus ?? undefined) ?? "")
   let idLabel = $derived(buildIdLabel(vendorLabel, productLabel))
 </script>
 
@@ -58,9 +58,7 @@
     padding: $spacing-03 $spacing-04;
     background: var(--color-tooltip-bg);
     color: var(--color-tooltip-text);
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--color-tooltip-border);
+    border: 1px solid var(--color-tooltip-border);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     font-size: 0.85rem;
     pointer-events: auto;
@@ -78,53 +76,29 @@
 
     &::before {
       top: 100%;
-      border-top-width: 16px;
-      border-right-width: 20px;
-      border-bottom-width: 0;
-      border-left-width: 20px;
-      border-top-color: var(--color-tooltip-border);
-      border-right-color: transparent;
-      border-bottom-color: transparent;
-      border-left-color: transparent;
+      border-width: 16px 20px 0 20px;
+      border-color: var(--color-tooltip-border) transparent transparent transparent;
       z-index: -1;
     }
 
     &::after {
       top: calc(100% - 1px);
-      border-top-width: 15px;
-      border-right-width: 19px;
-      border-bottom-width: 0;
-      border-left-width: 19px;
-      border-top-color: var(--color-tooltip-bg);
-      border-right-color: transparent;
-      border-bottom-color: transparent;
-      border-left-color: transparent;
+      border-width: 15px 19px 0 19px;
+      border-color: var(--color-tooltip-bg) transparent transparent transparent;
     }
 
     &.bottom::before {
       top: auto;
       bottom: 100%;
-      border-top-width: 0;
-      border-right-width: 20px;
-      border-bottom-width: 16px;
-      border-left-width: 20px;
-      border-top-color: transparent;
-      border-right-color: transparent;
-      border-bottom-color: var(--color-tooltip-border);
-      border-left-color: transparent;
+      border-width: 0 20px 16px 20px;
+      border-color: transparent transparent var(--color-tooltip-border) transparent;
     }
 
     &.bottom::after {
       top: auto;
       bottom: calc(100% - 1px);
-      border-top-width: 0;
-      border-right-width: 19px;
-      border-bottom-width: 15px;
-      border-left-width: 19px;
-      border-top-color: transparent;
-      border-right-color: transparent;
-      border-bottom-color: var(--color-tooltip-bg);
-      border-left-color: transparent;
+      border-width: 0 19px 15px 19px;
+      border-color: transparent transparent var(--color-tooltip-bg) transparent;
     }
 
     .header {

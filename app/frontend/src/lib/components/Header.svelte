@@ -15,7 +15,7 @@
   let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : undefined)
   let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : formatTimestamp(new Date()))
   let isRefreshing = $state(false)
-  let refreshResetTimer: ReturnType<typeof setTimeout> | null = null
+  let refreshResetTimer: ReturnType<typeof setTimeout> | undefined = undefined
 
   let nextTheme = $derived(getNextTheme($theme))
   let currentThemeLabel = $derived(themeLabels[$theme])
@@ -30,14 +30,14 @@
     isRefreshing = true
     if (refreshResetTimer) {
       clearTimeout(refreshResetTimer)
-      refreshResetTimer = null
+      refreshResetTimer = undefined
     }
 
     Refresh()
 
     refreshResetTimer = setTimeout(() => {
       isRefreshing = false
-      refreshResetTimer = null
+      refreshResetTimer = undefined
     }, 450)
   }
 </script>

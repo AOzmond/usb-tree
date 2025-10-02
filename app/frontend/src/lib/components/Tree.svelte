@@ -20,8 +20,6 @@
     min-height: 0;
     overflow: auto;
     background-color: var(--color-tree-bg);
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-bottom-color: var(--color-divider);
+    border-bottom: 1px solid var(--color-divider);
   }
 </style>
