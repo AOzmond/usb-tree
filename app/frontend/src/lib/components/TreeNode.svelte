@@ -19,7 +19,7 @@
   const defaultHref = "https://the-sz.com/products/usbid/"
 
   const hasChildren = $derived(() => (node.children?.length ?? 0) > 0)
-  const iconClass = $derived(hasChildren() ? "Chevron" : (node.device.state ?? "Dot"))
+  const iconClass = $derived(hasChildren() ? "chevron" : (node.device.state ?? "dot"))
   const collapsedClass = $derived(isCollapsed ? "collapsed" : "")
 
   const TreeIcon = $derived(
