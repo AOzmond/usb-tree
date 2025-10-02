@@ -82,7 +82,7 @@
   .pane {
     flex-grow: 1;
     flex-shrink: 1;
-    flex-basis: 0%;
+    flex-basis: 0;
     min-height: 25%;
     display: flex;
     flex-direction: column;
