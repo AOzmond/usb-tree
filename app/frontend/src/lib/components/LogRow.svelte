@@ -10,7 +10,7 @@
 
 <code class={`log-row ${log.State}`}>
   <div class="left">
-    <div class="timestamp">
+    <div class="timeStateWrapper">
       <span>
         {formatTimestamp(log.Time)}
       </span>
@@ -46,7 +46,7 @@
     align-self: center;
   }
 
-  .timestamp {
+  .timeStateWrapper {
     white-space: nowrap;
     display: flex;
     align-items: center;
