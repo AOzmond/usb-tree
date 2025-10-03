@@ -17,7 +17,6 @@
   let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : undefined)
   let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : formatTimestamp(new Date()))
   let isRefreshing = $state(false)
-  let refreshIconElement: HTMLElement | undefined = undefined
 
   let nextTheme = $derived(getNextTheme($theme))
   let currentThemeLabel = $derived(themeLabels[$theme])
