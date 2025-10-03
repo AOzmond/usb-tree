@@ -108,7 +108,7 @@ func Refresh() (time.Time, []Device) {
 	logtime, retrievedDevices := getDevices()
 	if retrievedDevices != nil {
 		cachedDevices = retrievedDevices
-    lastMergedMap = nil
+		lastMergedMap = nil
 		return logtime, cachedDevices
 	}
 
@@ -128,7 +128,7 @@ func getDevices() (time.Time, []Device) {
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
 		devices = append(devices, descToDevice(*desc))
-		return true
+		return false
 	})
 	if err != nil {
 		addErrorLog(fmt.Sprintf("Error trying to get USB devices: %s", err.Error()), time.Now(), StateError)
@@ -282,13 +282,6 @@ func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
 		if devices[i].Bus != devices[j].Bus {
 			return devices[i].Bus < devices[j].Bus
-		}
-		flatten := func(path []int) string {
-			s := ""
-			for _, p := range path {
-				s += fmt.Sprintf("%04d-", p)
-			}
-			return s
 		}
 
 		return flatten(devices[i].Path) < flatten(devices[j].Path)
