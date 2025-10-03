@@ -10,13 +10,23 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
+    "@poppanator/sveltekit-svg": "^6.0.0",
     "@sveltejs/vite-plugin-svelte": "^6.2.0",
     "@tsconfig/svelte": "^5.0.5",
+    "@types/node": "^24.5.2",
+    "sass": "^1.92.1",
     "svelte": "^5.38.8",
     "svelte-check": "^4.0.0",
     "svelte-preprocess": "^6.0.0",
     "tslib": "^2.4.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.5"
+  },
+  "dependencies": {
+    "@carbon/styles": "^1.90.0",
+    "@fontsource-variable/ibm-plex-sans": "^5.2.8",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@lucide/svelte": "^0.544.0",
+    "carbon-components-svelte": "^0.89.7"
   }
 }

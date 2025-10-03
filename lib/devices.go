@@ -33,6 +33,7 @@ type TreeNode struct {
 type Log struct {
 	Time  time.Time
 	Text  string
+	Speed string
 	State LogState
 }
 
@@ -107,6 +108,7 @@ func Refresh() (time.Time, []Device) {
 	logtime, retrievedDevices := getDevices()
 	if retrievedDevices != nil {
 		cachedDevices = retrievedDevices
+    lastMergedMap = nil
 		return logtime, cachedDevices
 	}
 
@@ -180,6 +182,9 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 	// Search for removed devices to update changed.
 	for key := range lastMergedMap {
 		if _, exists := mergedMap[key]; !exists {
+			device := lastMergedMap[key]
+			device.State = StateRemoved
+			addDeviceLog(device, logtime)
 			changed = true
 		}
 	}
@@ -275,6 +280,17 @@ func flatten(path []int) string {
 // sortDevices sorts devices consistently by their path
 func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
+		if devices[i].Bus != devices[j].Bus {
+			return devices[i].Bus < devices[j].Bus
+		}
+		flatten := func(path []int) string {
+			s := ""
+			for _, p := range path {
+				s += fmt.Sprintf("%04d-", p)
+			}
+			return s
+		}
+
 		return flatten(devices[i].Path) < flatten(devices[j].Path)
 	})
 
@@ -286,7 +302,16 @@ func addErrorLog(text string, logtime time.Time, state LogState) {
 }
 
 func addDeviceLog(device Device, logtime time.Time) {
-	logs = append(logs, Log{Time: logtime, Text: device.Name, State: device.State})
+	if lastMergedMap == nil {
+		return
+	}
+
+	logState := device.State
+	if device.State == StateNormal {
+		logState = StateAdded
+	}
+
+	logs = append(logs, Log{Time: logtime, Text: device.Name, State: logState, Speed: device.Speed})
 }
 
 // GetLog returns all stored device logs.

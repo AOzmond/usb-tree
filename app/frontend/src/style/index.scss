@@ -1,0 +1,32 @@
+@use "variables" as *;
+
+button {
+  color: inherit;
+}
+
+html {
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+code {
+  font-family: "JetBrains Mono", monospace;
+}
+
+body {
+  background-color: var(--color-tree-bg);
+  color: var(--color-text);
+}
+
+svg > * {
+  fill: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(-360deg);
+  }
+}
