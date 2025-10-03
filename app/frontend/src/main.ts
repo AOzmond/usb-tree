@@ -12,4 +12,5 @@ import "$style/theme.scss"
 const app = mount(App, {
   target: document.getElementById("app")!,
 })
+
 export default app

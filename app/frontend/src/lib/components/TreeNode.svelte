@@ -112,6 +112,7 @@
         gap: $spacing-02;
       }
     }
+
     .speed {
       white-space: nowrap;
       align-self: flex-start;

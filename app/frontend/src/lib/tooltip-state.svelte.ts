@@ -36,10 +36,6 @@ const tooltipState = writable<TooltipState>(initialState)
 
 export const tooltip = { subscribe: tooltipState.subscribe }
 
-function resetState(): void {
-  tooltipState.set(initialState)
-}
-
 // showTooltip displays the tooltip with new content at the requested position
 export function showTooltip(content: TooltipContent, position: TooltipPosition): void {
   tooltipState.set({
@@ -50,7 +46,7 @@ export function showTooltip(content: TooltipContent, position: TooltipPosition):
 }
 
 export function hideTooltip(): void {
-  resetState()
+  tooltipState.set(initialState)
 }
 
 // TooltipActionOptions configure how the tooltipTrigger retrieves content and hides

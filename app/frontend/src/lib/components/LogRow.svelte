@@ -1,7 +1,7 @@
 <script lang="ts">
   import { iconByState, formatSpeed, formatTimestamp } from "$lib/utilities"
 
-  import { Plus, Minus, Dot } from "@lucide/svelte"
+  import { Dot } from "@lucide/svelte"
 
   let { log } = $props()
 

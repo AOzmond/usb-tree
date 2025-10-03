@@ -49,6 +49,7 @@
   </Content>
   <Tooltip />
 </div>
+
 <svelte:window
   onpointermove={handleWindowPointerMove}
   onpointerup={handleWindowPointerUp}
@@ -57,6 +58,7 @@
 
 <style lang="scss">
   @use "variables.scss" as *;
+
   .app {
     display: flex;
     flex-direction: column;
@@ -77,6 +79,7 @@
       cursor: row-resize;
       user-select: none;
     }
+
     .pane {
       flex-grow: 1;
       flex-shrink: 1;
