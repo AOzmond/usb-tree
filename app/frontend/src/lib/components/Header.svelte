@@ -17,12 +17,16 @@
   let lastLog = $derived($deviceLogs?.length ? $deviceLogs[$deviceLogs.length - 1] : undefined)
   let lastUpdatedTimestamp = $derived(lastLog ? formatTimestamp(lastLog.Time) : formatTimestamp(new Date()))
   let isRefreshing = $state(false)
-  let refreshResetTimer: ReturnType<typeof setTimeout> | undefined = undefined
+  let refreshIconElement: HTMLElement | undefined = undefined
 
   let nextTheme = $derived(getNextTheme($theme))
   let currentThemeLabel = $derived(themeLabels[$theme])
   let nextThemeLabel = $derived(themeLabels[nextTheme])
   let themeTone = $derived($theme === "g100" ? "dark" : "light")
+
+  function handleAnimationEnd() {
+    isRefreshing = false
+  }
 
   async function handleRefresh() {
     if (isRefreshing) {
@@ -30,17 +34,7 @@
     }
 
     isRefreshing = true
-    if (refreshResetTimer) {
-      clearTimeout(refreshResetTimer)
-      refreshResetTimer = undefined
-    }
-
     Refresh()
-
-    refreshResetTimer = setTimeout(() => {
-      isRefreshing = false
-      refreshResetTimer = undefined
-    }, 450)
   }
 </script>
 
@@ -65,6 +59,7 @@
       iconDescription="Refresh"
       tooltipAlignment="end"
       onclick={handleRefresh}
+      onanimationend={handleAnimationEnd}
     />
   </HeaderUtilities>
 </Header>

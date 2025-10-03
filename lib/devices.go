@@ -92,6 +92,8 @@ func Init(onUpdateCallback func([]Device)) []Device {
 // Refresh resets the cached Device state to that of the current devices connected to the machine.
 func Refresh() []Device {
 	_, cachedDevices = getDevices()
+	lastMergedMap = nil
+
 	return cachedDevices
 }
 
@@ -272,7 +274,13 @@ func addDeviceLog(device Device, logtime time.Time) {
 	if lastMergedMap == nil {
 		return
 	}
-	logs = append(logs, Log{Time: logtime, Text: device.Name, State: device.State, Speed: device.Speed})
+
+	logState := device.State
+	if device.State == StateNormal {
+		logState = StateAdded
+	}
+
+	logs = append(logs, Log{Time: logtime, Text: device.Name, State: logState, Speed: device.Speed})
 }
 
 // GetLog returns all stored device logs.
