@@ -17,7 +17,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:     "usb-tree",
+		Title:     "USB Tree",
 		Width:     600,
 		Height:    600,
 		MinWidth:  600,
