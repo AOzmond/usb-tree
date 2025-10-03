@@ -2,7 +2,6 @@ package lib
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"time"
 
@@ -43,6 +42,7 @@ const (
 	StateNormal  LogState = "normal"
 	StateAdded   LogState = "added"
 	StateRemoved LogState = "removed"
+	StateError   LogState = "error"
 )
 
 var (
@@ -65,8 +65,17 @@ func Stop() {
 // It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
-	onUpdateCallback(Refresh())
 	go func() {
+		_, initialDevices := Refresh()
+
+		for initialDevices == nil {
+			time.Sleep(1 * time.Second)
+			onUpdateCallback(nil)
+			_, initialDevices = Refresh()
+		}
+
+		onUpdateCallback(initialDevices)
+
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
 
@@ -74,9 +83,14 @@ func Init(onUpdateCallback func([]Device)) []Device {
 			select {
 			case <-ticker.C:
 				logtime, newDevices := getDevices()
-				changed, mergedDevices := deviceDiff(newDevices, logtime)
-				if changed {
-					onUpdateCallback(mergedDevices)
+
+				if newDevices != nil {
+					changed, mergedDevices := deviceDiff(newDevices, logtime)
+					if changed {
+						onUpdateCallback(mergedDevices)
+					}
+				} else {
+					onUpdateCallback(nil)
 				}
 
 			case <-pollingStop:
@@ -90,11 +104,15 @@ func Init(onUpdateCallback func([]Device)) []Device {
 }
 
 // Refresh resets the cached Device state to that of the current devices connected to the machine.
-func Refresh() []Device {
-	_, cachedDevices = getDevices()
-	lastMergedMap = nil
+func Refresh() (time.Time, []Device) {
+	logtime, retrievedDevices := getDevices()
+	if retrievedDevices != nil {
+		cachedDevices = retrievedDevices
+    lastMergedMap = nil
+		return logtime, cachedDevices
+	}
 
-	return cachedDevices
+	return logtime, nil
 }
 
 // returns lists of devices.
@@ -102,7 +120,7 @@ func getDevices() (time.Time, []Device) {
 	ctx := gousb.NewContext()
 	defer func() {
 		if err := ctx.Close(); err != nil {
-			log.Printf("error closing USB context: %v\n", err)
+			addErrorLog(fmt.Sprintf("Error trying to get USB devices: %s", err.Error()), time.Now(), StateError)
 		}
 	}()
 
@@ -110,11 +128,11 @@ func getDevices() (time.Time, []Device) {
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
 		devices = append(devices, descToDevice(*desc))
-		return false
+		return true
 	})
 	if err != nil {
-		log.Printf("Issue accessing USB Devices: %v", err)
-		return time.Now(), []Device{}
+		addErrorLog(fmt.Sprintf("Error trying to get USB devices: %s", err.Error()), time.Now(), StateError)
+		return time.Now(), nil
 	}
 
 	return time.Now(), devices
@@ -203,7 +221,7 @@ func BuildDeviceTree(devices []Device) []*TreeNode {
 	}
 
 	// Loop through each node to assign children
-	for parentIdx := len(nodes) - 1; parentIdx >= 0; parentIdx-- {
+	for parentIdx := range nodes {
 		// Find this node's children
 		for childIdx := range nodes {
 
@@ -250,6 +268,15 @@ func (d *Device) treeNode() TreeNode {
 	}
 }
 
+func flatten(path []int) string {
+	s := ""
+	for _, p := range path {
+		s += fmt.Sprintf("%04d-", p)
+	}
+
+	return s
+}
+
 // sortDevices sorts devices consistently by their path
 func sortDevices(devices []Device) []Device {
 	sort.Slice(devices, func(i, j int) bool {
@@ -268,6 +295,10 @@ func sortDevices(devices []Device) []Device {
 	})
 
 	return devices
+}
+
+func addErrorLog(text string, logtime time.Time, state LogState) {
+	logs = append(logs, Log{Time: logtime, Text: text, State: state})
 }
 
 func addDeviceLog(device Device, logtime time.Time) {
