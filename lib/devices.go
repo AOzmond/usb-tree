@@ -129,12 +129,8 @@ func getDevices() (time.Time, []Device) {
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
 		device := descToDevice(*desc)
-		info := device.getPriorityNameCacheKey()
-		if info.Name != "" {
-			device.Name = info.Name
-		}
-		if info.Speed != "" {
-			device.Speed = info.Speed
+		if !device.enrich() {
+			return false
 		}
 		devices = append(devices, device)
 		return false
