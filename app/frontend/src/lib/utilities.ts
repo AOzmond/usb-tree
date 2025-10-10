@@ -24,10 +24,10 @@ export function formatSpeed(rawSpeed?: string): string {
   }
 
   const normalized = rawSpeed.toLowerCase()
-  const value = SPEED_MAP[normalized]
+  var value = SPEED_MAP[normalized]
 
   if (value === undefined) {
-    return rawSpeed
+    value = Number(rawSpeed)
   }
 
   if (value >= 1000) {

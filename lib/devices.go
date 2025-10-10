@@ -21,6 +21,7 @@ type Device struct {
 	Speed     string   `json:"speed"`
 	Bus       int      `json:"bus"`
 	State     LogState `json:"state"`
+	DevNum    int      `json:"devNum"`
 }
 
 // TreeNode represents a Device and its children for building tree structures.
@@ -127,7 +128,15 @@ func getDevices() (time.Time, []Device) {
 	devices := []Device{}
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
-		devices = append(devices, descToDevice(*desc))
+		device := descToDevice(*desc)
+		info := device.getPriorityNameCacheKey()
+		if info.Name != "" {
+			device.Name = info.Name
+		}
+		if info.Speed != "" {
+			device.Speed = info.Speed
+		}
+		devices = append(devices, device)
 		return false
 	})
 	if err != nil {
@@ -148,6 +157,7 @@ func descToDevice(desc gousb.DeviceDesc) Device {
 		ProductID: desc.Product.String(),
 		Speed:     desc.Speed.String(),
 		State:     StateNormal,
+		DevNum:    desc.Address,
 	}
 }
 
