@@ -15,22 +15,28 @@ type deviceInfo struct {
 var deviceInfoCache = map[string]deviceInfo{}
 
 func (d *Device) getPriorityNameCacheKey() deviceInfo {
-	// Check cache for device name
-
 	key := fmt.Sprintf("%s:%s:%03d:%03d", d.VendorID, d.ProductID, d.Bus, d.DevNum)
 	if info, found := deviceInfoCache[key]; found {
 		return info
 	}
 
-	// If not found, get from udev
-	enumerateAndCache()
+	maxAttempts := 6
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		if attempt > 0 {
+			// Wait 20ms between attempts (total max wait: 200ms)
+			time.Sleep(20 * time.Millisecond)
+			println(attempt)
+		}
 
-	if info, found := deviceInfoCache[key]; found {
-		return info
+		enumerateAndCache()
+
+		if info, found := deviceInfoCache[key]; found {
+			println("Meow")
+			return info
+		}
 	}
 
-	addErrorLog(">"+key+"< not found in cache", time.Now(), StateError)
-	// Return empty deviceInfo if still not found
+	addErrorLog(key+" not found in cache", time.Now(), StateError)
 	return deviceInfo{}
 }
 
@@ -42,6 +48,7 @@ func enumerateAndCache() {
 		addErrorLog(err.Error(), time.Now(), StateError)
 	}
 	devices, _ := e.Devices()
+
 	for _, device := range devices {
 
 		vid := device.PropertyValue("ID_VENDOR_ID")
