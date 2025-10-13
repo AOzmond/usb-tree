@@ -9,7 +9,7 @@ import (
 	"github.com/google/gousb/usbid"
 )
 
-// A LogState represents the difference between the cached Device and current Device.
+// A LogState represents the difference between the cached Device and the current Device.
 type LogState string
 
 // A Device represents a USB Device
@@ -189,12 +189,13 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 		if _, exists := mergedMap[key]; !exists {
 			device := lastMergedMap[key]
 			device.State = StateRemoved
+			clearPriorityNameCache(device)
 			addDeviceLog(device, logtime)
 			changed = true
 		}
 	}
 
-	// Convert map back into slice and log changes since lastMergedMap
+	// Convert the map back into slice and log changes since lastMergedMap
 	merged = make([]Device, 0, len(mergedMap))
 	for key, device := range mergedMap {
 		merged = append(merged, device)
@@ -203,6 +204,9 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 			addDeviceLog(device, logtime)
 			changed = true
 		} else if device.State != lastDevice.State {
+			if device.State == StateRemoved {
+				clearPriorityNameCache(device)
+			}
 			addDeviceLog(device, logtime)
 			changed = true
 		}

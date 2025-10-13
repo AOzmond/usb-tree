@@ -85,3 +85,8 @@ func enumerateAndCache() {
 		}
 	}
 }
+
+func clearPriorityNameCache(device Device) {
+	key := device.getPriorityNameCacheKey()
+	delete(deviceInfoCache, key)
+}
