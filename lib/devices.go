@@ -9,7 +9,7 @@ import (
 	"github.com/google/gousb/usbid"
 )
 
-// A LogState represents the difference between the cached Device and current Device.
+// A LogState represents the difference between the cached Device and the current Device.
 type LogState string
 
 // A Device represents a USB Device
@@ -21,6 +21,7 @@ type Device struct {
 	Speed     string   `json:"speed"`
 	Bus       int      `json:"bus"`
 	State     LogState `json:"state"`
+	DevNum    int      `json:"devNum"`
 }
 
 // TreeNode represents a Device and its children for building tree structures.
@@ -61,7 +62,7 @@ func Stop() {
 	}
 }
 
-// Init will start the polling of Devices connected to the machine, and return the current list of connected Devices.
+// Init will start the polling of Devices connected to the machine and return the current list of connected Devices.
 // It takes a callback function to be run anytime there is a change in Devices
 func Init(onUpdateCallback func([]Device)) []Device {
 	pollingStop = make(chan bool)
@@ -82,10 +83,10 @@ func Init(onUpdateCallback func([]Device)) []Device {
 		for {
 			select {
 			case <-ticker.C:
-				logtime, newDevices := getDevices()
+				logTime, newDevices := getDevices()
 
 				if newDevices != nil {
-					changed, mergedDevices := deviceDiff(newDevices, logtime)
+					changed, mergedDevices := deviceDiff(newDevices, logTime)
 					if changed {
 						onUpdateCallback(mergedDevices)
 					}
@@ -105,14 +106,14 @@ func Init(onUpdateCallback func([]Device)) []Device {
 
 // Refresh resets the cached Device state to that of the current devices connected to the machine.
 func Refresh() (time.Time, []Device) {
-	logtime, retrievedDevices := getDevices()
+	logTime, retrievedDevices := getDevices()
 	if retrievedDevices != nil {
 		cachedDevices = retrievedDevices
 		lastMergedMap = nil
-		return logtime, cachedDevices
+		return logTime, cachedDevices
 	}
 
-	return logtime, nil
+	return logTime, nil
 }
 
 // returns lists of devices.
@@ -124,10 +125,13 @@ func getDevices() (time.Time, []Device) {
 		}
 	}()
 
-	devices := []Device{}
+	var devices []Device
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
-		devices = append(devices, descToDevice(*desc))
+		device := descToDevice(*desc)
+		if device.enrich() {
+			devices = append(devices, device)
+		}
 		return false
 	})
 	if err != nil {
@@ -138,7 +142,7 @@ func getDevices() (time.Time, []Device) {
 	return time.Now(), devices
 }
 
-// Returns device based on a given DeviceDesc
+// Returns a device based on a given DeviceDesc
 func descToDevice(desc gousb.DeviceDesc) Device {
 	return Device{
 		Bus:       desc.Bus,
@@ -148,6 +152,7 @@ func descToDevice(desc gousb.DeviceDesc) Device {
 		ProductID: desc.Product.String(),
 		Speed:     desc.Speed.String(),
 		State:     StateNormal,
+		DevNum:    desc.Address,
 	}
 }
 
@@ -155,7 +160,7 @@ func (d *Device) key() string {
 	return fmt.Sprintf("%d:%v:%s:%s:%s", d.Bus, d.Path, d.VendorID, d.ProductID, d.Speed)
 }
 
-func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []Device) {
+func deviceDiff(newDevices []Device, logTime time.Time) (changed bool, merged []Device) {
 	mergedMap := make(map[string]Device)
 	changed = false
 
@@ -165,7 +170,7 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 		mergedMap[device.key()] = device
 	}
 
-	// Reset persisting devices to normal, and add new devices
+	// Reset persisting devices to normal and add new devices
 	for _, newDevice := range newDevices {
 		key := newDevice.key()
 		if existingDevice, exists := mergedMap[key]; exists {
@@ -184,21 +189,25 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 		if _, exists := mergedMap[key]; !exists {
 			device := lastMergedMap[key]
 			device.State = StateRemoved
-			addDeviceLog(device, logtime)
+			clearPriorityNameCache(device)
+			addDeviceLog(device, logTime)
 			changed = true
 		}
 	}
 
-	// Convert map back into slice and log changes since lastMergedMap
+	// Convert the map back into slice and log changes since lastMergedMap
 	merged = make([]Device, 0, len(mergedMap))
 	for key, device := range mergedMap {
 		merged = append(merged, device)
 
 		if lastDevice, exists := lastMergedMap[key]; !exists {
-			addDeviceLog(device, logtime)
+			addDeviceLog(device, logTime)
 			changed = true
 		} else if device.State != lastDevice.State {
-			addDeviceLog(device, logtime)
+			if device.State == StateRemoved {
+				clearPriorityNameCache(device)
+			}
+			addDeviceLog(device, logTime)
 			changed = true
 		}
 	}
@@ -212,8 +221,8 @@ func deviceDiff(newDevices []Device, logtime time.Time) (changed bool, merged []
 
 // BuildDeviceTree converts a device list to a device tree
 func BuildDeviceTree(devices []Device) []*TreeNode {
-	roots := []*TreeNode{}
-	nodes := []*TreeNode{}
+	var roots []*TreeNode
+	var nodes []*TreeNode
 
 	for _, dev := range devices {
 		newNode := dev.treeNode()
@@ -290,11 +299,11 @@ func sortDevices(devices []Device) []Device {
 	return devices
 }
 
-func addErrorLog(text string, logtime time.Time, state LogState) {
-	logs = append(logs, Log{Time: logtime, Text: text, State: state})
+func addErrorLog(text string, logTime time.Time, state LogState) {
+	logs = append(logs, Log{Time: logTime, Text: text, State: state})
 }
 
-func addDeviceLog(device Device, logtime time.Time) {
+func addDeviceLog(device Device, logTime time.Time) {
 	if lastMergedMap == nil {
 		return
 	}
@@ -304,7 +313,7 @@ func addDeviceLog(device Device, logtime time.Time) {
 		logState = StateAdded
 	}
 
-	logs = append(logs, Log{Time: logtime, Text: device.Name, State: logState, Speed: device.Speed})
+	logs = append(logs, Log{Time: logTime, Text: device.Name, State: logState, Speed: device.Speed})
 }
 
 // GetLog returns all stored device logs.
