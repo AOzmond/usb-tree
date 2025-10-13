@@ -73,10 +73,10 @@ func enumerateAndCache() {
 			name := vendorName + " " + deviceName
 			pid := device.PropertyValue("ID_MODEL_ID")
 			bus := device.PropertyValue("BUSNUM")
-			devnum := device.PropertyValue("DEVNUM")
+			devNum := device.PropertyValue("DEVNUM")
 			speed := device.SysattrValue("speed")
 
-			key := fmt.Sprintf("%s:%s:%03s:%03s", vid, pid, bus, devnum)
+			key := fmt.Sprintf("%s:%s:%03s:%03s", vid, pid, bus, devNum)
 
 			deviceInfoCache[key] = deviceInfo{
 				Name:  name,
