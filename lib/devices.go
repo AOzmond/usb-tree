@@ -129,10 +129,9 @@ func getDevices() (time.Time, []Device) {
 
 	_, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
 		device := descToDevice(*desc)
-		if !device.enrich() {
-			return false
+		if device.enrich() {
+			devices = append(devices, device)
 		}
-		devices = append(devices, device)
 		return false
 	})
 	if err != nil {
@@ -143,7 +142,7 @@ func getDevices() (time.Time, []Device) {
 	return time.Now(), devices
 }
 
-// Returns device based on a given DeviceDesc
+// Returns a device based on a given DeviceDesc
 func descToDevice(desc gousb.DeviceDesc) Device {
 	return Device{
 		Bus:       desc.Bus,

@@ -1,3 +1,5 @@
+//go:build linux
+
 package lib
 
 import (
@@ -15,17 +17,22 @@ type deviceInfo struct {
 var deviceInfoCache = map[string]deviceInfo{}
 
 func (d *Device) enrich() bool {
-	info := d.getPriorityNameCacheKey()
+	info := getPriorityInfo(*d)
 	if info.Name != "" && info.Speed != "" {
 		d.Name = info.Name
 		d.Speed = info.Speed
 		return true
 	}
+
 	return false
 }
 
-func (d *Device) getPriorityNameCacheKey() deviceInfo {
-	key := fmt.Sprintf("%s:%s:%03d:%03d", d.VendorID, d.ProductID, d.Bus, d.DevNum)
+func (d *Device) getPriorityNameCacheKey() string {
+	return fmt.Sprintf("%s:%s:%03d:%03d", d.VendorID, d.ProductID, d.Bus, d.DevNum)
+}
+
+func getPriorityInfo(device Device) deviceInfo {
+	key := device.getPriorityNameCacheKey()
 
 	if _, found := deviceInfoCache[key]; !found {
 		enumerateAndCache()
@@ -45,6 +52,7 @@ func enumerateAndCache() {
 	if err != nil {
 		addErrorLog(err.Error(), time.Now(), StateError)
 	}
+
 	devices, _ := e.Devices()
 
 	for _, device := range devices {
@@ -69,6 +77,7 @@ func enumerateAndCache() {
 			speed := device.SysattrValue("speed")
 
 			key := fmt.Sprintf("%s:%s:%03s:%03s", vid, pid, bus, devnum)
+
 			deviceInfoCache[key] = deviceInfo{
 				Name:  name,
 				Speed: speed,
