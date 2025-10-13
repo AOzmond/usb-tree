@@ -4,7 +4,7 @@ package lib
 
 import (
 	"fmt"
-	"time"
+	"log"
 
 	"github.com/jochenvg/go-udev"
 )
@@ -17,21 +17,21 @@ type deviceInfo struct {
 var deviceInfoCache = map[string]deviceInfo{}
 
 func (d *Device) enrich() bool {
-	info := getPriorityInfo(*d)
-	if info.Name != "" && info.Speed != "" {
-		d.Name = info.Name
-		d.Speed = info.Speed
-		return true
+	info, ok := getPriorityInfo(*d)
+	if !ok {
+		return false
 	}
 
-	return false
+	d.Name = info.Name
+	d.Speed = info.Speed
+	return true
 }
 
 func (d *Device) getPriorityNameCacheKey() string {
 	return fmt.Sprintf("%s:%s:%03d:%03d", d.VendorID, d.ProductID, d.Bus, d.DevNum)
 }
 
-func getPriorityInfo(device Device) deviceInfo {
+func getPriorityInfo(device Device) (deviceInfo, bool) {
 	key := device.getPriorityNameCacheKey()
 
 	if _, found := deviceInfoCache[key]; !found {
@@ -39,10 +39,10 @@ func getPriorityInfo(device Device) deviceInfo {
 	}
 
 	if info, found := deviceInfoCache[key]; found {
-		return info
+		return info, true
 	}
 
-	return deviceInfo{}
+	return deviceInfo{}, false
 }
 
 func enumerateAndCache() {
@@ -50,13 +50,12 @@ func enumerateAndCache() {
 	e := u.NewEnumerate()
 	err := e.AddMatchSubsystem("usb")
 	if err != nil {
-		addErrorLog(err.Error(), time.Now(), StateError)
+		log.Printf("Failed to add USB subsystem match: %v", err)
 	}
 
 	devices, _ := e.Devices()
 
 	for _, device := range devices {
-
 		vid := device.PropertyValue("ID_VENDOR_ID")
 
 		if vid != "" {
