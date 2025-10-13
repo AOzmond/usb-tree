@@ -4,7 +4,6 @@ package lib
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jochenvg/go-udev"
 )
@@ -50,7 +49,7 @@ func enumerateAndCache() {
 	e := u.NewEnumerate()
 	err := e.AddMatchSubsystem("usb")
 	if err != nil {
-		log.Printf("Failed to add USB subsystem match: %v", err)
+		return
 	}
 
 	devices, _ := e.Devices()
