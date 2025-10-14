@@ -48,8 +48,8 @@ archives:
     ids: [windows-amd64]
     formats: ["zip"]
     files:
-      - LICENSE
-      - README.md
+      - ../LICENSE
+      - ../README.md
       - ./third_party/libusb/windows/amd64/bin/libusb-1.0.dll
 
 changelog:
