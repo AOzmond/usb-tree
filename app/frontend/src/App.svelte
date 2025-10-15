@@ -90,11 +90,11 @@
     }
 
     .pane-tree {
-      min-height: 64px;
+      min-height: 4rem;
     }
 
     .pane-log {
-      min-height: 76px;
+      min-height: 5rem;
     }
   }
 
