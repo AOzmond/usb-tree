@@ -9,14 +9,36 @@ repos:
     rev: v1.0.0
     hooks:
       - id: go-fmt-goimports
-      - id: go-test
-      - id: go-vet
       - id: gofumpt
       - id: golint
       - id: staticcheck
-      - id: golangci-lint
+        files: ^lib/.*\.go$
   - repo: local
     hooks:
+      - id: go-test-lib
+        name: go-test (lib)
+        entry: bash -c 'cd lib && go test ./...'
+        language: system
+        pass_filenames: false
+        files: ^lib/.*\.go$
+      - id: go-vet-lib
+        name: go-vet (lib)
+        entry: bash -c 'cd lib && go vet ./...'
+        language: system
+        pass_filenames: false
+        files: ^lib/.*\.go$
+      - id: go-test-app
+        name: go-test (app)
+        entry: bash -c 'cd app && go test ./...'
+        language: system
+        pass_filenames: false
+        files: ^app/.*\.go$
+      - id: go-vet-app
+        name: go-vet (app)
+        entry: bash -c 'cd app && go vet ./...'
+        language: system
+        pass_filenames: false
+        files: ^app/.*\.go$
       - id: prettier
         name: Prettier
         entry: bunx prettier --write --ignore-unknown
