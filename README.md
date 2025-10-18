@@ -1,10 +1,10 @@
 # USB Tree
+[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://aozmond.github.io)  
 [![Build Status](https://github.com/AOzmond/usb-tree/actions/workflows/release.yml/badge.svg)](https://github.com/AOzmond/usb-tree/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/AOzmond/usb-tree/app)](https://goreportcard.com/report/github.com/AOzmond/usb-tree)
 [![License](https://img.shields.io/github/license/AOzmond/usb-tree)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/AOzmond/usb-tree)](https://github.com/AOzmond/usb-tree/releases)
 [![Platform](https://img.shields.io/badge/platform-linux%20|%20windows-lightgrey.svg)](#)
-[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://aozmond.github.io)
 [![Code style: gofumpt](https://img.shields.io/badge/code%20style-gofumpt-blue.svg)](https://github.com/mvdan/gofumpt)
 ---
 ## Tech Stack
@@ -69,5 +69,6 @@ This project is licensed under the GPL-2.0 License.
 ## Author
 
 Alastair Ozmond  
-Software Engineer | Full-Stack & Systems Developer  
+[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://aozmond.github.io)   
+Software Engineer | Full-Stack & Systems Developer   
 [LinkedIn](www.linkedin.com/in/alastair-ozmond-108512179)
