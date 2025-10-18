@@ -104,6 +104,14 @@ jobs:
           bun install
           bun run build
 
+      - name: Fix go-webview2 compatibility
+        working-directory: app
+        shell: pwsh
+        run: |
+          # Pin go-webview2 to a compatible version
+          go get github.com/wailsapp/go-webview2@v1.0.16
+          go mod tidy
+
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
