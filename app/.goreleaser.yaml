@@ -9,28 +9,26 @@ before:
 
 builds:
   - id: linux-amd64
-    main: ./app
-    dir: .
+    main: .
     goos: [linux]
     goarch: [amd64]
     env:
       - CGO_ENABLED=1
-      - PKG_CONFIG_PATH=./app/third_party/libusb/linux/x86_64/pkgconfig
+      - PKG_CONFIG_PATH=./third_party/libusb/linux/x86_64/pkgconfig
     tags: [desktop, production]
     ldflags:
       - -s -w
 
   - id: windows-amd64
-    main: ./app
-    dir: .
+    main: .
     goos: [windows]
     goarch: [amd64]
     env:
       - CGO_ENABLED=1
       - CC=x86_64-w64-mingw32-gcc
       - CXX=x86_64-w64-mingw32-g++
-      - CGO_CFLAGS=-I./app/third_party/libusb/windows/amd64/include
-      - CGO_LDFLAGS=-L./app/third_party/libusb/windows/amd64/lib -lusb-1.0
+      - CGO_CFLAGS=-I./third_party/libusb/windows/amd64/include
+      - CGO_LDFLAGS=-L./third_party/libusb/windows/amd64/lib -lusb-1.0
     tags: [desktop, production]
     ldflags:
       - -s -w -H windowsgui
