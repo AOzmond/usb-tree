@@ -4,6 +4,7 @@ package lib
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jochenvg/go-udev"
 )
@@ -21,7 +22,9 @@ func (d *Device) enrich() bool {
 		return false
 	}
 
-	d.Name = info.Name
+	if len(strings.TrimSpace(info.Name)) > 0 {
+		d.Name = info.Name
+	}
 	d.Speed = info.Speed
 	return true
 }
