@@ -43,15 +43,14 @@ jobs:
             libudev-dev \
             pkg-config \
             libgtk-3-dev \
-            libwebkit2gtk-4.1-dev
+            libwebkit2gtk-4.1-dev \
+            gcc-mingw-w64-x86-64 \
+            g++-mingw-w64-x86-64
 
       - name: Set up WebKit2GTK compatibility
         run: |
           # Create a symlink for webkit2gtk-4.0.pc to point to webkit2gtk-4.1.pc
           sudo ln -sf /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.1.pc /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc
-
-      - name: Install repository JavaScript dependencies
-        run: bun install
 
       - name: Install Go tooling required by hooks
         run: |
