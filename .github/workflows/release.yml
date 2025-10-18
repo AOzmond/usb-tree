@@ -6,51 +6,133 @@ on:
       - "v*.*.*"
 
 jobs:
-  Release:
-    name: Release Artifacts
+  build-linux:
+    name: Build Linux
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    defaults:
-      run:
-        shell: bash
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: ">=1.25.0"
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            libusb-1.0-0-dev \
+            libudev-dev \
+            pkg-config
+
+      - name: Set up WebKit2GTK compatibility
+        run: |
+          sudo ln -sf /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.1.pc /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc
+
+      - name: Install repository JavaScript dependencies
+        run: bun install
+
+      - name: Build frontend
+        working-directory: app/frontend
+        run: |
+          bun install
+          bun run build
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Build Linux binary
+        working-directory: app
+        run: wails build -platform linux/amd64 -clean
+
+      - name: Create tarball
+        run: |
+          cd app/build/bin
+          tar czf ../../../usb-tree-linux-amd64.tar.gz usb-tree
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-amd64
+          path: usb-tree-linux-amd64.tar.gz
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ">=1.25.0"
+
+      - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
       - name: Install repository JavaScript dependencies
         run: bun install
 
-      - name: Install Go tooling required by hooks
-        run: |
-          go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
-      - name: Prepare Wails frontend assets
+      - name: Build frontend
         working-directory: app/frontend
         run: |
           bun install
           bun run build
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Release with GoReleaser Cross
-        uses: goreleaser/goreleaser-cross-action@v3
+      - name: Build Windows binary
+        working-directory: app
+        run: wails build -platform windows/amd64 -clean
+
+      - name: Create zip
+        run: |
+          cd app/build/bin
+          Compress-Archive -Path usb-tree.exe -DestinationPath ../../../usb-tree-windows-amd64.zip
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
         with:
-          version: latest
-          args: release --clean
-          workdir: app
+          name: windows-amd64
+          path: usb-tree-windows-amd64.zip
+
+  release:
+    name: Create Release
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-amd64
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-amd64
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            usb-tree-linux-amd64.tar.gz
+            usb-tree-windows-amd64.zip
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
