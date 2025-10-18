@@ -12,41 +12,46 @@ jobs:
   Validate:
     runs-on: ubuntu-latest
     permissions:
-      # Give the default GITHUB_TOKEN write permission to commit and push the
-      # added or changed files to the repository.
       contents: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
 
       - uses: actions/setup-go@v5
         with:
-          go-version: ">=1.25.0"
+          go-version: "1.25"
+          cache: true
 
-      - name: "Set up Bun"
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libusb-1.0-0-dev \
-            libudev-dev \
-            pkg-config
+      - name: Cache system dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libusb-1.0-0-dev libudev-dev pkg-config
+          version: 1.0
 
-      - name: "Install repository JavaScript dependencies"
-        run: |
-          bun install
+      - name: Install repository JavaScript dependencies
+        run: bun install --frozen-lockfile
 
       - name: Prepare Wails frontend assets
         working-directory: app/frontend
         run: |
-          bun install
+          bun install --frozen-lockfile
           bun run build
+
+      - name: Cache Go tools
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin
+          key: go-tools-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            go-tools-${{ runner.os }}-
 
       - name: Install tools
         run: |
@@ -55,11 +60,15 @@ jobs:
           go install github.com/lietu/go-pre-commit@latest
           go install honnef.co/go/tools/cmd/staticcheck@latest
 
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: --all-files
 
-      # Commit all changed files back to the repository
-      - uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
-        # Even if pre-commit gave an error, which it does always when it makes changes which we're trying to commit here
+      - uses: stefanzweifel/git-auto-commit-action@v5
         if: always()

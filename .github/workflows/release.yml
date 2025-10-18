@@ -16,37 +16,38 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: ">=1.25.0"
+          go-version: "1.25"
+          cache: true
 
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libgtk-3-dev \
-            libwebkit2gtk-4.1-dev \
-            libusb-1.0-0-dev \
-            libudev-dev \
-            pkg-config
+      - name: Cache system dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libgtk-3-dev libwebkit2gtk-4.1-dev libusb-1.0-0-dev libudev-dev pkg-config
+          version: 1.0
 
       - name: Set up WebKit2GTK compatibility
-        run: |
-          sudo ln -sf /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.1.pc /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc
+        run: sudo ln -sf /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.1.pc /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc
 
-      - name: Install repository JavaScript dependencies
-        run: bun install
+      - name: Cache Wails CLI
+        id: cache-wails
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin/wails
+          key: wails-${{ runner.os }}-latest
+
+      - name: Install Wails
+        if: steps.cache-wails.outputs.cache-hit != 'true'
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
       - name: Build frontend
         working-directory: app/frontend
         run: |
-          bun install
+          bun install --frozen-lockfile
           bun run build
-
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
       - name: Build Linux binary
         working-directory: app
@@ -62,6 +63,7 @@ jobs:
         with:
           name: linux-amd64
           path: usb-tree-linux-amd64.tar.gz
+          retention-days: 1
 
   build-windows:
     name: Build Windows
@@ -73,11 +75,18 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: ">=1.25.0"
+          go-version: "1.25"
+          cache: true
 
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: C:\vcpkg\installed
+          key: vcpkg-${{ runner.os }}-libusb
 
       - name: Install libusb via vcpkg
         run: |
@@ -92,27 +101,37 @@ jobs:
           echo "CGO_CFLAGS=-IC:/vcpkg/installed/x64-windows/include" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           echo "CGO_LDFLAGS=-LC:/vcpkg/installed/x64-windows/lib -lusb-1.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
+      - name: Cache Chocolatey packages
+        uses: actions/cache@v4
+        with:
+          path: C:\ProgramData\chocolatey
+          key: choco-${{ runner.os }}-pkgconfig
+
       - name: Install pkg-config
         run: choco install pkgconfiglite -y
-
-      - name: Install repository JavaScript dependencies
-        run: bun install
 
       - name: Build frontend
         working-directory: app/frontend
         run: |
-          bun install
+          bun install --frozen-lockfile
           bun run build
 
       - name: Fix go-webview2 compatibility
         working-directory: app
         shell: pwsh
         run: |
-          # Pin go-webview2 to a compatible version
           go get github.com/wailsapp/go-webview2@v1.0.16
           go mod tidy
 
+      - name: Cache Wails CLI
+        id: cache-wails
+        uses: actions/cache@v4
+        with:
+          path: ~\go\bin\wails.exe
+          key: wails-${{ runner.os }}-latest
+
       - name: Install Wails
+        if: steps.cache-wails.outputs.cache-hit != 'true'
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
       - name: Build Windows binary
@@ -120,8 +139,7 @@ jobs:
         run: wails build -platform windows/amd64 -clean
 
       - name: Bundle libusb DLL
-        run: |
-          Copy-Item "C:\vcpkg\installed\x64-windows\bin\libusb-1.0.dll" -Destination "app\build\bin\"
+        run: Copy-Item "C:\vcpkg\installed\x64-windows\bin\libusb-1.0.dll" -Destination "app\build\bin\"
 
       - name: Create zip
         run: |
@@ -133,6 +151,7 @@ jobs:
         with:
           name: windows-amd64
           path: usb-tree-windows-amd64.zip
+          retention-days: 1
 
   release:
     name: Create Release
@@ -145,22 +164,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download Linux artifact
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: linux-amd64
-
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-amd64
+          path: artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            usb-tree-linux-amd64.tar.gz
-            usb-tree-windows-amd64.zip
+          files: artifacts/**/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
