@@ -105,12 +105,6 @@ jobs:
           echo "CGO_CFLAGS=-IC:/vcpkg/installed/x64-windows/include" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           echo "CGO_LDFLAGS=-LC:/vcpkg/installed/x64-windows/lib -lusb-1.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Cache Chocolatey packages
-        uses: actions/cache@v4
-        with:
-          path: C:\ProgramData\chocolatey
-          key: choco-${{ runner.os }}-pkgconfig
-
       - name: Install pkg-config
         run: choco install pkgconfiglite -y
 
