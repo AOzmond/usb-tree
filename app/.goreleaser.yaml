@@ -4,9 +4,6 @@ version: 2
 
 before:
   hooks:
-    # Build the frontend using Bun instead of npm
-    - bash -c "cd frontend && bun install"
-    - bash -c "cd frontend && bun run build"
     # Regenerate Wails bindings and embed assets
     - wails generate
 
