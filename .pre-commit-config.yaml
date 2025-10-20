@@ -16,25 +16,25 @@ repos:
     hooks:
       - id: go-test-lib
         name: go-test (lib)
-        entry: bash -c 'cd lib && go test ./...'
+        entry: go test lib/...'
         language: system
         pass_filenames: false
         files: ^lib/.*\.go$
       - id: go-vet-lib
         name: go-vet (lib)
-        entry: bash -c 'cd lib && go vet ./...'
+        entry: go vet lib/...'
         language: system
         pass_filenames: false
         files: ^lib/.*\.go$
       - id: go-test-app
         name: go-test (app)
-        entry: bash -c 'cd app && go test ./...'
+        entry: go test app/...
         language: system
         pass_filenames: false
         files: ^app/.*\.go$
       - id: go-vet-app
         name: go-vet (app)
-        entry: bash -c 'cd app && go vet ./...'
+        entry: go vet app/...
         language: system
         pass_filenames: false
         files: ^app/.*\.go$
