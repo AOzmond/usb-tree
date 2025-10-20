@@ -3,30 +3,30 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "*.*.*"
 
 jobs:
   build-linux:
     name: Build Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04 # Pin to LTS version instead of latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version: "1.25"
           cache-dependency-path: |
             app/go.sum
             lib/go.sum
 
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
         with:
           bun-version: latest
 
       - name: Cache system dependencies
-        uses: awalsh128/cache-apt-pkgs-action@latest
+        uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05 # v1.6.0
         with:
           packages: libgtk-3-dev libwebkit2gtk-4.1-dev libusb-1.0-0-dev libudev-dev pkg-config
           version: 1.0
@@ -36,7 +36,7 @@ jobs:
 
       - name: Cache Wails CLI
         id: cache-wails
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/go/bin/wails
           key: wails-${{ runner.os }}-latest
@@ -55,39 +55,42 @@ jobs:
         working-directory: app
         run: wails build -platform linux/amd64 -clean
 
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
       - name: Create tarball
         run: |
           cd app/build/bin
-          tar czf ../../../usb-tree-linux-amd64.tar.gz usb-tree
+          tar czf ../../../artifacts/usb-tree-linux-amd64.tar.gz usb-tree
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: linux-amd64
-          path: usb-tree-linux-amd64.tar.gz
+          path: artifacts/usb-tree-linux-amd64.tar.gz
           retention-days: 1
 
   build-windows:
     name: Build Windows
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version: "1.25"
           cache-dependency-path: |
             app/go.sum
             lib/go.sum
 
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
         with:
           bun-version: latest
 
       - name: Cache vcpkg packages
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: C:\vcpkg\installed
           key: vcpkg-${{ runner.os }}-libusb
@@ -123,7 +126,7 @@ jobs:
 
       - name: Cache Wails CLI
         id: cache-wails
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~\go\bin\wails.exe
           key: wails-${{ runner.os }}-latest
@@ -139,36 +142,39 @@ jobs:
       - name: Bundle libusb DLL
         run: Copy-Item "C:\vcpkg\installed\x64-windows\bin\libusb-1.0.dll" -Destination "app\build\bin\"
 
+      - name: Create artifacts directory
+        run: New-Item -ItemType Directory -Force -Path artifacts
+
       - name: Create zip
         run: |
           cd app/build/bin
-          Compress-Archive -Path usb-tree.exe,libusb-1.0.dll -DestinationPath ../../../usb-tree-windows-amd64.zip
+          Compress-Archive -Path usb-tree.exe,libusb-1.0.dll -DestinationPath ../../../artifacts/usb-tree-windows-amd64.zip
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: windows-amd64
-          path: usb-tree-windows-amd64.zip
+          path: artifacts/usb-tree-windows-amd64.zip
           retention-days: 1
 
   release:
     name: Create Release
     needs: [build-linux, build-windows]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04 # Pin to LTS version
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
           path: artifacts
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
         with:
           files: artifacts/**/*
           generate_release_notes: true
