@@ -16,33 +16,29 @@ repos:
     hooks:
       - id: go-test-lib
         name: go-test (lib)
-        entry: go test lib/...'
+        entry: go test ./lib/...
         language: system
         pass_filenames: false
         files: ^lib/.*\.go$
       - id: go-vet-lib
         name: go-vet (lib)
-        entry: go vet lib/...'
+        entry: go vet ./lib/...
         language: system
         pass_filenames: false
         files: ^lib/.*\.go$
       - id: go-test-app
         name: go-test (app)
-        entry: go test app/...
+        entry: go test ./app/...
         language: system
         pass_filenames: false
         files: ^app/.*\.go$
       - id: go-vet-app
         name: go-vet (app)
-        entry: go vet app/...
+        entry: go vet ./app/...
         language: system
         pass_filenames: false
         files: ^app/.*\.go$
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
-    hooks:
       - id: prettier
-        types_or: [javascript, jsx, ts, tsx, json, css, scss, markdown, yaml, html]
-        additional_dependencies:
-          - prettier@3.6.2
-          - prettier-plugin-svelte@3.4.0
+        name: Prettier
+        entry: bunx prettier --write --ignore-unknown
+        language: system
