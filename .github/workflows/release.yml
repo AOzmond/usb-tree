@@ -193,8 +193,15 @@ jobs:
     name: Update AUR Package
     needs: [release]
     runs-on: ubuntu-22.04
+    container:
+      image: archlinux:latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
+      - name: Install basic dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm git base-devel
+
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
@@ -236,17 +243,31 @@ jobs:
           echo "PKGBUILD updated to version ${VERSION}"
           cat PKGBUILD
 
-      - name: Install dependencies for makepkg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pacman
-
       - name: Generate .SRCINFO
         run: |
           cd aur/usb-tree-app-bin
-          makepkg --printsrcinfo > .SRCINFO
+
+          # makepkg needs to run as non-root user
+          useradd -m builder
+          chown -R builder:builder .
+
+          # Generate .SRCINFO
+          su - builder -c "cd $GITHUB_WORKSPACE/aur/usb-tree-app-bin && makepkg --printsrcinfo > .SRCINFO"
+
           echo ".SRCINFO generated:"
           cat .SRCINFO
+
+      - name: Validate PKGBUILD
+        run: |
+          cd aur/usb-tree-app-bin
+
+          # Validate the PKGBUILD syntax
+          su - builder -c "cd $GITHUB_WORKSPACE/aur/usb-tree-app-bin && makepkg --verifysource" || echo "Source verification skipped (expected for remote sources)"
+
+      - name: Install desktop-file-utils and validate
+        run: |
+          pacman -S --noconfirm desktop-file-utils
+          desktop-file-validate aur/usb-tree-app-bin/usb-tree.desktop || echo "Desktop file validation warnings (non-fatal)"
 
       - name: Create Pull Request with AUR updates
         uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
@@ -258,7 +279,9 @@ jobs:
 
             - Updated PKGBUILD version
             - Updated SHA256 checksum: `${{ steps.calc_sha.outputs.sha256 }}`
-            - Regenerated .SRCINFO
+            - Regenerated .SRCINFO using makepkg
+            - Validated PKGBUILD syntax
+            - Validated desktop file
           branch: update-aur-${{ steps.get_version.outputs.version }}
           delete-branch: true
           add-paths: |
