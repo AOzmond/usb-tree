@@ -208,13 +208,33 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: main
 
       - name: Configure git safe directory
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine source branch
+        id: get_branch
+        run: |
+          # Get the tag name
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "Tag: $TAG"
+
+          # Find which branch contains this tag
+          BRANCH=$(git branch -r --contains "refs/tags/$TAG" | grep -v HEAD | sed 's/origin\///' | head -n 1 | xargs)
+
+          # If no branch found, default to main
+          if [ -z "$BRANCH" ]; then
+            BRANCH="main"
+          fi
+
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "Source branch: $BRANCH"
+
+          # Checkout the branch
+          git checkout "$BRANCH"
 
       - name: Get release version
         id: get_version
@@ -281,6 +301,8 @@ jobs:
 
       - name: Commit and push AUR updates
         run: |
+          BRANCH=${{ steps.get_branch.outputs.branch }}
+
           # Verify we're on a branch
           git status
           echo "Current branch: $(git branch --show-current)"
@@ -296,5 +318,5 @@ jobs:
           git add PKGBUILD .SRCINFO
           git commit -m "chore: update AUR package to ${{ steps.get_version.outputs.version }}"
 
-          # Push to main branch
-          git push origin HEAD:main
+          # Push to the source branch
+          git push origin "HEAD:${BRANCH}"
