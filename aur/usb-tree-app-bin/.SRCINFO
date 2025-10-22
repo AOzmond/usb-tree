@@ -1,0 +1,16 @@
+pkgbase = usb-tree-app-bin
+	pkgdesc = USB device tree viewer with detailed information (binary release)
+	pkgver = 0.0.1
+	pkgrel = 1
+	url = https://github.com/AOzmond/usb-tree
+	arch = x86_64
+	license = GPL
+	depends = gtk3
+	depends = webkit2gtk
+	depends = libusb
+	provides = usb-tree
+	conflicts = usb-tree
+	source = usb-tree-app-bin-0.0.1.tar.gz::https://github.com/AOzmond/usb-tree/releases/download/0.0.1/usb-tree-linux-amd64.tar.gz
+	sha256sums = d3a7420f4ba41235256cf2a3216f703f6176fd8bfa3f436f6caa83490da1f1cf
+
+pkgname = usb-tree-app-bin
