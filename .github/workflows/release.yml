@@ -209,6 +209,12 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Configure git safe directory
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Get release version
         id: get_version
         run: |
@@ -273,10 +279,15 @@ jobs:
           desktop-file-validate aur/usb-tree-app-bin/usb-tree.desktop || echo "Desktop file validation warnings (non-fatal)"
 
       - name: Commit and push AUR updates
-        uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
-        with:
-          commit_message: "chore: update AUR package to ${{ steps.get_version.outputs.version }}"
-          file_pattern: "aur/usb-tree-app-bin/PKGBUILD aur/usb-tree-app-bin/.SRCINFO"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+        run: |
+          cd aur/usb-tree-app-bin
+
+          # Check if there are changes to commit
+          if git diff --quiet PKGBUILD .SRCINFO; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git add PKGBUILD .SRCINFO
+          git commit -m "chore: update AUR package to ${{ steps.get_version.outputs.version }}"
+          git push
