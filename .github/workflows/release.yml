@@ -239,7 +239,7 @@ jobs:
       - name: Install dependencies for makepkg
         run: |
           sudo apt-get update
-          sudo apt-get install -y pacman-package-manager
+          sudo apt-get install -y pacman
 
       - name: Generate .SRCINFO
         run: |
