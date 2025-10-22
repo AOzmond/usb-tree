@@ -11,6 +11,6 @@ pkgbase = usb-tree-app-bin
 	provides = usb-tree
 	conflicts = usb-tree
 	source = usb-tree-app-bin-0.0.2.tar.gz::https://github.com/AOzmond/usb-tree/releases/download/0.0.2/usb-tree-linux-amd64.tar.gz
-	sha256sums = 02374c8db8a6e6a0adfe7b6a02fd95f66b2e7eb59bea70e53dd0b9cf87686aa1
+	sha256sums = 66f66bef5adf99c8ebb635a826d604e53666ff916e44ba8a3739841b0b007cd8
 
 pkgname = usb-tree-app-bin
