@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=USB Tree
+Comment=USB device tree viewer and monitor
+Exec=usb-tree
+Icon=usb-tree
+Terminal=false
+Type=Application
+Categories=System;Utility;
+StartupNotify=true

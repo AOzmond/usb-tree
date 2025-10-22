@@ -62,10 +62,14 @@ jobs:
       - name: Create artifacts directory
         run: mkdir -p artifacts
 
-      - name: Create tarball
+      - name: Create tarball with binary, desktop file, and icon
         run: |
-          cd app/build/bin
-          tar czf ../../../artifacts/usb-tree-linux-amd64.tar.gz usb-tree
+          mkdir -p bundle
+          cp app/build/bin/usb-tree bundle/
+          cp aur/usb-tree-app-bin/usb-tree.desktop bundle/
+          cp aur/usb-tree-app-bin/usb-tree.png bundle/
+          cd bundle
+          tar czf ../artifacts/usb-tree-linux-amd64.tar.gz usb-tree usb-tree.desktop usb-tree.png
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -184,3 +188,79 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-aur:
+    name: Update AUR Package
+    needs: [release]
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Get release version
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        with:
+          name: linux-amd64
+          path: artifacts
+
+      - name: Calculate SHA256
+        id: calc_sha
+        run: |
+          SHA256=$(sha256sum artifacts/usb-tree-linux-amd64.tar.gz | awk '{print $1}')
+          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+          echo "SHA256 checksum: $SHA256"
+
+      - name: Update PKGBUILD
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          SHA256=${{ steps.calc_sha.outputs.sha256 }}
+
+          cd aur/usb-tree-app-bin
+
+          # Update version
+          sed -i "s/^pkgver=.*/pkgver=${VERSION}/" PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
+
+          # Update checksum
+          sed -i "s/^sha256sums=.*/sha256sums=('${SHA256}')/" PKGBUILD
+
+          echo "PKGBUILD updated to version ${VERSION}"
+          cat PKGBUILD
+
+      - name: Install dependencies for makepkg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pacman-package-manager
+
+      - name: Generate .SRCINFO
+        run: |
+          cd aur/usb-tree-app-bin
+          makepkg --printsrcinfo > .SRCINFO
+          echo ".SRCINFO generated:"
+          cat .SRCINFO
+
+      - name: Create Pull Request with AUR updates
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+        with:
+          commit-message: "chore: update AUR package to ${{ steps.get_version.outputs.version }}"
+          title: "Update AUR package to ${{ steps.get_version.outputs.version }}"
+          body: |
+            Automated update of AUR package files for release ${{ steps.get_version.outputs.version }}
+
+            - Updated PKGBUILD version
+            - Updated SHA256 checksum: `${{ steps.calc_sha.outputs.sha256 }}`
+            - Regenerated .SRCINFO
+          branch: update-aur-${{ steps.get_version.outputs.version }}
+          delete-branch: true
+          add-paths: |
+            aur/usb-tree-app-bin/PKGBUILD
+            aur/usb-tree-app-bin/.SRCINFO

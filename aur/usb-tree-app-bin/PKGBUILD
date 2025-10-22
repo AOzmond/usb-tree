@@ -1,0 +1,27 @@
+# Maintainer: Alastair Ozmond <alastair.ozmond@gmail.com>
+pkgname=usb-tree-app-bin
+pkgver=0.0.1
+pkgrel=1
+pkgdesc="USB device tree viewer with detailed information (binary release)"
+arch=('x86_64')
+url="https://github.com/AOzmond/usb-tree"
+license=('GPL')
+depends=('gtk3' 'webkit2gtk' 'libusb')
+provides=('usb-tree')
+conflicts=('usb-tree')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/releases/download/${pkgver}/usb-tree-linux-amd64.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    # Install binary
+    install -Dm755 "${srcdir}/usb-tree" "${pkgdir}/usr/bin/usb-tree"
+
+    # Install desktop file
+    install -Dm644 "${srcdir}/usb-tree.desktop" "${pkgdir}/usr/share/applications/usb-tree.desktop"
+
+    # Install icon
+    install -Dm644 "${srcdir}/usb-tree.png" "${pkgdir}/usr/share/pixmaps/usb-tree.png"
+
+    # Also install icon in hicolor theme (standard location)
+    install -Dm644 "${srcdir}/usb-tree.png" "${pkgdir}/usr/share/icons/hicolor/256x256/apps/usb-tree.png"
+}
