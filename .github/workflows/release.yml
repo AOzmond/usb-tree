@@ -208,6 +208,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
 
       - name: Configure git safe directory
         run: |
@@ -280,6 +281,10 @@ jobs:
 
       - name: Commit and push AUR updates
         run: |
+          # Verify we're on a branch
+          git status
+          echo "Current branch: $(git branch --show-current)"
+
           cd aur/usb-tree-app-bin
 
           # Check if there are changes to commit
@@ -290,4 +295,6 @@ jobs:
 
           git add PKGBUILD .SRCINFO
           git commit -m "chore: update AUR package to ${{ steps.get_version.outputs.version }}"
-          git push
+
+          # Push to main branch
+          git push origin HEAD:main
