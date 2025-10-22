@@ -24,4 +24,7 @@ package() {
 
     # Also install icon in hicolor theme (standard location)
     install -Dm644 "${srcdir}/usb-tree.png" "${pkgdir}/usr/share/icons/hicolor/256x256/apps/usb-tree.png"
+
+    # Install license
+    install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

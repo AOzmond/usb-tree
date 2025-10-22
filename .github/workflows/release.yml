@@ -70,8 +70,9 @@ jobs:
           cp app/build/bin/usb-tree bundle/
           cp aur/usb-tree-app-bin/usb-tree.desktop bundle/
           cp aur/usb-tree-app-bin/usb-tree.png bundle/
+          cp LICENSE bundle/
           cd bundle
-          tar czf ../artifacts/usb-tree-linux-amd64.tar.gz usb-tree usb-tree.desktop usb-tree.png
+          tar czf ../artifacts/usb-tree-linux-amd64.tar.gz usb-tree usb-tree.desktop usb-tree.png LICENSE
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
