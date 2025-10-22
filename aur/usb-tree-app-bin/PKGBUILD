@@ -10,7 +10,7 @@ depends=('gtk3' 'webkit2gtk-4.1' 'libusb')
 provides=('usb-tree')
 conflicts=('usb-tree')
 source=("${pkgname}-${pkgver}.tar.gz::${url}/releases/download/${pkgver}/usb-tree-linux-amd64.tar.gz")
-sha256sums=('815af3dd787355486ecfb893fdb9b481b02c2819ea656d760e3d4dfaba28beaa')
+sha256sums=('02374c8db8a6e6a0adfe7b6a02fd95f66b2e7eb59bea70e53dd0b9cf87686aa1')
 
 package() {
     # Install binary
