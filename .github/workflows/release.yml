@@ -68,8 +68,8 @@ jobs:
         run: |
           mkdir -p bundle
           cp app/build/bin/usb-tree bundle/
-          cp aur/usb-tree-app-bin/usb-tree.desktop bundle/
-          cp aur/usb-tree-app-bin/usb-tree.png bundle/
+          cp app/linux/usb-tree.desktop bundle/
+          cp app/linux/usb-tree.png bundle/
           cp LICENSE bundle/
           cd bundle
           tar czf ../artifacts/usb-tree-linux-amd64.tar.gz usb-tree usb-tree.desktop usb-tree.png LICENSE
