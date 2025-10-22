@@ -57,7 +57,9 @@ jobs:
 
       - name: Build Linux binary
         working-directory: app
-        run: wails build -platform linux/amd64 -clean
+        env:
+          CGO_LDFLAGS: "-Wl,-z,relro,-z,now"
+        run: wails build -platform linux/amd64 -clean -ldflags "-linkmode external -extldflags '-Wl,-z,relro,-z,now -pie'"
 
       - name: Create artifacts directory
         run: mkdir -p artifacts
