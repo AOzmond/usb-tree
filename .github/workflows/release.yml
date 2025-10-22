@@ -196,6 +196,8 @@ jobs:
     container:
       image: archlinux:latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
     steps:
       - name: Install basic dependencies
         run: |
@@ -205,6 +207,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get release version
         id: get_version
@@ -269,21 +272,11 @@ jobs:
           pacman -S --noconfirm desktop-file-utils
           desktop-file-validate aur/usb-tree-app-bin/usb-tree.desktop || echo "Desktop file validation warnings (non-fatal)"
 
-      - name: Create Pull Request with AUR updates
-        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+      - name: Commit and push AUR updates
+        uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
         with:
-          commit-message: "chore: update AUR package to ${{ steps.get_version.outputs.version }}"
-          title: "Update AUR package to ${{ steps.get_version.outputs.version }}"
-          body: |
-            Automated update of AUR package files for release ${{ steps.get_version.outputs.version }}
-
-            - Updated PKGBUILD version
-            - Updated SHA256 checksum: `${{ steps.calc_sha.outputs.sha256 }}`
-            - Regenerated .SRCINFO using makepkg
-            - Validated PKGBUILD syntax
-            - Validated desktop file
-          branch: update-aur-${{ steps.get_version.outputs.version }}
-          delete-branch: true
-          add-paths: |
-            aur/usb-tree-app-bin/PKGBUILD
-            aur/usb-tree-app-bin/.SRCINFO
+          commit_message: "chore: update AUR package to ${{ steps.get_version.outputs.version }}"
+          file_pattern: "aur/usb-tree-app-bin/PKGBUILD aur/usb-tree-app-bin/.SRCINFO"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
