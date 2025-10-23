@@ -1,0 +1,215 @@
+name: Update AUR
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-aur-bin:
+    name: Update AUR Binary Package
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux
+
+    steps:
+      - name: Install Dependencies
+        run: |
+          pacman -Syu --noconfirm git openssh jq base-devel
+
+      - name: Get Release Information
+        run: |
+          set -x
+          latest_version=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/releases/latest | jq -r .tag_name)
+
+          # Download the Linux release tarball
+          curl -L https://github.com/AOzmond/usb-tree/releases/download/${latest_version}/usb-tree-linux-amd64.tar.gz -o usb-tree-linux-amd64.tar.gz
+
+          # Calculate SHA256
+          sha256sum=$(sha256sum usb-tree-linux-amd64.tar.gz | cut -d' ' -f1)
+
+          echo "SHA256: $sha256sum"
+          echo "VERSION: $latest_version"
+
+          echo "sha256sum=$sha256sum" >> $GITHUB_ENV
+          echo "version=$latest_version" >> $GITHUB_ENV
+          set +x
+
+      - name: Create PKGBUILD Directory
+        run: |
+          mkdir -p aur-package-bin
+
+      - name: Generate PKGBUILD for Binary Package
+        run: |
+          cat > aur-package-bin/PKGBUILD << 'PKGBUILD_EOF'
+          # Maintainer: Alastair Ozmond <alastair.ozmond@gmail.com>
+          pkgname=usb-tree-app-bin
+          pkgver=VERSION_PLACEHOLDER
+          pkgrel=1
+          pkgdesc="USB device tree viewer with detailed information (binary release)"
+          arch=('x86_64')
+          url="https://github.com/AOzmond/usb-tree"
+          license=('GPL-2.0-or-later')
+          depends=('gtk3' 'webkit2gtk-4.1' 'libusb')
+          provides=('usb-tree')
+          conflicts=('usb-tree')
+          source=("${pkgname}-${pkgver}.tar.gz::${url}/releases/download/VERSION_PLACEHOLDER/usb-tree-linux-amd64.tar.gz")
+          sha256sums=('SHA256_PLACEHOLDER')
+
+          package() {
+              # Install binary
+              install -Dm755 "${srcdir}/usb-tree" "${pkgdir}/usr/bin/usb-tree"
+
+              # Install desktop file
+              install -Dm644 "${srcdir}/usb-tree.desktop" "${pkgdir}/usr/share/applications/usb-tree.desktop"
+
+              # Install icon
+              install -Dm644 "${srcdir}/usb-tree.png" "${pkgdir}/usr/share/pixmaps/usb-tree.png"
+
+              # Also install icon in hicolor theme (standard location)
+              install -Dm644 "${srcdir}/usb-tree.png" "${pkgdir}/usr/share/icons/hicolor/256x256/apps/usb-tree.png"
+
+              # Install license
+              install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+          }
+          PKGBUILD_EOF
+
+          # Replace placeholders with actual values
+          sed -i "s/VERSION_PLACEHOLDER/${{ env.version }}/g" aur-package-bin/PKGBUILD
+          sed -i "s/SHA256_PLACEHOLDER/${{ env.sha256sum }}/g" aur-package-bin/PKGBUILD
+
+          echo "Generated PKGBUILD for usb-tree-app-bin:"
+          cat aur-package-bin/PKGBUILD
+
+      - name: Upload Binary PKGBUILD Artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pkgbuild-bin
+          path: aur-package-bin/PKGBUILD
+          retention-days: 30
+
+  #      - name: Publish Binary AUR Package
+  #        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+  #        with:
+  #          pkgname: usb-tree-app-bin
+  #          pkgbuild: ./aur-package-bin/PKGBUILD
+  #          commit_username: ${{ secrets.AUR_USERNAME }}
+  #          commit_email: ${{ secrets.AUR_EMAIL }}
+  #          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE }}
+  #          commit_message: "chore: update AUR package to ${{ env.version }}"
+  #          ssh_keyscan_types: rsa,ecdsa,ed25519
+
+  update-aur-source:
+    name: Update AUR Source Package
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux
+
+    steps:
+      - name: Install Dependencies
+        run: |
+          pacman -Syu --noconfirm git openssh jq base-devel
+
+      - name: Get Release Information
+        run: |
+          latest_version=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/releases/latest | jq -r .tag_name)
+
+          # Get the commit hash for the tag
+          commit_hash=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/git/ref/tags/${latest_version} | jq -r '.object.sha')
+
+          # If it's an annotated tag, we need to get the actual commit
+          object_type=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/git/tags/${commit_hash} | jq -r '.object.type // "commit"')
+          if [ "$object_type" = "commit" ]; then
+            commit_hash=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/git/tags/${commit_hash} | jq -r '.object.sha')
+          fi
+
+          # Download the source tarball and calculate SHA256
+          curl -L https://github.com/AOzmond/usb-tree/archive/${commit_hash}.tar.gz -o usb-tree-source.tar.gz
+          sha256sum_source=$(sha256sum usb-tree-source.tar.gz | cut -d' ' -f1)
+
+          echo "VERSION: $latest_version"
+          echo "COMMIT: $commit_hash"
+          echo "SHA256: $sha256sum_source"
+          echo "version=$latest_version" >> $GITHUB_ENV
+          echo "commit_hash=$commit_hash" >> $GITHUB_ENV
+          echo "sha256sum_source=$sha256sum_source" >> $GITHUB_ENV
+
+      - name: Create PKGBUILD Directory
+        run: |
+          mkdir -p aur-package-src
+
+      - name: Generate PKGBUILD for Source Package
+        run: |
+          cat > aur-package-src/PKGBUILD << 'PKGBUILD_EOF'
+          # Maintainer: Alastair Ozmond <alastair.ozmond@gmail.com>
+          pkgname=usb-tree-app
+          pkgver=VERSION_PLACEHOLDER
+          pkgrel=1
+          pkgdesc="USB device tree viewer with detailed information"
+          arch=('x86_64')
+          url="https://github.com/AOzmond/usb-tree"
+          license=('GPL-2.0-or-later')
+          depends=('gtk3' 'webkit2gtk-4.1' 'libusb')
+          makedepends=('go' 'bun-bin' 'git')
+          provides=('usb-tree')
+          conflicts=('usb-tree' 'usb-tree-app-bin')
+          source=("git+${url}.git#tag=${pkgver}")
+          sha256sums=('SHA256_PLACEHOLDER')
+
+          build() {
+              cd "${srcdir}/usb-tree-VERSION_PLACEHOLDER"
+              cd app
+
+              # Install frontend dependencies
+              bun install
+
+              # Build the application with wails
+              go install github.com/wailsapp/wails/v2/cmd/wails@latest
+              ~/go/bin/wails build -clean -platform linux/amd64
+          }
+
+          package() {
+              cd "${srcdir}/usb-tree-VERSION_PLACEHOLDER"
+
+              # Install binary
+              install -Dm755 "app/build/bin/usb-tree" "${pkgdir}/usr/bin/usb-tree"
+
+              # Install desktop file
+              install -Dm644 "app/build/linux/usb-tree.desktop" "${pkgdir}/usr/share/applications/usb-tree.desktop"
+
+              # Install icon
+              install -Dm644 "app/build/linux/usb-tree.png" "${pkgdir}/usr/share/pixmaps/usb-tree.png"
+
+              # Also install icon in hicolor theme (standard location)
+              install -Dm644 "app/build/linux/usb-tree.png" "${pkgdir}/usr/share/icons/hicolor/256x256/apps/usb-tree.png"
+
+              # Install license
+              install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+          }
+          PKGBUILD_EOF
+
+          # Replace placeholders with actual values
+          sed -i "s/VERSION_PLACEHOLDER/${{ env.version }}/g" aur-package-src/PKGBUILD
+          sed -i "s/COMMIT_HASH_PLACEHOLDER/${{ env.commit_hash }}/g" aur-package-src/PKGBUILD
+          sed -i "s/SHA256_PLACEHOLDER/${{ env.sha256sum_source }}/g" aur-package-src/PKGBUILD
+
+          echo "Generated PKGBUILD for usb-tree-app:"
+          cat aur-package-src/PKGBUILD
+
+      - name: Upload Source PKGBUILD Artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pkgbuild-source
+          path: aur-package-src/PKGBUILD
+          retention-days: 30
+#      - name: Publish Source AUR Package
+#        uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 #4.1.1
+#        with:
+#          pkgname: usb-tree-app
+#          pkgbuild: ./aur-package-src/PKGBUILD
+#          commit_username: ${{ secrets.AUR_USERNAME }}
+#          commit_email: ${{ secrets.AUR_EMAIL }}
+#          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE }}
+#          commit_message: "update AUR package to ${{ env.version }}"
+#          ssh_keyscan_types: rsa,ecdsa,ed25519
