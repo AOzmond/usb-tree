@@ -119,24 +119,13 @@ jobs:
         run: |
           latest_version=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/releases/latest | jq -r .tag_name)
 
-          # Get the commit hash for the tag
-          commit_hash=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/git/ref/tags/${latest_version} | jq -r '.object.sha')
-
-          # If it's an annotated tag, we need to get the actual commit
-          object_type=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/git/tags/${commit_hash} | jq -r '.object.type // "commit"')
-          if [ "$object_type" = "commit" ]; then
-            commit_hash=$(curl -s https://api.github.com/repos/AOzmond/usb-tree/git/tags/${commit_hash} | jq -r '.object.sha')
-          fi
-
-          # Download the source tarball and calculate SHA256
-          curl -L https://github.com/AOzmond/usb-tree/archive/${commit_hash}.tar.gz -o usb-tree-source.tar.gz
+          # Download the source tarball from the release tag
+          curl -L https://github.com/AOzmond/usb-tree/archive/refs/tags/${latest_version}.tar.gz -o usb-tree-source.tar.gz
           sha256sum_source=$(sha256sum usb-tree-source.tar.gz | cut -d' ' -f1)
 
           echo "VERSION: $latest_version"
-          echo "COMMIT: $commit_hash"
           echo "SHA256: $sha256sum_source"
           echo "version=$latest_version" >> $GITHUB_ENV
-          echo "commit_hash=$commit_hash" >> $GITHUB_ENV
           echo "sha256sum_source=$sha256sum_source" >> $GITHUB_ENV
 
       - name: Create PKGBUILD Directory
@@ -158,11 +147,11 @@ jobs:
           makedepends=('go' 'bun-bin' 'git')
           provides=('usb-tree')
           conflicts=('usb-tree' 'usb-tree-app-bin')
-          source=("git+${url}.git#tag=${pkgver}")
+          source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/${pkgver}.tar.gz")
           sha256sums=('SHA256_PLACEHOLDER')
 
           build() {
-              cd "${srcdir}/usb-tree-VERSION_PLACEHOLDER"
+              cd "${srcdir}/usb-tree-${pkgver}"
               cd app
 
               # Install frontend dependencies
@@ -174,7 +163,7 @@ jobs:
           }
 
           package() {
-              cd "${srcdir}/usb-tree-VERSION_PLACEHOLDER"
+              cd "${srcdir}/usb-tree-${pkgver}"
 
               # Install binary
               install -Dm755 "app/build/bin/usb-tree" "${pkgdir}/usr/bin/usb-tree"
@@ -195,7 +184,6 @@ jobs:
 
           # Replace placeholders with actual values
           sed -i "s/VERSION_PLACEHOLDER/${{ env.version }}/g" aur-package-src/PKGBUILD
-          sed -i "s/COMMIT_HASH_PLACEHOLDER/${{ env.commit_hash }}/g" aur-package-src/PKGBUILD
           sed -i "s/SHA256_PLACEHOLDER/${{ env.sha256sum_source }}/g" aur-package-src/PKGBUILD
 
           echo "Generated PKGBUILD for usb-tree-app:"
