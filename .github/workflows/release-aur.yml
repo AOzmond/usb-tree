@@ -152,12 +152,13 @@ jobs:
 
           build() {
               cd "${srcdir}/usb-tree-${pkgver}"
-              cd app
 
               # Install frontend dependencies
+              cd app/frontend
               bun install
 
               # Build the application with wails
+              cd ../
               go install github.com/wailsapp/wails/v2/cmd/wails@latest
               ~/go/bin/wails build -clean -platform linux/amd64
           }
