@@ -189,8 +189,7 @@ jobs:
         with:
           files: artifacts/**/*
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
 #  update-aur:
 #    name: Update AUR Package
 #    needs: [release]
