@@ -158,8 +158,9 @@ jobs:
 
       - name: Create zip
         run: |
+          Copy-Item LICENSE -Destination app\build\bin\
           cd app/build/bin
-          Compress-Archive -Path usb-tree.exe,libusb-1.0.dll -DestinationPath ../../../artifacts/usb-tree-windows-amd64.zip
+          Compress-Archive -Path usb-tree.exe,libusb-1.0.dll,LICENSE -DestinationPath ../../../artifacts/usb-tree-windows-amd64.zip
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
