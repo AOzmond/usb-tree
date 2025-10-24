@@ -46,7 +46,7 @@ jobs:
           pkgname=usb-tree-app-bin
           pkgver=VERSION_PLACEHOLDER
           pkgrel=1
-          pkgdesc="USB device tree viewer with detailed information (binary release)"
+          pkgdesc="USB device tree viewer with detailed information and monitor (binary release)"
           arch=('x86_64')
           url="https://github.com/AOzmond/usb-tree"
           license=('GPL-2.0-or-later')
@@ -135,7 +135,7 @@ jobs:
           pkgname=usb-tree-app
           pkgver=VERSION_PLACEHOLDER
           pkgrel=1
-          pkgdesc="USB device tree viewer with detailed information"
+          pkgdesc="USB device tree viewer with detailed information and monitor"
           arch=('x86_64')
           url="https://github.com/AOzmond/usb-tree"
           license=('GPL-2.0-or-later')
