@@ -136,7 +136,7 @@ jobs:
           pkgver=VERSION_PLACEHOLDER
           pkgrel=1
           pkgdesc="USB device tree viewer with detailed information and monitor"
-          arch=('x86_64')
+          arch=('any')
           url="https://github.com/AOzmond/usb-tree"
           license=('GPL-2.0-or-later')
           depends=('gtk3' 'webkit2gtk-4.1' 'libusb')
