@@ -156,7 +156,7 @@ jobs:
               # Build the application with wails
               cd ../
               go install github.com/wailsapp/wails/v2/cmd/wails@latest
-              $(go env GOPATH)/bin/wails build -clean -platform linux/amd64
+              $(go env GOPATH)/bin/wails build -clean
           }
 
           package() {
