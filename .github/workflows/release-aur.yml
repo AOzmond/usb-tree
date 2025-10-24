@@ -3,10 +3,6 @@ name: Update AUR
 on:
   release:
     types: [published]
-  workflow_run:
-    workflows: ["Release"]
-    types:
-      - completed
 
 jobs:
   update-aur-bin:
@@ -196,6 +192,7 @@ jobs:
           name: pkgbuild-source
           path: aur-package-src/PKGBUILD
           retention-days: 30
+
       - name: Publish Source AUR Package
         uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 #4.1.1
         with:
