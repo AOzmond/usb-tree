@@ -27,8 +27,9 @@
 ## Overview
 
 **USB Tree** is a cross-platform desktop and command-line tool that visualizes, logs, and monitors USB devices
-connected to your computer in real-time. It’s built in **Go** with **Wails v2**, combining a native Go backend
-with a modern **Svelte + TypeScript** frontend.
+connected to your computer in real-time. The desktop application is built in **Go** with **Wails v2**,
+combining a native Go backend with a modern **Svelte + TypeScript** frontend. The command-line tool is still
+under development, but will feature the same Go backend libraries.
 
 Use USB Tree to:
 
@@ -52,19 +53,19 @@ USB topology and events.
 
 ---
 
-## Screenshots / Demo
+## Demo
 
-TBD
+![output.gif](output.gif)
 
 ---
-
-## CLI
-
-See [CLI documentation](cli/README.md) for usage details.
 
 ## GUI APP
 
 See [GUI documentation](app/README.md) for usage details.
+
+## CLI ( Under Development )
+
+See [CLI documentation](cli/README.md) for usage details.
 
 ---
 
