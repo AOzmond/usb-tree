@@ -140,8 +140,8 @@ This project is licensed under the GPL-2.0 License. See the LICENSE file for det
 
 Alastair Ozmond
 
-[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://aozmond.github.io)
+[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://www.linkedin.com/in/alastair-ozmond-108512179)
 
-[LinkedIn](www.linkedin.com/in/alastair-ozmond-108512179)
+[LinkedIn](https://www.linkedin.com/in/alastair-ozmond-108512179)
 
 Software Engineer | Full-Stack & Systems Developer
