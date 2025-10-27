@@ -1,6 +1,6 @@
 # USB Tree
 
-[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://aozmond.github.io)
+[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://www.linkedin.com/in/alastair-ozmond-108512179)
 [![Build Status](https://github.com/AOzmond/usb-tree/actions/workflows/release.yml/badge.svg)](https://github.com/AOzmond/usb-tree/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/AOzmond/usb-tree/app)](https://goreportcard.com/report/github.com/AOzmond/usb-tree)
 [![License](https://img.shields.io/github/license/AOzmond/usb-tree)](./LICENSE)
@@ -79,8 +79,8 @@ This project is licensed under the GPL-2.0 License.
 
 Alastair Ozmond
 
-[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://aozmond.github.io)
+[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://www.linkedin.com/in/alastair-ozmond-108512179)
 
-[LinkedIn](www.linkedin.com/in/alastair-ozmond-108512179)
+[LinkedIn](https://www.linkedin.com/in/alastair-ozmond-108512179)
 
 Software Engineer | Full-Stack & Systems Developer
