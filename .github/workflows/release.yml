@@ -1,0 +1,193 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+jobs:
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-22.04
+    container:
+      image: debian:bookworm
+    steps:
+      - name: Install basic dependencies
+        run: |
+          apt-get update
+          apt-get install -y curl git ca-certificates unzip
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version: "1.25"
+          cache-dependency-path: |
+            app/go.sum
+            lib/go.sum
+
+      - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
+        with:
+          bun-version: latest
+
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libusb-1.0-0-dev libudev-dev pkg-config
+
+      - name: Set up WebKit2GTK compatibility
+        run: ln -sf /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.1.pc /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc
+
+      - name: Cache Wails CLI
+        id: cache-wails
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/go/bin/wails
+          key: wails-${{ runner.os }}-latest
+
+      - name: Install Wails
+        if: steps.cache-wails.outputs.cache-hit != 'true'
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Build frontend
+        working-directory: app/frontend
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+
+      - name: Build Linux binary
+        working-directory: app
+        env:
+          CGO_LDFLAGS: "-Wl,-z,relro,-z,now"
+        run: wails build -platform linux/amd64 -clean -ldflags "-linkmode external -extldflags '-Wl,-z,relro,-z,now -pie'"
+
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
+      - name: Create tarball with binary, desktop file, and icon
+        run: |
+          mkdir -p bundle
+          cp app/build/bin/usb-tree bundle/
+          cp app/build/linux/usb-tree.desktop bundle/
+          cp app/build/linux/usb-tree.png bundle/
+          cp LICENSE bundle/
+          cd bundle
+          tar czf $GITHUB_WORKSPACE/artifacts/usb-tree-linux-amd64.tar.gz usb-tree usb-tree.desktop usb-tree.png LICENSE
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: linux-amd64
+          path: artifacts/usb-tree-linux-amd64.tar.gz
+          retention-days: 1
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version: "1.25"
+          cache-dependency-path: |
+            app/go.sum
+            lib/go.sum
+
+      - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
+        with:
+          bun-version: latest
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: C:\vcpkg\installed
+          key: vcpkg-${{ runner.os }}-libusb
+
+      - name: Install libusb via vcpkg
+        run: |
+          vcpkg install libusb:x64-windows
+          vcpkg integrate install
+
+      - name: Set up environment for libusb
+        shell: pwsh
+        run: |
+          echo "PKG_CONFIG_PATH=C:\vcpkg\installed\x64-windows\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "PATH=$env:PATH;C:\vcpkg\installed\x64-windows\bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "CGO_CFLAGS=-IC:/vcpkg/installed/x64-windows/include" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "CGO_LDFLAGS=-LC:/vcpkg/installed/x64-windows/lib -lusb-1.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install pkg-config
+        run: choco install pkgconfiglite -y
+
+      - name: Build frontend
+        working-directory: app/frontend
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+
+      - name: Fix go-webview2 compatibility
+        working-directory: app
+        shell: pwsh
+        run: |
+          go get github.com/wailsapp/go-webview2@v1.0.16
+          go mod tidy
+
+      - name: Cache Wails CLI
+        id: cache-wails
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~\go\bin\wails.exe
+          key: wails-${{ runner.os }}-latest
+
+      - name: Install Wails
+        if: steps.cache-wails.outputs.cache-hit != 'true'
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Build Windows binary
+        working-directory: app
+        run: wails build -platform windows/amd64 -clean
+
+      - name: Bundle libusb DLL
+        run: Copy-Item "C:\vcpkg\installed\x64-windows\bin\libusb-1.0.dll" -Destination "app\build\bin\"
+
+      - name: Create artifacts directory
+        run: New-Item -ItemType Directory -Force -Path artifacts
+
+      - name: Create zip
+        run: |
+          Copy-Item LICENSE -Destination app\build\bin\
+          cd app/build/bin
+          Compress-Archive -Path usb-tree.exe,libusb-1.0.dll,LICENSE -DestinationPath $env:GITHUB_WORKSPACE\artifacts\usb-tree-windows-amd64.zip
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: windows-amd64
+          path: artifacts/usb-tree-windows-amd64.zip
+          retention-days: 1
+
+  release:
+    name: Create Release
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
+          token: ${{ secrets.RELEASE_TOKEN }}

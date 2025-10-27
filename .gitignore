@@ -17,15 +17,14 @@ profile.cov
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# Go workspace file
-go.work
-go.work.sum
-
 # env file
 .env
 
 # Editor/IDE
 .vscode/
 **/.vscode/
+.idea/
 
 node_modules
+# Added by goreleaser init:
+dist/
