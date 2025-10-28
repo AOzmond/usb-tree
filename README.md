@@ -8,4 +8,4 @@ See [CLI documentation](cli/README.md) for usage details.
 
 ## GUI APP
 
-See [GUI documentation](app/README.md) for usage details.
+See [GUI documentation](app/usb-tree/README.md) for usage details.
