@@ -55,7 +55,7 @@ USB topology and events.
 
 ## Demo
 
-<img src="output.gif" alt="Demo" width="500" height="500">
+![output.gif](output.gif)
 
 ---
 
