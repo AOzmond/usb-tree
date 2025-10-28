@@ -52,15 +52,13 @@ native Go backend with a modern Svelte frontend for optimal performance and user
 
 1. Download the latest `usb-tree-linux-amd64.tar.gz` from the
    [releases page](https://github.com/AOzmond/usb-tree/releases)
-2. Extract the archive:
+2. Extract the archive to your desired location:
    ```bash
    tar -xzf usb-tree-linux-amd64.tar.gz
    ```
-3. Install the files:
+3. Run binary:
    ```bash
-   sudo cp usb-tree /usr/local/bin/
-   sudo cp usb-tree.desktop /usr/share/applications/
-   sudo cp usb-tree.png /usr/share/pixmaps/
+   ./usb-tree
    ```
 
 #### Arch Linux (AUR)
@@ -83,18 +81,14 @@ yay -S usb-tree-app
 
 #### Required build tools:
 
-- **Go**: 1.25 or later ([download](https://go.dev/dl/))
-- **Bun**: Latest version ([install](https://bun.sh/))
-- **Wails v2**: latest
-  - see wails [install](https://wails.io/docs/next/gettingstarted/installation) page for O/S specific
-    instruction.
+- [**Go**: 1.25 ](https://go.dev/dl/)
+- [**Bun**: 1.3.1](https://bun.sh/)
+- [**Wails (v2)**: 2.10](https://wails.io/docs/next/gettingstarted/installation)
+  - see wails install page for OS specific instruction.
 
 #### System dependencies:
 
-- **libusb-1.0**: latest
-  - see [libusb](https://libusb.info/) for O/S specific instruction and dependencies.
-- See **Wails** [install](https://wails.io/docs/next/gettingstarted/installation) page for O/S specific
-  dependencies.
+- [**libusb-1.0**](https://libusb.info/)
 
 ### Build Steps
 
@@ -111,21 +105,13 @@ yay -S usb-tree-app
    go install github.com/wailsapp/wails/v2/cmd/wails@latest
    ```
 
-3. **Install frontend dependencies:**
-
-   ```bash
-   cd frontend
-   bun install
-   cd ..
-   ```
-
-4. **Build the application:**
+3. **Build the application:**
 
    ```bash
    wails build -clean
    ```
 
-5. **Locate the binary:**
+4. **Locate the binary:**
 
    The compiled executable will be in:
 
