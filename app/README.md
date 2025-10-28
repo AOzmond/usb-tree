@@ -1,16 +1,147 @@
-# GUI App README
+# USB Tree - GUI Application
 
-## About
+The USB Tree GUI provides an intuitive interface for viewing connected USB devices, monitoring hot-plug
+events, and accessing detailed device information. Built with [Wails v2](https://wails.io/), it combines a
+native Go backend with a modern Svelte frontend for optimal performance and user experience.
 
-This is the official Wails Svelte-TS template.
+[![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://kernel.org/)
+[![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
 
-## Live Development
+---
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect to
-this in your browser, and you can call your Go code from devtools.
+## Table of Contents
 
-## Building
+- [Features](#features)
+- [Demo](#demo)
+- [Installation](#installation)
+  - [Linux](#linux)
+  - [Windows](#windows)
+  - [Building from Source](#building-from-source)
+  - [Build Steps](#build-steps)
+- [License](#license)
+- [Author](#author)
 
-To build a redistributable, production mode package, use `wails build`.
+## Features
+
+- **Real-Time USB Device Tree**: Visualize all connected USB devices in a hierarchical tree structure
+- **Hot-Plug Detection**: Automatically detect when devices are connected or disconnected
+  - changes are reflected in the tree structure with color coding and icons
+  - all changes are logged to a log section at the bottom of the app
+  - Device tree can be reset to the current state by clicking the "Refresh" button
+- **Device Details**: View comprehensive information including:
+  - Vendor ID and Product ID
+  - Manufacturer and product names
+  - Device bus information
+  - USB version and device speed
+  - Clicking a device in the tree will open a database search for more information.
+- **Event Logging**: Track all device connection and disconnection events with timestamps in the lower portion
+  of the app.
+- **Cross-Platform**: Native support for Linux and Windows
+- **Modern UI**: Clean, responsive interface built with Svelte and Carbon Design System
+  - Dark mode supported
+
+## Demo:
+
+<img src="/images/output.gif" alt="Demo" width="500" >
+
+## Installation
+
+### Linux
+
+#### From Release
+
+1. Download the latest `usb-tree-linux-amd64.tar.gz` from the
+   [releases page](https://github.com/AOzmond/usb-tree/releases)
+2. Extract the archive:
+   ```bash
+   tar -xzf usb-tree-linux-amd64.tar.gz
+   ```
+3. Install the files:
+   ```bash
+   sudo cp usb-tree /usr/local/bin/
+   sudo cp usb-tree.desktop /usr/share/applications/
+   sudo cp usb-tree.png /usr/share/pixmaps/
+   ```
+
+#### Arch Linux (AUR)
+
+```bash
+# Binary package
+yay -S usb-tree-app-bin
+
+# Or build from source
+yay -S usb-tree-app
+```
+
+### Windows
+
+1. Download the latest `usb-tree-windows-amd64.zip` from the release page
+2. Extract the archive to your desired location
+3. Run `usb-tree.exe` Note: Ensure libusb-1.0.dll is in the same directory as the executable.
+
+### Building from Source
+
+#### Required build tools:
+
+- **Go**: 1.25 or later ([download](https://go.dev/dl/))
+- **Bun**: Latest version ([install](https://bun.sh/))
+- **Wails v2**: latest
+  - see wails [install](https://wails.io/docs/next/gettingstarted/installation) page for O/S specific
+    instruction.
+
+#### System dependencies:
+
+- **libusb-1.0**: latest
+  - see [libusb](https://libusb.info/) for O/S specific instruction and dependencies.
+- See **Wails** [install](https://wails.io/docs/next/gettingstarted/installation) page for O/S specific
+  dependencies.
+
+### Build Steps
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/AOzmond/usb-tree.git
+   cd usb-tree/app
+   ```
+
+2. **Install Wails CLI:**
+
+   ```bash
+   go install github.com/wailsapp/wails/v2/cmd/wails@latest
+   ```
+
+3. **Install frontend dependencies:**
+
+   ```bash
+   cd frontend
+   bun install
+   cd ..
+   ```
+
+4. **Build the application:**
+
+   ```bash
+   wails build -clean
+   ```
+
+5. **Locate the binary:**
+
+   The compiled executable will be in:
+
+- **Linux**: `build/bin/usb-tree`
+- **Windows**: `build/bin/usb-tree.exe`
+
+## License
+
+This project is licensed under the GPL-2.0 License. See the LICENSE file for details.
+
+## Author
+
+Alastair Ozmond
+
+[![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://www.linkedin.com/in/alastair-ozmond-108512179)
+
+[LinkedIn](https://www.linkedin.com/in/alastair-ozmond-108512179)
+
+Software Engineer | Full-Stack & Systems Developer
