@@ -42,7 +42,7 @@ native Go backend with a modern Svelte frontend for optimal performance and user
 
 ## Demo:
 
-<img src="/images/output.gif" alt="Demo" width="500" >
+<img src="images/output.gif" alt="Demo" width="500" >
 
 ## Installation
 
