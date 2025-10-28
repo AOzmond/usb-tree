@@ -31,7 +31,7 @@ native Go backend with a modern Svelte frontend for optimal performance and user
 - **Device Details**: View comprehensive information including:
   - Vendor ID and Product ID
   - Manufacturer and product names
-  - Device bus information
+  - Device path and bus information
   - USB version and device speed
   - Clicking a device in the tree will open a database search for more information.
 - **Event Logging**: Track all device connection and disconnection events with timestamps in the lower portion
