@@ -2,7 +2,7 @@
 
 [![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://www.linkedin.com/in/alastair-ozmond-108512179)
 [![Build Status](https://github.com/AOzmond/usb-tree/actions/workflows/release.yml/badge.svg)](https://github.com/AOzmond/usb-tree/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/AOzmond/usb-tree/app)](https://goreportcard.com/report/github.com/AOzmond/usb-tree)
+[![Go Report Card](https://goreportcard.com/badge/github.com/AOzmond/usb-tree/app)](https://goreportcard.com/report/github.com/AOzmond/usb-tree/app)
 [![License](https://img.shields.io/github/license/AOzmond/usb-tree)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/AOzmond/usb-tree)](https://github.com/AOzmond/usb-tree/releases)
 [![Platform](https://img.shields.io/badge/platform-linux%20|%20windows-lightgrey.svg)](#)
