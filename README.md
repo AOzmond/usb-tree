@@ -38,8 +38,8 @@ Use USB Tree to:
 - Display vendor, and product information
 - Compare changes across sessions for debugging or audit purposes
 
-The tool is designed for developers, hardware engineers, and system administrators who want quick insight into
-USB topology and events.
+The tool is designed for anyone looking for an easy-to-use, lightweight, and portable solution for monitoring
+USB devices.
 
 ---
 
