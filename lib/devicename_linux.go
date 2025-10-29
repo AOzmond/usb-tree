@@ -16,8 +16,8 @@ type deviceInfo struct {
 }
 
 var (
-	deviceInfoCache   = map[string]deviceInfo{}
-	deviceInfoCacheMu sync.RWMutex
+	deviceInfoCache     = map[string]deviceInfo{}
+	deviceInfoCacheLock sync.RWMutex
 )
 
 func (d *Device) enrich() bool {
@@ -40,17 +40,17 @@ func (d *Device) getPriorityNameCacheKey() string {
 func getPriorityInfo(device Device) (deviceInfo, bool) {
 	key := device.getPriorityNameCacheKey()
 
-	deviceInfoCacheMu.RLock()
+	deviceInfoCacheLock.RLock()
 	_, found := deviceInfoCache[key]
-	deviceInfoCacheMu.RUnlock()
+	deviceInfoCacheLock.RUnlock()
 
 	if !found {
 		enumerateAndCache()
 	}
 
-	deviceInfoCacheMu.RLock()
+	deviceInfoCacheLock.RLock()
 	info, found := deviceInfoCache[key]
-	deviceInfoCacheMu.RUnlock()
+	deviceInfoCacheLock.RUnlock()
 
 	if found {
 		return info, true
@@ -101,15 +101,15 @@ func enumerateAndCache() {
 	}
 
 	// Replace the entire cache with write lock (minimize lock time)
-	deviceInfoCacheMu.Lock()
+	deviceInfoCacheLock.Lock()
 	deviceInfoCache = newCache
-	deviceInfoCacheMu.Unlock()
+	deviceInfoCacheLock.Unlock()
 }
 
 func clearPriorityNameCache(device Device) {
 	key := device.getPriorityNameCacheKey()
 
-	deviceInfoCacheMu.Lock()
+	deviceInfoCacheLock.Lock()
 	delete(deviceInfoCache, key)
-	deviceInfoCacheMu.Unlock()
+	deviceInfoCacheLock.Unlock()
 }
