@@ -41,12 +41,16 @@ func getPriorityInfo(device Device) (deviceInfo, bool) {
 	key := device.getPriorityNameCacheKey()
 
 	deviceInfoCacheMu.RLock()
-	info, found := deviceInfoCache[key]
+	_, found := deviceInfoCache[key]
 	deviceInfoCacheMu.RUnlock()
 
 	if !found {
 		enumerateAndCache()
 	}
+
+	deviceInfoCacheMu.RLock()
+	info, found := deviceInfoCache[key]
+	deviceInfoCacheMu.RUnlock()
 
 	if found {
 		return info, true
