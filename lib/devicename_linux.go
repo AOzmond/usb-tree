@@ -69,7 +69,7 @@ func enumerateAndCache() {
 
 	devices, _ := e.Devices()
 
-	newCache := make(map[string]deviceInfo)
+	newCache := map[string]deviceInfo{}
 
 	for _, device := range devices {
 		vid := device.PropertyValue("ID_VENDOR_ID")
