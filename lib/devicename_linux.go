@@ -5,6 +5,7 @@ package lib
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/jochenvg/go-udev"
 )
@@ -14,7 +15,10 @@ type deviceInfo struct {
 	Speed string
 }
 
-var deviceInfoCache = map[string]deviceInfo{}
+var (
+	deviceInfoCache     = map[string]deviceInfo{}
+	deviceInfoCacheLock sync.RWMutex
+)
 
 func (d *Device) enrich() bool {
 	info, ok := getPriorityInfo(*d)
@@ -36,11 +40,19 @@ func (d *Device) getPriorityNameCacheKey() string {
 func getPriorityInfo(device Device) (deviceInfo, bool) {
 	key := device.getPriorityNameCacheKey()
 
-	if _, found := deviceInfoCache[key]; !found {
+	deviceInfoCacheLock.RLock()
+	_, found := deviceInfoCache[key]
+	deviceInfoCacheLock.RUnlock()
+
+	if !found {
 		enumerateAndCache()
 	}
 
-	if info, found := deviceInfoCache[key]; found {
+	deviceInfoCacheLock.RLock()
+	info, found := deviceInfoCache[key]
+	deviceInfoCacheLock.RUnlock()
+
+	if found {
 		return info, true
 	}
 
@@ -56,6 +68,8 @@ func enumerateAndCache() {
 	}
 
 	devices, _ := e.Devices()
+
+	newCache := map[string]deviceInfo{}
 
 	for _, device := range devices {
 		vid := device.PropertyValue("ID_VENDOR_ID")
@@ -79,15 +93,23 @@ func enumerateAndCache() {
 
 			key := fmt.Sprintf("%s:%s:%03s:%03s", vid, pid, bus, devNum)
 
-			deviceInfoCache[key] = deviceInfo{
+			newCache[key] = deviceInfo{
 				Name:  name,
 				Speed: speed,
 			}
 		}
 	}
+
+	// Replace the entire cache with write lock (minimize lock time)
+	deviceInfoCacheLock.Lock()
+	deviceInfoCache = newCache
+	deviceInfoCacheLock.Unlock()
 }
 
 func clearPriorityNameCache(device Device) {
 	key := device.getPriorityNameCacheKey()
+
+	deviceInfoCacheLock.Lock()
 	delete(deviceInfoCache, key)
+	deviceInfoCacheLock.Unlock()
 }

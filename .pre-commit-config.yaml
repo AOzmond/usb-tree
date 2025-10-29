@@ -16,7 +16,7 @@ repos:
     hooks:
       - id: go-test-lib
         name: go-test (lib)
-        entry: go test ./lib/...
+        entry: go test -race ./lib/...
         language: system
         pass_filenames: false
         files: ^lib/.*\.go$
