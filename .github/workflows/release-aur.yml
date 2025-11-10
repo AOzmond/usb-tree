@@ -3,12 +3,12 @@ name: Update AUR
 on:
   release:
     types: [published]
-    branches: ["main"]
 
 jobs:
   update-aur-bin:
     name: Update AUR Binary Package
     runs-on: ubuntu-latest
+    if: !startsWith(github.event.release.tag_name , 'test')
 
     container:
       image: archlinux
@@ -103,6 +103,7 @@ jobs:
   update-aur-source:
     name: Update AUR Source Package
     runs-on: ubuntu-latest
+    if: !startsWith(github.event.release.tag_name , 'test')
 
     container:
       image: archlinux
