@@ -102,27 +102,23 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
-          path: C:\vcpkg\installed
-          key: vcpkg-${{ runner.os }}-libusb
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-libusb
 
-      - name: Install libusb via vcpkg
-        run: |
-          vcpkg install libusb:x64-windows
-          vcpkg integrate install
-
-      - name: Set up environment for libusb
+      - name: Set up environment for MSYS2
         shell: pwsh
         run: |
-          echo "PKG_CONFIG_PATH=C:\vcpkg\installed\x64-windows\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "PATH=$env:PATH;C:\vcpkg\installed\x64-windows\bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "CGO_CFLAGS=-IC:/vcpkg/installed/x64-windows/include" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "CGO_LDFLAGS=-LC:/vcpkg/installed/x64-windows/lib -lusb-1.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Install pkg-config
-        run: choco install pkgconfiglite -y
+          echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "PATH=C:\msys64\mingw64\bin;$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "CGO_ENABLED=1" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "CC=gcc" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build frontend
         working-directory: app/frontend
@@ -153,7 +149,7 @@ jobs:
         run: wails build -platform windows/amd64 -clean -nsis
 
       - name: Bundle libusb DLL
-        run: Copy-Item "C:\vcpkg\installed\x64-windows\bin\libusb-1.0.dll" -Destination "app\build\bin\"
+        run: Copy-Item "C:\msys64\mingw64\bin\libusb-1.0.dll" -Destination "app\build\bin\"
 
       - name: Create artifacts directory
         run: New-Item -ItemType Directory -Force -Path artifacts
