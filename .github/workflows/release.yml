@@ -103,7 +103,7 @@ jobs:
           bun-version: latest
 
       - name: Setup MSYS2
-        uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
+        uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
           update: true
@@ -111,6 +111,14 @@ jobs:
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-pkg-config
             mingw-w64-x86_64-libusb
+
+      - name: Get MSYS2 root path
+        id: msys2-path
+        shell: msys2 {0}
+        run: |
+          MSYS2_ROOT=$(cygpath -w /)
+          echo "root=$MSYS2_ROOT" >> $GITHUB_OUTPUT
+          echo "MSYS2 root: $MSYS2_ROOT"
 
       - name: Verify libusb installation
         shell: msys2 {0}
@@ -144,17 +152,15 @@ jobs:
 
       - name: Build Windows binary with NSIS
         working-directory: app
-        shell: pwsh
-        env:
-          PKG_CONFIG_PATH: C:\msys64\mingw64\lib\pkgconfig
-          CGO_ENABLED: 1
-          CC: gcc
+        shell: msys2 {0}
         run: |
-          $env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
-          wails build -platform windows/amd64 -clean -nsis
+          export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:$PKG_CONFIG_PATH"
+          export CGO_ENABLED=1
+          ~/go/bin/wails.exe build -platform windows/amd64 -clean -nsis
 
       - name: Bundle libusb DLL
-        run: Copy-Item "C:\msys64\mingw64\bin\libusb-1.0.dll" -Destination "app\build\bin\"
+        shell: pwsh
+        run: Copy-Item "${{ steps.msys2-path.outputs.root }}\mingw64\bin\libusb-1.0.dll" -Destination "app\build\bin\"
 
       - name: Create artifacts directory
         run: New-Item -ItemType Directory -Force -Path artifacts
