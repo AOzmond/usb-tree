@@ -111,6 +111,7 @@ jobs:
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-pkg-config
             mingw-w64-x86_64-libusb
+            mingw-w64-x86_64-nsis
           path-type: inherit
 
       - name: Get MSYS2 root path
