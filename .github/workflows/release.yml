@@ -126,19 +126,19 @@ jobs:
           ls -la /mingw64/lib/pkgconfig/libusb-1.0.pc
           pkg-config --cflags --libs libusb-1.0
 
-          - name: Fix go-webview2 compatibility
-            working-directory: app
-            shell: pwsh
-            run: |
-              go get github.com/wailsapp/go-webview2@v1.0.16
-              go mod tidy
+      - name: Fix go-webview2 compatibility
+        working-directory: app
+        shell: pwsh
+        run: |
+          go get github.com/wailsapp/go-webview2@v1.0.16
+          go mod tidy
 
-          - name: Cache Wails CLI
-            id: cache-wails
-            uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-            with:
-              path: ~\go\bin\wails.exe
-              key: wails-${{ runner.os }}-latest
+      - name: Cache Wails CLI
+        id: cache-wails
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~\go\bin\wails.exe
+          key: wails-${{ runner.os }}-latest
 
       - name: Install Wails
         if: steps.cache-wails.outputs.cache-hit != 'true'
@@ -152,7 +152,8 @@ jobs:
           export CGO_ENABLED=1
           WAILS_PATH=$(cygpath "$USERPROFILE/go/bin/wails.exe")
           GO_PATH=$(cygpath "$GOROOT/bin")
-          BUN_PATH=$(cygpath "$(dirname "$(which bun.exe)")")
+          BUN_DIR=$(dirname "$(which bun.exe)")
+          BUN_PATH=$(cygpath "$BUN_DIR")
           export PATH="$GO_PATH:$BUN_PATH:/mingw64/bin:$PATH"
           "$WAILS_PATH" build -platform windows/amd64 -clean -nsis
 
