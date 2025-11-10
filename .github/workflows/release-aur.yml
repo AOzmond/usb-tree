@@ -8,7 +8,7 @@ jobs:
   update-aur-bin:
     name: Update AUR Binary Package
     runs-on: ubuntu-latest
-    if: !startsWith(github.event.release.tag_name , 'test')
+    if: "!contains(github.ref, 'main')"
 
     container:
       image: archlinux
@@ -103,7 +103,7 @@ jobs:
   update-aur-source:
     name: Update AUR Source Package
     runs-on: ubuntu-latest
-    if: !startsWith(github.event.release.tag_name , 'test')
+    if: "!contains(github.ref, 'main')"
 
     container:
       image: archlinux
