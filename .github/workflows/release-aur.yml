@@ -8,6 +8,7 @@ jobs:
   update-aur-bin:
     name: Update AUR Binary Package
     runs-on: ubuntu-latest
+    if: github.ref_name == 'main'
 
     container:
       image: archlinux
