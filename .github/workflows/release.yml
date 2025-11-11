@@ -161,7 +161,9 @@ jobs:
 
           $wailsJsonPath = "app\wails.json"
           $wailsJson = Get-Content $wailsJsonPath -Raw | ConvertFrom-Json
-          $wailsJson.info.productVersion = $version
+
+          $wailsJson.Info | Add-Member -MemberType NoteProperty -Name "productVersion" -Value $version -Force
+
           $wailsJson | ConvertTo-Json -Depth 10 | Set-Content $wailsJsonPath -Encoding UTF8
 
           Write-Host "Updated wails.json with version $version"
