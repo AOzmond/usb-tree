@@ -153,6 +153,19 @@ jobs:
           Copy-Item "LICENSE" -Destination "app\build\bin\"
           Copy-Item "LICENSE" -Destination "app\build\windows\installer\"
 
+      - name: Update version in wails.json
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          Write-Host "Setting version to: $version"
+
+          $wailsJsonPath = "app\wails.json"
+          $wailsJson = Get-Content $wailsJsonPath -Raw | ConvertFrom-Json
+          $wailsJson.info.productVersion = $version
+          $wailsJson | ConvertTo-Json -Depth 10 | Set-Content $wailsJsonPath -Encoding UTF8
+
+          Write-Host "Updated wails.json with version $version"
+
       - name: Build Windows binary with NSIS
         working-directory: app
         shell: msys2 {0}
