@@ -100,33 +100,31 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
-          path: C:\vcpkg\installed
-          key: vcpkg-${{ runner.os }}-libusb
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-libusb
+            mingw-w64-x86_64-nsis
+          path-type: inherit
 
-      - name: Install libusb via vcpkg
+      - name: Get MSYS2 root path
+        id: msys2-path
+        shell: msys2 {0}
         run: |
-          vcpkg install libusb:x64-windows
-          vcpkg integrate install
+          MSYS2_ROOT=$(cygpath -w /)
+          echo "root=$MSYS2_ROOT" >> $GITHUB_OUTPUT
+          echo "MSYS2 root: $MSYS2_ROOT"
 
-      - name: Set up environment for libusb
-        shell: pwsh
+      - name: Verify libusb installation
+        shell: msys2 {0}
         run: |
-          echo "PKG_CONFIG_PATH=C:\vcpkg\installed\x64-windows\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "PATH=$env:PATH;C:\vcpkg\installed\x64-windows\bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "CGO_CFLAGS=-IC:/vcpkg/installed/x64-windows/include" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "CGO_LDFLAGS=-LC:/vcpkg/installed/x64-windows/lib -lusb-1.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Install pkg-config
-        run: choco install pkgconfiglite -y
-
-      - name: Build frontend
-        working-directory: app/frontend
-        run: |
-          bun install --frozen-lockfile
-          bun run build
+          ls -la /mingw64/lib/pkgconfig/libusb-1.0.pc
+          pkg-config --cflags --libs libusb-1.0
 
       - name: Fix go-webview2 compatibility
         working-directory: app
@@ -146,15 +144,50 @@ jobs:
         if: steps.cache-wails.outputs.cache-hit != 'true'
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Build Windows binary
-        working-directory: app
-        run: wails build -platform windows/amd64 -clean
+      - name: Prepare libusb DLL for installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path app\build\bin
+          New-Item -ItemType Directory -Force -Path app\build\windows\installer
+          Copy-Item "${{ steps.msys2-path.outputs.root }}\mingw64\bin\libusb-1.0.dll" -Destination "app\build\bin\"
+          Copy-Item "LICENSE" -Destination "app\build\bin\"
+          Copy-Item "LICENSE" -Destination "app\build\windows\installer\"
 
-      - name: Bundle libusb DLL
-        run: Copy-Item "C:\vcpkg\installed\x64-windows\bin\libusb-1.0.dll" -Destination "app\build\bin\"
+      - name: Update version in wails.json
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          Write-Host "Setting version to: $version"
+
+          $wailsJsonPath = "app\wails.json"
+          $wailsJson = Get-Content $wailsJsonPath -Raw | ConvertFrom-Json
+
+          $wailsJson.Info | Add-Member -MemberType NoteProperty -Name "productVersion" -Value $version -Force
+
+          $wailsJson | ConvertTo-Json -Depth 10 | Set-Content $wailsJsonPath -Encoding UTF8
+
+          Write-Host "Updated wails.json with version $version"
+
+      - name: Build Windows binary with NSIS
+        working-directory: app
+        shell: msys2 {0}
+        run: |
+          export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:$PKG_CONFIG_PATH"
+          export CGO_ENABLED=1
+          WAILS_PATH=$(cygpath "$USERPROFILE/go/bin/wails.exe")
+
+          # Extract version from git tag
+          VERSION="${GITHUB_REF_NAME}"
+          echo "Building version: $VERSION"
+
+          "$WAILS_PATH" build -platform windows/amd64 -nsis
 
       - name: Create artifacts directory
         run: New-Item -ItemType Directory -Force -Path artifacts
+
+      - name: Copy NSIS installer
+        run: |
+          Get-ChildItem -Path app\build\bin -Filter *installer*.exe | Copy-Item -Destination artifacts\
 
       - name: Create zip
         run: |
@@ -166,7 +199,7 @@ jobs:
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: windows-amd64
-          path: artifacts/usb-tree-windows-amd64.zip
+          path: artifacts/*
           retention-days: 1
 
   release:

@@ -9,5 +9,10 @@
   "author": {
     "name": "AOzmond",
     "email": "alastair.ozmond@gmail.com"
+  },
+  "Info": {
+    "companyName": "USB Tree",
+    "productName": "USB Tree",
+    "copyright": "Copyright Alastair Ozmond"
   }
 }
