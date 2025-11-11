@@ -101,7 +101,7 @@ jobs:
           bun-version: latest
 
       - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
           msystem: MINGW64
           update: true
@@ -180,7 +180,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME}"
           echo "Building version: $VERSION"
 
-          "$WAILS_PATH" build -platform windows/amd64 -nsis -ldflags "-X main.version=$VERSION"
+          "$WAILS_PATH" build -platform windows/amd64 -nsis
 
       - name: Create artifacts directory
         run: New-Item -ItemType Directory -Force -Path artifacts
