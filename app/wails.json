@@ -13,8 +13,6 @@
   "Info": {
     "companyName": "Alastair Ozmond",
     "productName": "USB Tree",
-    "productVersion": "1.0.0",
-    "copyright": "",
-    "comments": "Built using Wails (https://wails.io)"
+    "copyright": "Copyright Alastair Ozmond"
   }
 }
