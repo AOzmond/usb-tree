@@ -148,7 +148,10 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path app\build\bin
+          New-Item -ItemType Directory -Force -Path app\build\windows\installer
           Copy-Item "${{ steps.msys2-path.outputs.root }}\mingw64\bin\libusb-1.0.dll" -Destination "app\build\bin\"
+          Copy-Item "LICENSE" -Destination "app\build\bin\"
+          Copy-Item "LICENSE" -Destination "app\build\windows\installer\"
 
       - name: Build Windows binary with NSIS
         working-directory: app
