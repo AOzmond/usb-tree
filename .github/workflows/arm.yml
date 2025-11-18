@@ -15,15 +15,15 @@ jobs:
     steps:
       - name: Install basic dependencies
         run: |
-          apt-get update
-          apt-get install -y curl git ca-certificates unzip
+          sudo apt-get update
+          sudo apt-get install -y curl git ca-certificates unzip
 
       - name: Enable multi-arch and install dependencies
         run: |
-          dpkg --add-architecture arm64
-          apt-get update
-          apt-get install -y crossbuild-essential-arm64 pkg-config
-          apt-get install -y libgtk-3-dev:arm64 libwebkit2gtk-4.1-dev:arm64 libusb-1.0-0-dev:arm64 libudev-dev:arm64
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update
+          sudo apt-get install -y crossbuild-essential-arm64 pkg-config
+          sudo apt-get install -y libgtk-3-dev:arm64 libwebkit2gtk-4.1-dev:arm64 libusb-1.0-0-dev:arm64 libudev-dev:arm64
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
@@ -39,7 +39,7 @@ jobs:
           bun-version: latest
 
       - name: Set up WebKit2GTK compatibility
-        run: ln -sf /usr/lib/aarch64-linux-gnu/pkgconfig/webkit2gtk-4.1.pc /usr/lib/aarch64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc
+        run: sudo ln -sf /usr/lib/aarch64-linux-gnu/pkgconfig/webkit2gtk-4.1.pc /usr/lib/aarch64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc
 
       - name: Cache Wails CLI
         id: cache-wails
