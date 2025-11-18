@@ -10,8 +10,6 @@ jobs:
   build-linux-arm64:
     name: Build Linux ARM64
     runs-on: ubuntu-22.04
-    container:
-      image: debian:bookworm
     steps:
       - name: Install basic dependencies
         run: |
