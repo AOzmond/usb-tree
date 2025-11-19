@@ -20,11 +20,17 @@ jobs:
         run: |
           sudo dpkg --add-architecture arm64
 
-          # Update sources.list to separate architectures:
-          # 1. Restrict existing sources (archive.ubuntu.com) to amd64
-          sudo sed -i 's/deb http/deb [arch=amd64] http/g' /etc/apt/sources.list
+          # 1. Restrict ALL existing sources to amd64 only to prevent 404 errors on arm64
+          # This includes the main list and any third-party repos (like Docker, Chrome, etc.) in sources.list.d
+          sudo sed -i 's/^deb /deb [arch=amd64] /g' /etc/apt/sources.list
 
-          # 2. Add arm64 sources pointing to ports.ubuntu.com
+          for f in /etc/apt/sources.list.d/*.list; do
+            if [ -f "$f" ]; then
+              sudo sed -i 's/^deb /deb [arch=amd64] /g' "$f"
+            fi
+          done
+
+          # 2. Add arm64 specific sources from Ubuntu Ports
           echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
           echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
           echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
