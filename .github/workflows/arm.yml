@@ -67,6 +67,7 @@ jobs:
           wails build \
             -platform linux/arm64 \
             -clean \
+            -tags webkit2_41 \
             -ldflags "-linkmode external -extldflags '-Wl,-z,relro,-z,now -pie'"
 
       - name: Create artifacts directory
