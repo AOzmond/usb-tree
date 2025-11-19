@@ -8,8 +8,7 @@ on:
 jobs:
   build-linux-arm64:
     name: Build Linux ARM64
-    # Use an ARM64 runner so we build a native ARM64 binary
-    runs-on: ubuntu-22.04-arm64
+    runs-on: ubuntu-24.04-arm64
 
     steps:
       - name: Install basic dependencies
