@@ -3,7 +3,7 @@ name: Build ARM
 on:
   push:
     tags:
-      - "*.*.*"
+      - "*"
   workflow_dispatch:
 
 jobs:
