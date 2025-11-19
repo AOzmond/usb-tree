@@ -19,6 +19,16 @@ jobs:
       - name: Enable multi-arch and install dependencies
         run: |
           sudo dpkg --add-architecture arm64
+
+          # Update sources.list to separate architectures:
+          # 1. Restrict existing sources (archive.ubuntu.com) to amd64
+          sudo sed -i 's/deb http/deb [arch=amd64] http/g' /etc/apt/sources.list
+
+          # 2. Add arm64 sources pointing to ports.ubuntu.com
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
+
           sudo apt-get update
           sudo apt-get install -y crossbuild-essential-arm64 pkg-config
           sudo apt-get install -y libgtk-3-dev:arm64 libwebkit2gtk-4.1-dev:arm64 libusb-1.0-0-dev:arm64 libudev-dev:arm64
