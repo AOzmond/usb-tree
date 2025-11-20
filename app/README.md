@@ -76,12 +76,37 @@ See Website at [usb-tree.github.io](https://usb-tree.github.io)
 
 #### Arch Linux (AUR)
 
+AUR helper
+
 ```bash
 # Binary package
-yay -S usb-tree-app-bin
+yay -S usb-tree-app-bin # or paru etc.
+```
 
-# Or build from source
+or
+
+```bash
+# Build from source
 yay -S usb-tree-app
+```
+
+Manually
+
+```bash
+# Binary package
+git clone https://aur.archlinux.org/usb-tree-app-bin.git
+cd usb-tree-app-bin
+makepkg -si
+```
+
+or
+
+```bash
+# Build from source
+git clone https://aur.archlinux.org/usb-tree-app.git
+cd usb-tree-app
+makepkg -si
+
 ```
 
 ### Windows
