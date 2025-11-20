@@ -134,7 +134,7 @@ winget install USBTree.USBTree
 3. **Build the application:**
 
    ```bash
-   wails build -clean
+   wails build
    ```
 
 4. **Locate the binary:**
