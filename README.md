@@ -5,10 +5,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/AOzmond/usb-tree/app)](https://goreportcard.com/report/github.com/AOzmond/usb-tree/app)
 [![License](https://img.shields.io/github/license/AOzmond/usb-tree)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/AOzmond/usb-tree)](https://github.com/AOzmond/usb-tree/releases)
-[![Platform](https://img.shields.io/badge/platform-linux%20|%20windows-lightgrey.svg)](#)
+[![Platform](https://img.shields.io/badge/platform-linux%20|%20windows-lightgrey.svg)]()
 [![Code style: gofumpt](https://img.shields.io/badge/code%20style-gofumpt-blue.svg)](https://github.com/mvdan/gofumpt)
 
-See Website at [usb-tree.github.io](https://usb-tree.github.io)
+See the Website at [usb-tree.github.io](https://usb-tree.github.io)
 
 ---
 
@@ -17,12 +17,12 @@ See Website at [usb-tree.github.io](https://usb-tree.github.io)
 **USB Tree** is a cross-platform desktop and command-line tool that visualizes, logs, and monitors USB devices
 connected to your computer in real-time. The desktop application is built in **Go** with **Wails v2**,
 combining a native Go backend with a modern **Svelte + TypeScript** frontend. The command-line tool is still
-under development, but will feature the same Go backend libraries.
+under development but will feature the same Go backend libraries.
 
 Use USB Tree to:
 
 - View all currently connected USB devices in a hierarchical “tree” view
-- Log device connect/disconnect events with timestamps
+- Log devices connect/disconnect events with timestamps
 - Display vendor, and product information
 - Compare changes across sessions for debugging or audit purposes
 

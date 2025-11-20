@@ -1,10 +1,12 @@
 # USB Tree - GUI Application
 
 The USB Tree GUI provides an intuitive interface for viewing connected USB devices, monitoring hot-plug
-events, and accessing detailed device information. Built with [Wails v2](https://wails.io/), it combines a
-native Go backend with a modern Svelte frontend for optimal performance and user experience.
+events, and accessing detailed device information.
 
-See Website at [usb-tree.github.io](https://usb-tree.github.io)
+Built with [Wails v2](https://wails.io/), it combines a native Go backend with a modern Svelte frontend for
+optimal performance and user experience.
+
+See the Website at [usb-tree.github.io](https://usb-tree.github.io)
 
 ---
 
@@ -36,20 +38,20 @@ See Website at [usb-tree.github.io](https://usb-tree.github.io)
 
 ## Features
 
-- **Real-Time USB Device Tree**: Visualize all connected USB devices in a hierarchical tree structure
+- **Real-Time USB Device Tree**: Visualize connected USB devices in a hierarchical tree structure
+  - Tree shows device manufacturer and product names
+  - Devices negotiated speed are displayed to the right of device names
 - **Hot-Plug Detection**: Automatically detect when devices are connected or disconnected
   - changes are reflected in the tree structure with color coding and icons
   - all changes are logged to a log section at the bottom of the app
   - Device tree can be reset to the current state by clicking the "Refresh" button
-- **Device Details**: View comprehensive information including:
+- **Device Details**: device tooltip shows comprehensive information including:
   - Vendor ID and Product ID
-  - Manufacturer and product names
   - Device bus information
-  - USB version and device speed
   - Clicking a device in the tree will open a database search for more information.
-- **Event Logging**: Track all device connection and disconnection events with timestamps in the lower portion
-  of the app.
 - **Cross-Platform**: Native support for Linux and Windows
+  - Linux versions available for x86_64 and ARM64
+  - Windows version available for x86_64
 - **Modern UI**: Clean, responsive interface built with Svelte and Carbon Design System
   - Dark mode supported
 
@@ -135,7 +137,7 @@ winget install USBTree.USBTree
 - [**Go**: 1.25 ](https://go.dev/dl/)
 - [**Bun**: 1.3.1](https://bun.sh/)
 - [**Wails (v2)**: 2.10](https://wails.io/docs/next/gettingstarted/installation)
-  - see wails install page for OS specific instruction.
+  - see wails install page for OS-specific instruction.
 
 #### System dependencies:
 
