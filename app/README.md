@@ -4,6 +4,19 @@ The USB Tree GUI provides an intuitive interface for viewing connected USB devic
 events, and accessing detailed device information. Built with [Wails v2](https://wails.io/), it combines a
 native Go backend with a modern Svelte frontend for optimal performance and user experience.
 
+See Website at [usb-tree.github.io](https://usb-tree.github.io)
+
+---
+
+## Tech Stack
+
+[![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/)
+[![Svelte](https://img.shields.io/badge/Svelte-FF3E00?style=for-the-badge&logo=svelte&logoColor=white)](https://svelte.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Wails](https://img.shields.io/badge/Wails-FF6C37?style=for-the-badge&logo=wails&logoColor=white)](https://wails.io/)
+[![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white)](https://bun.sh/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![SCSS](https://img.shields.io/badge/SCSS-CC6699?style=for-the-badge&logo=sass&logoColor=white)](https://sass-lang.com/)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://kernel.org/)
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
 
@@ -50,7 +63,7 @@ native Go backend with a modern Svelte frontend for optimal performance and user
 
 #### From Release
 
-1. Download the latest `usb-tree-linux-amd64.tar.gz` from the
+1. Download the latest `usb-tree-linux-amd64.tar.gz` or `usb-tree-linux-arm64.tar.gz` from the
    [releases page](https://github.com/AOzmond/usb-tree/releases)
 2. Extract the archive to your desired location:
    ```bash
@@ -73,9 +86,22 @@ yay -S usb-tree-app
 
 ### Windows
 
+#### Winget
+
+```bash
+winget install USBTree.USBTree
+```
+
+#### Portable
+
 1. Download the latest `usb-tree-windows-amd64.zip` from the release page
 2. Extract the archive to your desired location
 3. Run `usb-tree.exe` Note: Ensure libusb-1.0.dll is in the same directory as the executable.
+
+#### Installer
+
+1. Download the latest `usb-tree-amd64-installer.exe ` from the release page
+2. Run the installer
 
 ### Building from Source
 

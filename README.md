@@ -8,19 +8,7 @@
 [![Platform](https://img.shields.io/badge/platform-linux%20|%20windows-lightgrey.svg)](#)
 [![Code style: gofumpt](https://img.shields.io/badge/code%20style-gofumpt-blue.svg)](https://github.com/mvdan/gofumpt)
 
----
-
-## Tech Stack
-
-[![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/)
-[![Svelte](https://img.shields.io/badge/Svelte-FF3E00?style=for-the-badge&logo=svelte&logoColor=white)](https://svelte.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Wails](https://img.shields.io/badge/Wails-FF6C37?style=for-the-badge&logo=wails&logoColor=white)](https://wails.io/)
-[![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white)](https://bun.sh/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![SCSS](https://img.shields.io/badge/SCSS-CC6699?style=for-the-badge&logo=sass&logoColor=white)](https://sass-lang.com/)
-[![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://kernel.org/)
-[![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
+See Website at [usb-tree.github.io](https://usb-tree.github.io)
 
 ---
 
