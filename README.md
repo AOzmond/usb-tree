@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/AOzmond/usb-tree/app)](https://goreportcard.com/report/github.com/AOzmond/usb-tree/app)
 [![License](https://img.shields.io/github/license/AOzmond/usb-tree)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/AOzmond/usb-tree)](https://github.com/AOzmond/usb-tree/releases)
-[![Platform](https://img.shields.io/badge/platform-linux%20|%20windows-lightgrey.svg)]()
+![Platform](https://img.shields.io/badge/platform-linux%20|%20windows-lightgrey.svg)
 [![Code style: gofumpt](https://img.shields.io/badge/code%20style-gofumpt-blue.svg)](https://github.com/mvdan/gofumpt)
 
 See the Website at [usb-tree.github.io](https://usb-tree.github.io)
