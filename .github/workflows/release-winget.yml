@@ -1,7 +1,6 @@
 name: WinGet submission on release
 
 on:
-  workflow_dispatch:
   release:
     types: [published]
 
@@ -15,35 +14,27 @@ jobs:
       WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_PUBLISH_TOKEN }}
 
     # Only submit stable releases
-    if: ${{ !github.event.release.prerelease }}
+    if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
 
     steps:
       - name: Submit usb-tree package to Windows Package Manager Community Repository
         shell: pwsh
         run: |
-          # Get installer info from GitHub release event
-          $assets = '${{ toJSON(github.event.release.assets) }}' | ConvertFrom-Json
+          # Tag name from the release event (e.g. "0.0.5")
+          $tag = ${{ toJSON(github.event.release.tag_name) }}
 
-          # Match the specific installer name: "usb-tree-amd64-installer.exe"
-          $installerUrl = $assets |
-            Where-Object -Property name -eq 'usb-tree-amd64-installer.exe' |
-            Select-Object -First 1 -ExpandProperty browser_download_url
-
-          if (-not $installerUrl) {
-            Write-Error "Could not find an installer asset named 'usb-tree-amd64-installer.exe' in the release assets."
-            exit 1
-          }
-
-          $packageVersion = ${{ toJSON(github.event.release.tag_name) }}
+          # Construct the installer URL directly from tag + known file name
+          $installerFileName = "usb-tree-amd64-installer.exe"
+          $installerUrl = "https://github.com/${{ github.repository }}/releases/download/$tag/$installerFileName"
 
           Write-Host "Using installer URL: $installerUrl"
-          Write-Host "Using package version: $packageVersion"
+          Write-Host "Using package version: $tag"
 
           # Download latest wingetcreate
           curl.exe -JLO https://aka.ms/wingetcreate/latest
 
           # Update package using wingetcreate
           .\wingetcreate.exe update USBTree.USBTree `
-            --version $packageVersion `
+            --version $tag `
             --urls "$installerUrl|machine" `
             --submit
