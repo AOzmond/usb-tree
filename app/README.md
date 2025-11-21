@@ -39,25 +39,21 @@ See the Website at [usb-tree.github.io](https://usb-tree.github.io)
 ## Features
 
 - **Real-Time USB Device Tree**: Visualize connected USB devices in a hierarchical tree structure
-  - Tree shows device manufacturer and product names
-  - Devices negotiated speed are displayed to the right of device names
+  - Shows manufacturer and product names
+  - Shows the speed the device is using
 - **Hot-Plug Detection**: Automatically detect when devices are connected or disconnected
-  - changes are reflected in the tree structure with color coding and icons
-  - all changes are logged to a log section at the bottom of the app
-  - Device tree can be reset to the current state by clicking the "Refresh" button
-- **Device Details**: device tooltip shows comprehensive information including:
+  - Device tree with visual indicators for changes
+  - Log of device disconnects and connects
+- **Device Details**: Device tooltip shows comprehensive information including:
   - Vendor ID and Product ID
   - Device bus information
-  - Clicking a device in the tree will open a database search for more information.
-- **Cross-Platform**: Native support for Linux and Windows
-  - Linux versions available for x86_64 and ARM64
-  - Windows version available for x86_64
-- **Modern UI**: Clean, responsive interface built with Svelte and Carbon Design System
-  - Dark mode supported
+  - Click to search in an online device database
+- **Cross-Platform**: Native support for Linux (x86-64 and ARM64) and Windows (x86-64)
+- **Modern UI**: Clean, responsive interface built with Svelte and Carbon Design System with dark mode support
 
 ## Demo:
 
-<img src="/images/output.gif" alt="Demo" width="500" >
+<img src="/images/output.gif" alt="Screen capture showing the functions" width="500" >
 
 ## Installation
 
@@ -65,12 +61,18 @@ See the Website at [usb-tree.github.io](https://usb-tree.github.io)
 
 #### From Release
 
-1. Download the latest `usb-tree-linux-amd64.tar.gz` or `usb-tree-linux-arm64.tar.gz` from the
-   [releases page](https://github.com/AOzmond/usb-tree/releases)
+1. Download the latest
+   [`usb-tree-linux-amd64.tar.gz`](https://github.com/AOzmond/usb-tree/releases/latest/download/usb-tree-linux-amd64.tar.gz)
+   or
+   [`usb-tree-linux-arm64.tar.gz`](https://github.com/AOzmond/usb-tree/releases/latest/download/usb-tree-linux-arm64.tar.gz)
+   or see the [releases](https://github.com/AOzmond/usb-tree/releases) page for all versions.
+
 2. Extract the archive to your desired location:
+
    ```bash
-   tar -xzf usb-tree-linux-amd64.tar.gz
+      tar -xzf usb-tree-linux-*.tar.gz
    ```
+
 3. Run binary:
    ```bash
    ./usb-tree
@@ -108,7 +110,6 @@ or
 git clone https://aur.archlinux.org/usb-tree-app.git
 cd usb-tree-app
 makepkg -si
-
 ```
 
 ### Windows
@@ -121,23 +122,25 @@ winget install USBTree.USBTree
 
 #### Portable
 
-1. Download the latest `usb-tree-windows-amd64.zip` from the release page
+1. Download the latest
+   [`usb-tree-windows-amd64.zip`](https://github.com/AOzmond/usb-tree/releases/latest/download/usb-tree-windows-amd64.zip)
+   or see the [releases](https://github.com/AOzmond/usb-tree/releases) page for all versions.
 2. Extract the archive to your desired location
-3. Run `usb-tree.exe` Note: Ensure libusb-1.0.dll is in the same directory as the executable.
+3. Run `usb-tree.exe` Note: Ensure `libusb-1.0.dll` is in the same directory as the executable.
 
 #### Installer
 
-1. Download the latest `usb-tree-amd64-installer.exe ` from the release page
-2. Run the installer
+Download and run the latest
+[`usb-tree-amd64-installer.exe`](https://github.com/AOzmond/usb-tree/releases/latest/download/usb-tree-amd64-installer.exe)
+or see the [releases](https://github.com/AOzmond/usb-tree/releases) page for all versions.
 
 ### Building from Source
 
-#### Required build tools:
+#### Required build tools
 
-- [**Go**: 1.25 ](https://go.dev/dl/)
+- [**Go**: 1.25](https://go.dev/dl/)
 - [**Bun**: 1.3.1](https://bun.sh/)
 - [**Wails (v2)**: 2.10](https://wails.io/docs/next/gettingstarted/installation)
-  - see wails install page for OS-specific instruction.
 
 #### System dependencies:
 
@@ -145,31 +148,15 @@ winget install USBTree.USBTree
 
 ### Build Steps
 
-1. **Clone the repository:**
+Clone the repository and build the application.
 
-   ```bash
-   git clone https://github.com/AOzmond/usb-tree.git
-   cd usb-tree/app
-   ```
+```bash
+git clone https://github.com/AOzmond/usb-tree.git
+cd usb-tree/app
+wails build
+```
 
-2. **Install Wails CLI:**
-
-   ```bash
-   go install github.com/wailsapp/wails/v2/cmd/wails@latest
-   ```
-
-3. **Build the application:**
-
-   ```bash
-   wails build
-   ```
-
-4. **Locate the binary:**
-
-   The compiled executable will be in:
-
-- **Linux**: `build/bin/usb-tree`
-- **Windows**: `build/bin/usb-tree.exe`
+The compiled executable will be in build/bin, named usb-tree for Linux, and usb-tree.exe for Windows.
 
 ## License
 
