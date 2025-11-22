@@ -9,7 +9,6 @@ jobs:
     name: Publish winget package
     runs-on: windows-latest
 
-    # winget-create will read the following environment variable to access the GitHub token needed for submitting a PR
     env:
       WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_PUBLISH_TOKEN }}
 
