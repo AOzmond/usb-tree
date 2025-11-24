@@ -21,7 +21,7 @@ under development but will feature the same Go backend libraries.
 
 Use USB Tree to:
 
-- View all currently connected USB devices in a hierarchical “tree” view
+- View all currently connected USB devices in a hierarchical "tree" view
 - Log devices connect/disconnect events with timestamps
 - Display vendor, and product information
 - Compare changes across sessions for debugging or audit purposes
@@ -43,7 +43,7 @@ USB devices.
 
 ## Demo
 
-<img src="images/output.gif" alt="Demo" width="500" >
+<img src="/images/output.gif" alt="Screen capture showing the functions" width="500">
 
 ---
 

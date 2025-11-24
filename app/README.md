@@ -51,9 +51,9 @@ See the Website at [usb-tree.github.io](https://usb-tree.github.io)
 - **Cross-Platform**: Native support for Linux (x86-64 and ARM64) and Windows (x86-64)
 - **Modern UI**: Clean, responsive interface built with Svelte and Carbon Design System with dark mode support
 
-## Demo:
+## Demo
 
-<img src="/images/output.gif" alt="Screen capture showing the functions" width="500" >
+<img src="/images/output.gif" alt="Screen capture showing the functions" width="500">
 
 ## Installation
 
@@ -70,10 +70,11 @@ See the Website at [usb-tree.github.io](https://usb-tree.github.io)
 2. Extract the archive to your desired location:
 
    ```bash
-      tar -xzf usb-tree-linux-*.tar.gz
+   tar -xzf usb-tree-linux-*.tar.gz
    ```
 
 3. Run binary:
+
    ```bash
    ./usb-tree
    ```
@@ -142,7 +143,7 @@ or see the [releases](https://github.com/AOzmond/usb-tree/releases) page for all
 - [**Bun**: 1.3.1](https://bun.sh/)
 - [**Wails (v2)**: 2.10](https://wails.io/docs/next/gettingstarted/installation)
 
-#### System dependencies:
+#### System dependencies
 
 - [**libusb-1.0**](https://libusb.info/)
 
@@ -156,11 +157,11 @@ cd usb-tree/app
 wails build
 ```
 
-The compiled executable will be in build/bin, named usb-tree for Linux, and usb-tree.exe for Windows.
+The compiled executable will be in `build/bin`, named `usb-tree` for Linux, and `usb-tree.exe` for Windows.
 
 ## License
 
-This project is licensed under the GPL-2.0 License. See the LICENSE file for details.
+This project is licensed under the GPL-2.0 License. See the [`LICENSE`](../LICENSE) file for details.
 
 ## Author
 
