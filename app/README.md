@@ -126,8 +126,10 @@ winget install USBTree.USBTree
 1. Download the latest
    [`usb-tree-windows-amd64.zip`](https://github.com/AOzmond/usb-tree/releases/latest/download/usb-tree-windows-amd64.zip)
    or see the [releases](https://github.com/AOzmond/usb-tree/releases) page for all versions.
-2. Extract the archive to your desired location
-3. Run `usb-tree.exe` Note: Ensure `libusb-1.0.dll` is in the same directory as the executable.
+2. Extract the archive to your desired location.
+3. Run `usb-tree.exe`.
+
+Note: Ensure `libusb-1.0.dll` is in the same directory as the executable.
 
 #### Installer
 
