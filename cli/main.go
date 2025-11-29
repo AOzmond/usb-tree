@@ -25,10 +25,11 @@ type model struct {
 }
 
 const (
-	gray       = "#888888"
-	white      = "#ffffff"
-	hotPink    = "#ff028d"
-	splitRatio = 0.7 // Ratio of tree view to log view
+	gray          = "#888888"
+	white         = "#ffffff"
+	hotPink       = "#ff028d"
+	splitRatio    = 0.7 // Ratio of tree view to log view
+	borderSpacing = 2   // the space taken up by the border
 )
 
 const (
@@ -135,13 +136,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		tooltipHeight := lipgloss.Height(m.tooltip)
 		remainingHeight := m.windowHeight - helpHeight - tooltipHeight
 
-		m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - 2
-		m.treeViewport.Width = m.windowWidth - 2
+		m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
+		m.treeViewport.Width = m.windowWidth - borderSpacing
 
-		m.tooltip = tooltipStyle.Width(m.windowWidth - 2).Render(m.tooltipContent)
+		m.tooltip = tooltipStyle.Width(m.windowWidth - borderSpacing).Render(m.tooltipContent)
 
-		m.logViewport.Height = remainingHeight - m.treeViewport.Height - 4
-		m.logViewport.Width = m.windowWidth - 2
+		m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
+		m.logViewport.Width = m.windowWidth - borderSpacing
 
 		m.help.Width = m.windowWidth
 
