@@ -12,6 +12,8 @@ import (
 	"github.com/charmbracelet/lipgloss/tree"
 )
 
+type focusIndex int
+
 type model struct {
 	windowWidth    int
 	windowHeight   int
@@ -20,7 +22,7 @@ type model struct {
 	tooltip        string
 	tooltipContent string
 	help           help.Model
-	focusedView    int
+	focusedView    focusIndex
 	lastUpdated    string
 }
 
@@ -33,8 +35,8 @@ const (
 )
 
 const (
-	treeView = iota
-	logView
+	treeView focusIndex = 0
+	logView  focusIndex = 1
 )
 
 var (
