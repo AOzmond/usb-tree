@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/AOzmond/usb-tree/lib"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/tree"
 )
 
 type focusIndex int
@@ -18,18 +18,25 @@ type model struct {
 	windowWidth    int
 	windowHeight   int
 	treeViewport   viewport.Model
+	treeContent    string
+	treeCursor     int
+	nodeCount      int
 	logViewport    viewport.Model
 	tooltip        string
 	tooltipContent string
 	help           help.Model
 	focusedView    focusIndex
 	lastUpdated    string
+	updates        chan []lib.Device
+	roots          []*lib.TreeNode
 }
 
 const (
 	gray          = "#888888"
 	white         = "#ffffff"
 	hotPink       = "#ff028d"
+	red           = "#FF0000"
+	green         = "#00FF00"
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
 )
@@ -55,21 +62,6 @@ var (
 
 // ***** Placeholder content *****
 // TODO: replace with real data
-var deviceTreePlaceHolder = tree.Root(".").
-	Child("Hub 1").
-	Child(
-		tree.New().
-			Root("Hub 2").
-			Child("Device 1      300Gbps").
-			Child("Device 2      300Gbps").
-			Child("Device 3      300Gbps"),
-	).
-	Child(
-		tree.New().
-			Root("Hub 3").
-			Child("Device 4      300Gbps").
-			Child("Device 5      300Gbps"),
-	)
 
 var placeHolderContent = "Bus 001 \nGaming Mouse \nhttps://www.google.com"
 
@@ -83,8 +75,9 @@ var placeHolderUpdated = " Last updated: 00:00:00"
 // ***** End of placeholder content *****
 
 func initialModel() model {
+	updates := make(chan []lib.Device, 1)
+
 	treeViewport := viewport.New(0, 0)
-	treeViewport.SetContent(deviceTreePlaceHolder.String())
 
 	logViewport := viewport.New(0, 0)
 	logViewport.SetContent(placeholderLogContent)
@@ -97,12 +90,16 @@ func initialModel() model {
 		help:           help.New(),
 		focusedView:    treeView,
 		lastUpdated:    placeHolderUpdated,
+		updates:        updates,
 	}
 	return m
 }
 
 func (m model) Init() tea.Cmd {
-	return nil
+	lib.Init(func(devices []lib.Device) {
+		m.updates <- devices
+	})
+	return waitForUpdate(m.updates)
 }
 
 func (m model) View() string {
@@ -130,6 +127,13 @@ func (m model) View() string {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+
+	case []lib.Device:
+		m.roots = lib.BuildDeviceTree(msg)
+		m.refreshTreeContent()
+
+		m.treeViewport.SetContent(m.treeContent)
+		return m, waitForUpdate(m.updates)
 
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
@@ -160,6 +164,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusedView = treeView
 			}
 			return m, nil
+
+		case key.Matches(msg, keys.Up):
+			if m.focusedView == treeView && m.treeCursor > 0 {
+				m.treeCursor--
+				m.refreshTreeContent()
+				m.updateViewportForCursor()
+				m.treeViewport.SetContent(m.treeContent)
+			}
+
+		case key.Matches(msg, keys.Down):
+			if m.focusedView == treeView && m.treeCursor < m.nodeCount-1 {
+				m.treeCursor++
+				m.refreshTreeContent()
+				m.updateViewportForCursor()
+				m.treeViewport.SetContent(m.treeContent)
+			}
 		}
 	}
 
