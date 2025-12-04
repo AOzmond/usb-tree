@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/AOzmond/usb-tree/lib"
 	"github.com/charmbracelet/bubbles/help"
@@ -26,7 +27,7 @@ type model struct {
 	tooltipContent string
 	help           help.Model
 	focusedView    focusIndex
-	lastUpdated    string
+	lastUpdated    time.Time
 	updates        chan []lib.Device
 	roots          []*lib.TreeNode
 }
@@ -70,8 +71,6 @@ var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 00:00:02 Device pqr 100000 Gbps
 00:00:03 Device xyz 100000 Gbps`
 
-var placeHolderUpdated = " Last updated: 00:00:00"
-
 // ***** End of placeholder content *****
 
 func initialModel() model {
@@ -89,7 +88,7 @@ func initialModel() model {
 		tooltip:        tooltipStyle.Render(placeHolderContent),
 		help:           help.New(),
 		focusedView:    treeView,
-		lastUpdated:    placeHolderUpdated,
+		lastUpdated:    time.Now(),
 		updates:        updates,
 	}
 	return m
@@ -113,13 +112,14 @@ func (m model) View() string {
 		logStyle = activeStyle
 	}
 
-	lastUpdatedWidth := lipgloss.Width(m.lastUpdated)
+	lastUpdatedString := m.lastUpdated.String()
+	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
 
 	helpView := m.help.View(keys)
 	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
 	helpView = helpViewStyle.Render(helpView)
 
-	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, m.lastUpdated, helpView)
+	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpView)
 
 	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), m.tooltip, logStyle.Render(m.logViewport.View()), statusLine)
 }
@@ -184,6 +184,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.updateViewportForCursor()
 				m.treeViewport.SetContent(m.treeContent)
 			}
+		case key.Matches(msg, keys.Refresh):
+			lastUpdate, newDevices := lib.Refresh()
+			m.updates <- newDevices
+			m.lastUpdated = lastUpdate
 		}
 	}
 
