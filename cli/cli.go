@@ -120,7 +120,7 @@ func (m Model) View() string {
 	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
 
-	helpView := m.help.View(keys)
+	helpView := m.help.FullHelpView(keys.FullHelp())
 	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
 	helpView = helpViewStyle.Render(helpView)
 
