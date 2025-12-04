@@ -2,6 +2,7 @@ package cli
 
 import (
 	"time"
+	"time"
 
 	"github.com/AOzmond/usb-tree/lib"
 	"github.com/charmbracelet/bubbles/help"
@@ -169,6 +170,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.updateViewportForCursor()
 				m.treeViewport.SetContent(m.treeContent)
 			}
+		case key.Matches(msg, keys.Refresh):
+			lastUpdate, newDevices := lib.Refresh()
+			m.updates <- newDevices
+			m.lastUpdated = lastUpdate
 		}
 	}
 

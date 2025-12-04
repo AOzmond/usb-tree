@@ -7,6 +7,7 @@ type keyMap struct {
 	SwitchFocus key.Binding
 	Up          key.Binding
 	Down        key.Binding
+	Refresh     key.Binding
 }
 
 var keys = keyMap{
@@ -25,6 +26,10 @@ var keys = keyMap{
 	Down: key.NewBinding(
 		key.WithKeys("down"),
 		key.WithHelp("↓", "move down"),
+	),
+	Refresh: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "refresh"),
 	),
 }
 
