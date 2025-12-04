@@ -152,6 +152,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.help.Width = m.windowWidth
 
+		m.refreshTreeContent()
+
+		m.treeViewport.SetContent(m.treeContent)
+
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, keys.Quit):
