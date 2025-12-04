@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/AOzmond/usb-tree/lib"
@@ -9,6 +11,7 @@ import (
 	"github.com/charmbracelet/lipgloss/tree"
 )
 
+// compactIndenter overwrite the default tree indenter to use a single space instead of two
 func compactIndenter(children tree.Children, index int) string {
 	if children.Length()-1 == index {
 		return "  "
@@ -16,6 +19,7 @@ func compactIndenter(children tree.Children, index int) string {
 	return "│ "
 }
 
+// compactEnumerator overwrite the default tree enumerator to reduce spacing
 func compactEnumerator(children tree.Children, index int) string {
 	if children.Length()-1 == index {
 		return "└─"
@@ -23,6 +27,7 @@ func compactEnumerator(children tree.Children, index int) string {
 	return "├─"
 }
 
+// waitForUpdate consumes the next update message from the provided subscription channel and returns it as a command.
 func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 	return func() tea.Msg {
 		return <-sub
@@ -31,16 +36,33 @@ func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 
 // refreshTreeContent rebuilds the visual tree based on roots and cursor
 func (m *model) refreshTreeContent() {
-	var sb strings.Builder
+	var deviceTreeSb strings.Builder
+	var speeds []string
 	idx := 0
 	for _, root := range m.roots {
-		var newTree *tree.Tree
-		newTree, idx = m.buildTreeFromRoot(root, idx)
-		sb.WriteString(newTree.String())
-		sb.WriteByte('\n')
+		var deviceTree *tree.Tree
+		var rootSpeeds []string
+		deviceTree, rootSpeeds, idx = m.buildTreeFromRoot(root, idx)
+		deviceTreeSb.WriteString(deviceTree.String())
+		deviceTreeSb.WriteByte('\n')
+		speeds = append(speeds, rootSpeeds...)
 	}
 	m.nodeCount = idx
-	m.treeContent = sb.String()
+
+	nameTreeStr := deviceTreeSb.String()
+	speedStr := strings.Join(speeds, "\n")
+
+	nameTreeWidth := lipgloss.Width(nameTreeStr)
+	speedStrWidth := lipgloss.Width(speedStr)
+	gapWidth := m.treeViewport.Width - nameTreeWidth - speedStrWidth
+
+	if gapWidth < 1 {
+		gapWidth = 1
+	}
+
+	gap := strings.Repeat(" ", gapWidth)
+
+	m.treeContent = lipgloss.JoinHorizontal(lipgloss.Top, nameTreeStr, gap, speedStr)
 }
 
 // updateViewportForCursor ensures the cursor is visible in the viewport
@@ -56,28 +78,59 @@ func (m *model) updateViewportForCursor() {
 }
 
 // buildTreeFromRoot iterates over the tree to build the view and track the cursor
-func (m *model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tree, int) {
+// Returns a name tree and a slice of speed strings, as well as the next index to use
+func (m *model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tree, []string, int) {
 	isSelected := currentIdx == m.treeCursor
 	idx := currentIdx + 1
 
 	name := node.Name
-	style := lipgloss.NewStyle()
+	speed := formatSpeed(node.Speed)
+	nameStyle := lipgloss.NewStyle()
+	speedStyle := lipgloss.NewStyle()
 
 	if node.State == lib.StateAdded {
-		style = style.Foreground(lipgloss.Color(green))
+		nameStyle = nameStyle.Foreground(lipgloss.Color(green))
+		speedStyle = speedStyle.Foreground(lipgloss.Color(green))
 	} else if node.State == lib.StateRemoved {
-		style = style.Foreground(lipgloss.Color(red))
+		nameStyle = nameStyle.Foreground(lipgloss.Color(red))
+		speedStyle = speedStyle.Foreground(lipgloss.Color(red))
 	}
 
 	if isSelected {
-		style = style.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
+		nameStyle = nameStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
+		speedStyle = speedStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
 	}
 
-	newTree := tree.New().Root(style.Render(name)).Indenter(compactIndenter).Enumerator(compactEnumerator)
+	nameTree := tree.New().Root(nameStyle.Render(name)).Indenter(compactIndenter).Enumerator(compactEnumerator)
+	speeds := []string{speedStyle.Render(speed)}
+
 	for _, child := range node.Children {
-		var childTree *tree.Tree
-		childTree, idx = m.buildTreeFromRoot(child, idx)
-		newTree.Child(childTree)
+		var childNameTree *tree.Tree
+		var childSpeeds []string
+		childNameTree, childSpeeds, idx = m.buildTreeFromRoot(child, idx)
+		nameTree.Child(childNameTree)
+		speeds = append(speeds, childSpeeds...)
 	}
-	return newTree, idx
+	return nameTree, speeds, idx
+}
+
+// formatSpeed formats the speed string to have a uniform size, and units.
+func formatSpeed(speed string) string {
+	if speed == "" {
+		return ""
+	}
+
+	speed = strings.TrimSpace(speed)
+
+	val, err := strconv.ParseFloat(speed, 64)
+	if err != nil {
+		return fmt.Sprintf("%8s", speed)
+	}
+
+	if val >= 1000 {
+		// Convert to Gbps
+		return fmt.Sprintf("%8s", fmt.Sprintf("%g Gbps", val/1000))
+	}
+
+	return fmt.Sprintf("%8s", fmt.Sprintf("%g Mbps", val))
 }
