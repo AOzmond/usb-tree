@@ -19,6 +19,9 @@ type focusIndex int
 type Model struct {
 	windowWidth    int
 	windowHeight   int
+	updates        chan []lib.Device
+	roots          []*lib.TreeNode
+	collapsed      map[*lib.TreeNode]bool // tracks which nodes are collapsed
 	treeViewport   viewport.Model
 	treeContent    string
 	treeCursor     int
@@ -27,10 +30,8 @@ type Model struct {
 	deviceTree     *tree.Tree
 	selectedDevice lib.Device
 	help           help.Model
-	focusedView    focusIndex
 	lastUpdated    time.Time
-	updates        chan []lib.Device
-	roots          []*lib.TreeNode
+	focusedView    focusIndex
 }
 
 const (
@@ -85,6 +86,7 @@ func InitialModel() Model {
 		focusedView:    treeView,
 		lastUpdated:    time.Now(),
 		updates:        updates,
+		collapsed:      make(map[*lib.TreeNode]bool),
 	}
 	return m
 }
@@ -170,6 +172,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.updateViewportForCursor()
 				m.treeViewport.SetContent(m.treeContent)
 			}
+
+		case key.Matches(msg, keys.Collapse):
+			if m.focusedView == treeView {
+				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
+					m.collapsed[node] = true
+					m.refreshTreeContent()
+					m.treeViewport.SetContent(m.treeContent)
+				}
+			}
+
+		case key.Matches(msg, keys.Expand):
+			if m.focusedView == treeView {
+				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
+					delete(m.collapsed, node)
+					m.refreshTreeContent()
+					m.treeViewport.SetContent(m.treeContent)
+				}
+			}
+
 		case key.Matches(msg, keys.Refresh):
 			lastUpdate, newDevices := lib.Refresh()
 			m.updates <- newDevices
