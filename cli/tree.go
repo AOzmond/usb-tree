@@ -43,6 +43,7 @@ func (m *model) refreshTreeContent() {
 		var deviceTree *tree.Tree
 		var rootSpeeds []string
 		deviceTree, rootSpeeds, idx = m.buildTreeFromRoot(root, idx)
+
 		deviceTreeSb.WriteString(deviceTree.String())
 		deviceTreeSb.WriteByte('\n')
 		speeds = append(speeds, rootSpeeds...)
@@ -94,12 +95,25 @@ func (m *model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 		statusPrefix = "+ "
 		nameStyle = nameStyle.Foreground(lipgloss.Color(green))
 		speedStyle = speedStyle.Foreground(lipgloss.Color(green))
+
 	case lib.StateRemoved:
 		statusPrefix = "- "
 		nameStyle = nameStyle.Foreground(lipgloss.Color(red))
 		speedStyle = speedStyle.Foreground(lipgloss.Color(red))
+
 	default:
-		statusPrefix = "· "
+		statusPrefix = ""
+
+	}
+
+	// Add expand/collapse indicator for nodes with children
+	var childrenIndicator string
+	if len(node.Children) > 0 {
+		if m.collapsed[node] {
+			childrenIndicator = "▶ "
+		} else {
+			childrenIndicator = "▼ "
+		}
 	}
 
 	if isSelected {
@@ -107,15 +121,22 @@ func (m *model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 		speedStyle = speedStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
 	}
 
-	nameTree := tree.New().Root(nameStyle.Render(statusPrefix + name)).Indenter(compactIndenter).Enumerator(compactEnumerator)
+	nameTree := tree.New().
+		Root(nameStyle.Render(childrenIndicator + statusPrefix + name)).
+		Indenter(compactIndenter).
+		Enumerator(compactEnumerator)
+
 	speeds := []string{speedStyle.Render(speed)}
 
-	for _, child := range node.Children {
-		var childNameTree *tree.Tree
-		var childSpeeds []string
-		childNameTree, childSpeeds, idx = m.buildTreeFromRoot(child, idx)
-		nameTree.Child(childNameTree)
-		speeds = append(speeds, childSpeeds...)
+	// Only render children if not collapsed
+	if !m.collapsed[node] {
+		for _, child := range node.Children {
+			var childDeviceTree *tree.Tree
+			var childSpeeds []string
+			childDeviceTree, childSpeeds, idx = m.buildTreeFromRoot(child, idx)
+			nameTree.Child(childDeviceTree)
+			speeds = append(speeds, childSpeeds...)
+		}
 	}
 	return nameTree, speeds, idx
 }
@@ -139,4 +160,38 @@ func formatSpeed(speed string) string {
 	}
 
 	return fmt.Sprintf("%8s", fmt.Sprintf("%g Mbps", val))
+}
+
+// getNodeAtCursor returns the TreeNode at the current cursor position
+func (m *model) getNodeAtCursor() *lib.TreeNode {
+	idx := 0
+	for _, root := range m.roots {
+		node, newIdx := m.findNodeAtIndex(root, idx, m.treeCursor)
+		if node != nil {
+			return node
+		}
+		idx = newIdx
+	}
+	return nil
+}
+
+// findNodeAtIndex recursively searches for the node at the target index
+func (m *model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx int) (*lib.TreeNode, int) {
+	if currentIdx == targetIdx {
+		return node, currentIdx + 1
+	}
+	idx := currentIdx + 1
+
+	if m.collapsed[node] {
+		return nil, idx
+	}
+
+	for _, child := range node.Children {
+		found, newIdx := m.findNodeAtIndex(child, idx, targetIdx)
+		if found != nil {
+			return found, newIdx
+		}
+		idx = newIdx
+	}
+	return nil, idx
 }

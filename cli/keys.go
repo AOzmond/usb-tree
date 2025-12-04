@@ -8,6 +8,8 @@ type keyMap struct {
 	Up          key.Binding
 	Down        key.Binding
 	Refresh     key.Binding
+	Collapse    key.Binding
+	Expand      key.Binding
 }
 
 var keys = keyMap{
@@ -31,14 +33,22 @@ var keys = keyMap{
 		key.WithKeys("r"),
 		key.WithHelp("r", "refresh"),
 	),
+	Collapse: key.NewBinding(
+		key.WithKeys("left"),
+		key.WithHelp("←", "collapse"),
+	),
+	Expand: key.NewBinding(
+		key.WithKeys("right"),
+		key.WithHelp("→", "expand"),
+	),
 }
 
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.Quit, k.SwitchFocus},
+		{k.Up, k.Down, k.Quit, k.SwitchFocus, k.Refresh, k.Collapse, k.Expand},
 	}
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Quit, k.SwitchFocus, k.Up, k.Down}
+	return []key.Binding{k.Quit, k.SwitchFocus, k.Up, k.Down, k.Refresh, k.Collapse, k.Expand}
 }
