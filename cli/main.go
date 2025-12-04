@@ -121,7 +121,7 @@ func (m model) View() string {
 	lastUpdatedString := "Last Updated: " + formatLastUpdated(m.lastUpdated)
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
 
-	helpView := m.help.View(keys)
+	helpView := m.help.FullHelpView(keys.FullHelp())
 	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
 	helpView = helpViewStyle.Render(helpView)
 
@@ -144,7 +144,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
 
-		helpHeight := lipgloss.Height(m.help.View(keys))
+		helpHeight := 2
 		tooltipHeight := lipgloss.Height(m.tooltip)
 		remainingHeight := m.windowHeight - helpHeight - tooltipHeight
 
