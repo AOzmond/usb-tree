@@ -88,12 +88,18 @@ func (m *model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 	nameStyle := lipgloss.NewStyle()
 	speedStyle := lipgloss.NewStyle()
 
-	if node.State == lib.StateAdded {
+	var statusPrefix string
+	switch node.State {
+	case lib.StateAdded:
+		statusPrefix = "+ "
 		nameStyle = nameStyle.Foreground(lipgloss.Color(green))
 		speedStyle = speedStyle.Foreground(lipgloss.Color(green))
-	} else if node.State == lib.StateRemoved {
+	case lib.StateRemoved:
+		statusPrefix = "- "
 		nameStyle = nameStyle.Foreground(lipgloss.Color(red))
 		speedStyle = speedStyle.Foreground(lipgloss.Color(red))
+	default:
+		statusPrefix = "· "
 	}
 
 	if isSelected {
@@ -101,7 +107,7 @@ func (m *model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 		speedStyle = speedStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
 	}
 
-	nameTree := tree.New().Root(nameStyle.Render(name)).Indenter(compactIndenter).Enumerator(compactEnumerator)
+	nameTree := tree.New().Root(nameStyle.Render(statusPrefix + name)).Indenter(compactIndenter).Enumerator(compactEnumerator)
 	speeds := []string{speedStyle.Render(speed)}
 
 	for _, child := range node.Children {
