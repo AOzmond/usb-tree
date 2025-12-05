@@ -220,3 +220,37 @@ func (m *Model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx in
 	}
 	return nil, idx
 }
+
+// getSelectedDeviceInfo returns formatted device info for the currently selected node
+func (m *model) getSelectedDeviceInfo() string {
+	node := m.getNodeAtCursor()
+	if node == nil {
+		return "No device selected"
+	}
+
+	busStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(plum))
+	deviceStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(gold))
+	vidStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(coralRed))
+	pidStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(paleGreen))
+	nameStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(gray))
+	linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(skyBlue))
+
+	busString := busStyle.Render("Bus: ", strconv.Itoa(node.Bus))
+	deviceString := deviceStyle.Render(" Device: ", strconv.Itoa(node.DevNum))
+	vidString := vidStyle.Render(" VID: ", node.VendorID)
+	pidString := pidStyle.Render(" PID: ", node.ProductID)
+
+	deviceInfo := lipgloss.JoinHorizontal(lipgloss.Left, busString, deviceString, vidString, pidString)
+
+	nameString := nameStyle.Render(node.Name)
+	linkString := linkStyle.Render(getDbAddress(node.VendorID, node.ProductID))
+
+	tooltipString := lipgloss.JoinVertical(lipgloss.Top, deviceInfo, nameString, linkString)
+
+	return tooltipString
+}
+
+func getDbAddress(vid string, pid string) string {
+	baseAddress := "https://the-sz.com/products/usbid/?v="
+	return baseAddress + vid + "&p=" + pid
+}
