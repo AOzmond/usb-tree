@@ -225,6 +225,7 @@ func (m *model) getSelectedDeviceInfo() string {
 	return tooltipString
 }
 
+// getDbAddress returns the USB-ID database link for the given VID and PID
 func getDbAddress(vid string, pid string) string {
 	baseAddress := "https://the-sz.com/products/usbid/?v="
 	return baseAddress + vid + "&p=" + pid
