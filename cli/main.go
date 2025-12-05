@@ -41,6 +41,13 @@ const (
 	green         = "#00FF00"
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
+
+	// Tooltip colors
+	skyBlue   = "#00BFFF"
+	gold      = "#FFD700"
+	coralRed  = "#FF6B6B"
+	paleGreen = "#98FB98"
+	plum      = "#DDA0DD"
 )
 
 const (
@@ -65,8 +72,6 @@ var (
 // ***** Placeholder content *****
 // TODO: replace with real data
 
-var placeHolderContent = "Bus 001 \nGaming Mouse \nhttps://www.google.com"
-
 var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 00:00:01 Device abc 100000 Gbps
 00:00:02 Device pqr 100000 Gbps
@@ -83,15 +88,13 @@ func initialModel() model {
 	logViewport.SetContent(placeholderLogContent)
 
 	m := model{
-		treeViewport:   treeViewport,
-		logViewport:    logViewport,
-		tooltipContent: placeHolderContent,
-		tooltip:        tooltipStyle.Render(placeHolderContent),
-		help:           help.New(),
-		focusedView:    treeView,
-		lastUpdated:    time.Now(),
-		updates:        updates,
-		collapsed:      make(map[*lib.TreeNode]bool),
+		treeViewport: treeViewport,
+		logViewport:  logViewport,
+		help:         help.New(),
+		focusedView:  treeView,
+		lastUpdated:  time.Now(),
+		updates:      updates,
+		collapsed:    make(map[*lib.TreeNode]bool),
 	}
 	return m
 }
@@ -110,6 +113,8 @@ func (m model) Init() tea.Cmd {
 func (m model) View() string {
 	var treeStyle, logStyle lipgloss.Style
 
+	fullWidthStyle := lipgloss.NewStyle().Width(m.windowWidth - borderSpacing)
+
 	if m.focusedView == treeView {
 		treeStyle = activeStyle
 		logStyle = inactiveStyle
@@ -117,6 +122,9 @@ func (m model) View() string {
 		treeStyle = inactiveStyle
 		logStyle = activeStyle
 	}
+
+	m.tooltipContent = fullWidthStyle.Render(m.getSelectedDeviceInfo())
+	m.tooltip = tooltipStyle.Render(m.tooltipContent)
 
 	lastUpdatedString := "Last Updated: " + formatLastUpdated(m.lastUpdated)
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
@@ -144,8 +152,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
 
-		helpHeight := 2
-		tooltipHeight := lipgloss.Height(m.tooltip)
+		helpHeight := 3
+		tooltipHeight := 5
 		remainingHeight := m.windowHeight - helpHeight - tooltipHeight
 
 		m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
