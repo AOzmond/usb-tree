@@ -230,3 +230,34 @@ func getDbAddress(vid string, pid string) string {
 	baseAddress := "https://the-sz.com/products/usbid/?v="
 	return baseAddress + vid + "&p=" + pid
 }
+
+func (m *model) formatLogContent() string {
+	var sb strings.Builder
+	for _, entry := range m.log {
+		sb.WriteString(m.formatLogEntry(entry))
+		sb.WriteByte('\n')
+	}
+	return sb.String()
+}
+
+func (m *model) formatLogEntry(log lib.Log) string {
+	addedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(green))
+	removedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(red))
+	stateStyle := lipgloss.NewStyle()
+	stateString := " "
+	if log.State == lib.StateRemoved {
+		stateStyle = removedStyle
+		stateString = "-"
+	} else if log.State == lib.StateAdded {
+		stateStyle = addedStyle
+		stateString = "+"
+	}
+	lhsString := stateStyle.Render(log.Time.Format("15:04:05") + " " + stateString + " " + log.Text + " ")
+	rhsString := formatSpeed(log.Speed)
+	paddingSize := m.windowWidth - lipgloss.Width(rhsString) - lipgloss.Width(lhsString) - borderSpacing
+	if paddingSize < 0 {
+		paddingSize = 0
+	}
+	padding := strings.Repeat(" ", paddingSize)
+	return lipgloss.JoinHorizontal(lipgloss.Left, lhsString, padding, rhsString)
+}

@@ -27,6 +27,8 @@ type model struct {
 	nodeCount      int
 	tooltip        string
 	tooltipContent string
+	log            []lib.Log
+	logContent     string
 	logViewport    viewport.Model
 	help           help.Model
 	lastUpdated    time.Time
@@ -69,23 +71,13 @@ var (
 			Border(lipgloss.RoundedBorder())
 )
 
-// ***** Placeholder content *****
-// TODO: replace with real data
-
-var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
-00:00:01 Device abc 100000 Gbps
-00:00:02 Device pqr 100000 Gbps
-00:00:03 Device xyz 100000 Gbps`
-
-// ***** End of placeholder content *****
-
 func initialModel() model {
 	updates := make(chan []lib.Device, 1)
 
 	treeViewport := viewport.New(0, 0)
 
 	logViewport := viewport.New(0, 0)
-	logViewport.SetContent(placeholderLogContent)
+	logViewport.SetContent("")
 
 	m := model{
 		treeViewport: treeViewport,
@@ -146,6 +138,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.roots = lib.BuildDeviceTree(msg)
 		m.refreshTreeContent()
 
+		m.log = lib.GetLog()
+		m.logContent = m.formatLogContent()
+		m.logViewport.SetContent(m.logContent)
+
 		m.treeViewport.SetContent(m.treeContent)
 		return m, waitForUpdate(m.updates)
 
@@ -163,6 +159,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
 		m.logViewport.Width = m.windowWidth - borderSpacing
+		m.logContent = m.formatLogContent()
+		m.logViewport.SetContent(m.logContent)
 
 		m.help.Width = m.windowWidth
 
