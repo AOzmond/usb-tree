@@ -25,10 +25,12 @@ type Model struct {
 	deviceTrees    []*tree.Tree
 	deviceSpeeds   []string
 	treeViewport   viewport.Model
-	logViewport    viewport.Model
 	treeCursor     int
 	nodeCount      int
 	selectedDevice *lib.TreeNode
+	log            []lib.Log
+	logContent     string
+	logViewport    viewport.Model
 	help           help.Model
 	focusedView    focusIndex
 	lastUpdated    time.Time
@@ -70,16 +72,6 @@ var (
 			Foreground(lipgloss.Color(white)).
 			Border(lipgloss.RoundedBorder())
 )
-
-// ***** Placeholder content *****
-// TODO: replace with real data
-
-var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
-00:00:01 Device abc 100000 Gbps
-00:00:02 Device pqr 100000 Gbps
-00:00:03 Device xyz 100000 Gbps`
-
-// ***** End of placeholder content *****
 
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
@@ -123,7 +115,6 @@ func (m Model) View() string {
 	m.treeViewport.SetContent(m.renderTree())
 	m.scrollToCursor()
 
-	m.logViewport.SetContent(placeholderLogContent)
 
 	fullWidthStyle := lipgloss.NewStyle().Width(m.windowWidth - borderSpacing)
 
@@ -149,6 +140,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []lib.Device:
 		m.roots = lib.BuildDeviceTree(msg)
 		m.refreshTreeModel()
+
+		m.log = lib.GetLog()
+		m.logContent = m.formatLogContent()
+		m.logViewport.SetContent(m.logContent)
+
 		m.treeViewport.SetContent(m.renderTree())
 		return m, waitForUpdate(m.updates)
 
