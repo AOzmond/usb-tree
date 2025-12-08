@@ -1,9 +1,6 @@
-package main
+package cli
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -14,7 +11,7 @@ import (
 
 type focusIndex int
 
-type model struct {
+type Model struct {
 	windowWidth    int
 	windowHeight   int
 	treeViewport   viewport.Model
@@ -78,18 +75,18 @@ var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 00:00:02 Device pqr 100000 Gbps
 00:00:03 Device xyz 100000 Gbps`
 
-var placeHolderUpdated = " Last updated: 00:00:00"
+var placeHolderUpdated = "Last updated: 00:00:00"
 
 // ***** End of placeholder content *****
 
-func initialModel() model {
+func InitialModel() Model {
 	treeViewport := viewport.New(0, 0)
 	treeViewport.SetContent(deviceTreePlaceHolder.String())
 
 	logViewport := viewport.New(0, 0)
 	logViewport.SetContent(placeholderLogContent)
 
-	m := model{
+	m := Model{
 		treeViewport:   treeViewport,
 		logViewport:    logViewport,
 		tooltipContent: placeHolderContent,
@@ -101,12 +98,14 @@ func initialModel() model {
 	return m
 }
 
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) View() string {
+func (m Model) View() string {
 	var treeStyle, logStyle lipgloss.Style
+
+	m.recalculateDimensions()
 
 	if m.focusedView == treeView {
 		treeStyle = activeStyle
@@ -127,26 +126,12 @@ func (m model) View() string {
 	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), m.tooltip, logStyle.Render(m.logViewport.View()), statusLine)
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
-
-		helpHeight := lipgloss.Height(m.help.View(keys))
-		tooltipHeight := lipgloss.Height(m.tooltip)
-		remainingHeight := m.windowHeight - helpHeight - tooltipHeight
-
-		m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
-		m.treeViewport.Width = m.windowWidth - borderSpacing
-
-		m.tooltip = tooltipStyle.Width(m.windowWidth - borderSpacing).Render(m.tooltipContent)
-
-		m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
-		m.logViewport.Width = m.windowWidth - borderSpacing
-
-		m.help.Width = m.windowWidth
 
 	case tea.KeyMsg:
 		switch {
@@ -172,10 +157,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func main() {
-	teaProgram := tea.NewProgram(initialModel(), tea.WithAltScreen())
-	if _, err := teaProgram.Run(); err != nil {
-		fmt.Printf("Error: %v", err)
-		os.Exit(1)
-	}
+func (m *Model) recalculateDimensions() {
+	helpHeight := lipgloss.Height(m.help.View(keys))
+	tooltipHeight := lipgloss.Height(m.tooltip)
+	remainingHeight := m.windowHeight - helpHeight - tooltipHeight
+
+	m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
+	m.treeViewport.Width = m.windowWidth - borderSpacing
+
+	m.tooltip = tooltipStyle.Width(m.windowWidth - borderSpacing).Render(m.tooltipContent)
+
+	m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
+	m.logViewport.Width = m.windowWidth - borderSpacing
+
+	m.help.Width = m.windowWidth
 }
