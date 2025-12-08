@@ -11,6 +11,7 @@ import (
 
 type focusIndex int
 
+// Model represents the primary structure containing application state and views.
 type Model struct {
 	windowWidth    int
 	windowHeight   int
@@ -79,16 +80,9 @@ var placeHolderUpdated = "Last updated: 00:00:00"
 
 // ***** End of placeholder content *****
 
+// InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
-	treeViewport := viewport.New(0, 0)
-	treeViewport.SetContent(deviceTreePlaceHolder.String())
-
-	logViewport := viewport.New(0, 0)
-	logViewport.SetContent(placeholderLogContent)
-
 	m := Model{
-		treeViewport:   treeViewport,
-		logViewport:    logViewport,
 		tooltipContent: placeHolderContent,
 		tooltip:        tooltipStyle.Render(placeHolderContent),
 		help:           help.New(),
@@ -98,14 +92,18 @@ func InitialModel() Model {
 	return m
 }
 
+// Init initializes the Model, preparing it to handle updates and rendering. It returns an optional initial command.
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+// View renders the current state of the Model, combining styled views for tree, log, tooltip, and status line.
 func (m Model) View() string {
 	var treeStyle, logStyle lipgloss.Style
 
 	m.recalculateDimensions()
+	m.treeViewport.SetContent(deviceTreePlaceHolder.String())
+	m.logViewport.SetContent(placeholderLogContent)
 
 	if m.focusedView == treeView {
 		treeStyle = activeStyle
@@ -126,6 +124,7 @@ func (m Model) View() string {
 	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), m.tooltip, logStyle.Render(m.logViewport.View()), statusLine)
 }
 
+// Update processes incoming messages, updates the model state, and returns the updated model and an optional command.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
