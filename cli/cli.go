@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"time"
+
+	"github.com/AOzmond/usb-tree/lib"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -17,11 +20,11 @@ type Model struct {
 	windowHeight   int
 	treeViewport   viewport.Model
 	logViewport    viewport.Model
-	tooltip        string
-	tooltipContent string
+	deviceTree     *tree.Tree
+	selectedDevice lib.Device
 	help           help.Model
 	focusedView    focusIndex
-	lastUpdated    string
+	lastUpdated    time.Time
 }
 
 const (
@@ -30,6 +33,7 @@ const (
 	hotPink       = "#ff028d"
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
+	tooltipHeight = 5
 )
 
 const (
@@ -69,25 +73,23 @@ var deviceTreePlaceHolder = tree.Root(".").
 			Child("Device 5      300Gbps"),
 	)
 
-var placeHolderContent = "Bus 001 \nGaming Mouse \nhttps://www.google.com"
+var placeHolderDevice = "Bus 001 \nGaming Mouse \nhttps://www.google.com"
 
 var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 00:00:01 Device abc 100000 Gbps
 00:00:02 Device pqr 100000 Gbps
 00:00:03 Device xyz 100000 Gbps`
 
-var placeHolderUpdated = "Last updated: 00:00:00"
-
 // ***** End of placeholder content *****
 
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
 	m := Model{
-		tooltipContent: placeHolderContent,
-		tooltip:        tooltipStyle.Render(placeHolderContent),
+		deviceTree:     deviceTreePlaceHolder,
+		selectedDevice: lib.Device{},
 		help:           help.New(),
 		focusedView:    treeView,
-		lastUpdated:    placeHolderUpdated,
+		lastUpdated:    time.Now(),
 	}
 	return m
 }
@@ -113,15 +115,18 @@ func (m Model) View() string {
 		logStyle = activeStyle
 	}
 
-	lastUpdatedWidth := lipgloss.Width(m.lastUpdated)
+	tooltip := tooltipStyle.Width(m.windowWidth - borderSpacing).Render(placeHolderDevice)
+
+	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
+	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
 
 	helpView := m.help.View(keys)
 	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
 	helpView = helpViewStyle.Render(helpView)
 
-	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, m.lastUpdated, helpView)
+	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpView)
 
-	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), m.tooltip, logStyle.Render(m.logViewport.View()), statusLine)
+	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), statusLine)
 }
 
 // Update processes incoming messages, updates the model state, and returns the updated model and an optional command.
@@ -158,13 +163,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Model) recalculateDimensions() {
 	helpHeight := lipgloss.Height(m.help.View(keys))
-	tooltipHeight := lipgloss.Height(m.tooltip)
 	remainingHeight := m.windowHeight - helpHeight - tooltipHeight
 
 	m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
 	m.treeViewport.Width = m.windowWidth - borderSpacing
-
-	m.tooltip = tooltipStyle.Width(m.windowWidth - borderSpacing).Render(m.tooltipContent)
 
 	m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
 	m.logViewport.Width = m.windowWidth - borderSpacing
