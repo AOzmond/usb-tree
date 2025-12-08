@@ -43,12 +43,12 @@ const (
 
 var (
 	activeStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
+			Border(lipgloss.DoubleBorder()).
 			BorderForeground(lipgloss.Color(hotPink))
 
 	inactiveStyle = lipgloss.NewStyle().
 			BorderForeground(lipgloss.Color(gray)).
-			Border(lipgloss.RoundedBorder())
+			Border(lipgloss.DoubleBorder())
 
 	tooltipStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color(white)).
