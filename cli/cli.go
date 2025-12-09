@@ -2,7 +2,6 @@ package cli
 
 import (
 	"time"
-	"time"
 
 	"github.com/AOzmond/usb-tree/lib"
 	"github.com/charmbracelet/bubbles/help"
@@ -10,24 +9,23 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/tree"
 )
 
 type focusIndex int
 
 // Model represents the primary structure containing application state and views.
 type Model struct {
-	windowWidth    int
-	windowHeight   int
-	updates        chan []lib.Device
-	roots          []*lib.TreeNode
-	collapsed      map[*lib.TreeNode]bool // tracks which nodes are collapsed
-	treeViewport   viewport.Model
-	treeContent    string
-	treeCursor     int
-	nodeCount      int
-	logViewport    viewport.Model
-	deviceTree     *tree.Tree
+	windowWidth  int
+	windowHeight int
+	updates      chan []lib.Device
+	roots        []*lib.TreeNode
+	collapsed    map[*lib.TreeNode]bool // tracks which nodes are collapsed
+	treeViewport viewport.Model
+	treeContent  string
+	treeCursor   int
+	nodeCount    int
+	logViewport  viewport.Model
+	// deviceTree     *tree.Tree
 	selectedDevice lib.Device
 	help           help.Model
 	lastUpdated    time.Time
@@ -43,6 +41,7 @@ const (
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
 	tooltipHeight = 5
+	helpHeight    = 2
 )
 
 const (
@@ -78,7 +77,6 @@ var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
-
 	updates := make(chan []lib.Device, 1)
 	m := Model{
 		selectedDevice: lib.Device{},
@@ -104,7 +102,6 @@ func (m Model) View() string {
 	var treeStyle, logStyle lipgloss.Style
 
 	m.recalculateDimensions()
-	m.treeViewport.SetContent(deviceTreePlaceHolder.String())
 	m.logViewport.SetContent(placeholderLogContent)
 
 	if m.focusedView == treeView {
@@ -208,7 +205,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) recalculateDimensions() {
-	helpHeight := lipgloss.Height(m.help.View(keys))
 	remainingHeight := m.windowHeight - helpHeight - tooltipHeight
 
 	m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing

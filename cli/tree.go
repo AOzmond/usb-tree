@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 }
 
 // refreshTreeContent rebuilds the visual tree based on roots and cursor
-func (m *model) refreshTreeContent() {
+func (m *Model) refreshTreeContent() {
 	var deviceTreeSb strings.Builder
 	var speeds []string
 	idx := 0
@@ -67,7 +67,7 @@ func (m *model) refreshTreeContent() {
 }
 
 // updateViewportForCursor ensures the cursor is visible in the viewport
-func (m *model) updateViewportForCursor() {
+func (m *Model) updateViewportForCursor() {
 	headerHeight := 1
 	visualCursor := m.treeCursor + headerHeight
 
@@ -80,7 +80,7 @@ func (m *model) updateViewportForCursor() {
 
 // buildTreeFromRoot iterates over the tree to build the view and track the cursor
 // Returns a name tree and a slice of speed strings, as well as the next index to use
-func (m *model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tree, []string, int) {
+func (m *Model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tree, []string, int) {
 	isSelected := currentIdx == m.treeCursor
 	idx := currentIdx + 1
 
@@ -163,7 +163,7 @@ func formatSpeed(speed string) string {
 }
 
 // getNodeAtCursor returns the TreeNode at the current cursor position
-func (m *model) getNodeAtCursor() *lib.TreeNode {
+func (m *Model) getNodeAtCursor() *lib.TreeNode {
 	idx := 0
 	for _, root := range m.roots {
 		node, newIdx := m.findNodeAtIndex(root, idx, m.treeCursor)
@@ -176,7 +176,7 @@ func (m *model) getNodeAtCursor() *lib.TreeNode {
 }
 
 // findNodeAtIndex recursively searches for the node at the target index
-func (m *model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx int) (*lib.TreeNode, int) {
+func (m *Model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx int) (*lib.TreeNode, int) {
 	if currentIdx == targetIdx {
 		return node, currentIdx + 1
 	}
