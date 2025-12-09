@@ -111,12 +111,9 @@ func (m Model) View() string {
 	m.statusHeight = lipgloss.Height(statusLine)
 
 	m.recalculateDimensions()
+
 	m.treeViewport.SetContent(m.refreshTreeContent())
-	if m.treeCursor >= m.treeViewport.Height {
-		m.treeViewport.SetYOffset(m.treeCursor)
-	} else if m.treeCursor < m.treeViewport.YOffset {
-		m.treeViewport.SetYOffset(m.treeCursor)
-	}
+	m.scrollToCursor()
 
 	m.logViewport.SetContent(placeholderLogContent)
 

@@ -151,6 +151,34 @@ func formatSpeed(speed string) string {
 	return fmt.Sprintf("%8s", fmt.Sprintf("%g Mbps", val))
 }
 
+// scrollToCursor adjusts the tree viewport's Y offset to keep the cursor centered when possible.
+func (m *Model) scrollToCursor() {
+	viewportHeight := m.treeViewport.Height
+	// Guard against uninitialized or invalid viewport dimensions
+	if viewportHeight <= 0 || m.nodeCount <= 0 {
+		return
+	}
+
+	// Calculate the ideal offset to center the cursor
+	idealOffset := m.treeCursor - viewportHeight/2
+
+	// Clamp to valid range: can't scroll above 0
+	if idealOffset < 0 {
+		idealOffset = 0
+	}
+
+	// Can't scroll past the end of content
+	maxOffset := m.nodeCount - viewportHeight
+	if maxOffset < 0 {
+		maxOffset = 0
+	}
+	if idealOffset > maxOffset {
+		idealOffset = maxOffset
+	}
+
+	m.treeViewport.SetYOffset(idealOffset)
+}
+
 // getNodeAtCursor returns the TreeNode at the current cursor position
 func (m *Model) getNodeAtCursor() *lib.TreeNode {
 	idx := 0
