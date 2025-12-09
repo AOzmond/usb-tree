@@ -35,7 +35,7 @@ func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 }
 
 // refreshTreeContent rebuilds the visual tree based on roots and cursor
-func (m *Model) refreshTreeContent() {
+func (m *Model) refreshTreeContent() string {
 	var deviceTreeSb strings.Builder
 	var speeds []string
 	idx := 0
@@ -63,19 +63,7 @@ func (m *Model) refreshTreeContent() {
 
 	gap := strings.Repeat(" ", gapWidth)
 
-	m.treeContent = lipgloss.JoinHorizontal(lipgloss.Top, nameTreeStr, gap, speedStr)
-}
-
-// updateViewportForCursor ensures the cursor is visible in the viewport
-func (m *Model) updateViewportForCursor() {
-	headerHeight := 1
-	visualCursor := m.treeCursor + headerHeight
-
-	if visualCursor < m.treeViewport.YOffset {
-		m.treeViewport.SetYOffset(visualCursor)
-	} else if visualCursor >= m.treeViewport.YOffset+m.treeViewport.Height {
-		m.treeViewport.SetYOffset(visualCursor - m.treeViewport.Height + 1)
-	}
+	return lipgloss.JoinHorizontal(lipgloss.Top, nameTreeStr, gap, speedStr)
 }
 
 // buildTreeFromRoot iterates over the tree to build the view and track the cursor
@@ -117,6 +105,7 @@ func (m *Model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 	}
 
 	if isSelected {
+		m.selectedDevice = node.Device
 		nameStyle = nameStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
 		speedStyle = speedStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
 	}

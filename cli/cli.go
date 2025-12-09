@@ -15,18 +15,17 @@ type focusIndex int
 
 // Model represents the primary structure containing application state and views.
 type Model struct {
-	windowWidth  int
-	windowHeight int
-	updates      chan []lib.Device
-	roots        []*lib.TreeNode
-	collapsed    map[*lib.TreeNode]bool // tracks which nodes are collapsed
-	treeViewport viewport.Model
-	treeContent  string
-	treeCursor   int
-	nodeCount    int
-	logViewport  viewport.Model
-	// deviceTree     *tree.Tree
+	windowWidth    int
+	windowHeight   int
+	statusHeight   int
+	updates        chan []lib.Device
+	roots          []*lib.TreeNode
+	collapsed      map[*lib.TreeNode]bool // tracks which nodes are collapsed
+	treeViewport   viewport.Model
+	treeCursor     int
+	nodeCount      int
 	selectedDevice lib.Device
+	logViewport    viewport.Model
 	help           help.Model
 	lastUpdated    time.Time
 	focusedView    focusIndex
@@ -41,7 +40,6 @@ const (
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
 	tooltipHeight = 5
-	helpHeight    = 2
 )
 
 const (
@@ -83,6 +81,7 @@ func InitialModel() Model {
 		help:           help.New(),
 		focusedView:    treeView,
 		lastUpdated:    time.Now(),
+		treeCursor:     0,
 		updates:        updates,
 		collapsed:      make(map[*lib.TreeNode]bool),
 	}
@@ -101,7 +100,24 @@ func (m Model) Init() tea.Cmd {
 func (m Model) View() string {
 	var treeStyle, logStyle lipgloss.Style
 
+	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
+	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
+
+	helpView := m.help.FullHelpView(keys.FullHelp())
+	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
+	helpView = helpViewStyle.Render(helpView)
+
+	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpView)
+	m.statusHeight = lipgloss.Height(statusLine)
+
 	m.recalculateDimensions()
+	m.treeViewport.SetContent(m.refreshTreeContent())
+	if m.treeCursor >= m.treeViewport.Height {
+		m.treeViewport.SetYOffset(m.treeCursor)
+	} else if m.treeCursor < m.treeViewport.YOffset {
+		m.treeViewport.SetYOffset(m.treeCursor)
+	}
+
 	m.logViewport.SetContent(placeholderLogContent)
 
 	if m.focusedView == treeView {
@@ -114,15 +130,6 @@ func (m Model) View() string {
 
 	tooltip := tooltipStyle.Width(m.windowWidth - borderSpacing).Render(placeHolderDevice)
 
-	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
-	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
-
-	helpView := m.help.FullHelpView(keys.FullHelp())
-	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
-	helpView = helpViewStyle.Render(helpView)
-
-	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpView)
-
 	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), statusLine)
 }
 
@@ -133,9 +140,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case []lib.Device:
 		m.roots = lib.BuildDeviceTree(msg)
-		m.refreshTreeContent()
-
-		m.treeViewport.SetContent(m.treeContent)
+		m.treeViewport.SetContent(m.refreshTreeContent())
 		return m, waitForUpdate(m.updates)
 
 	case tea.WindowSizeMsg:
@@ -157,25 +162,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Up):
 			if m.focusedView == treeView && m.treeCursor > 0 {
 				m.treeCursor--
-				m.refreshTreeContent()
-				m.updateViewportForCursor()
-				m.treeViewport.SetContent(m.treeContent)
+				return m, nil
 			}
 
 		case key.Matches(msg, keys.Down):
 			if m.focusedView == treeView && m.treeCursor < m.nodeCount-1 {
 				m.treeCursor++
-				m.refreshTreeContent()
-				m.updateViewportForCursor()
-				m.treeViewport.SetContent(m.treeContent)
+				return m, nil
 			}
 
 		case key.Matches(msg, keys.Collapse):
 			if m.focusedView == treeView {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					m.collapsed[node] = true
-					m.refreshTreeContent()
-					m.treeViewport.SetContent(m.treeContent)
 				}
 			}
 
@@ -183,8 +182,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.focusedView == treeView {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					delete(m.collapsed, node)
-					m.refreshTreeContent()
-					m.treeViewport.SetContent(m.treeContent)
 				}
 			}
 
@@ -205,7 +202,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) recalculateDimensions() {
-	remainingHeight := m.windowHeight - helpHeight - tooltipHeight
+	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
 
 	m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
 	m.treeViewport.Width = m.windowWidth - borderSpacing
