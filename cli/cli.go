@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/tree"
 )
 
 type focusIndex int
@@ -21,6 +22,8 @@ type Model struct {
 	updates        chan []lib.Device
 	roots          []*lib.TreeNode
 	collapsed      map[*lib.TreeNode]bool // tracks which nodes are collapsed
+	deviceTrees    []*tree.Tree
+	deviceSpeeds   []string
 	treeViewport   viewport.Model
 	treeCursor     int
 	nodeCount      int
@@ -112,7 +115,7 @@ func (m Model) View() string {
 
 	m.recalculateDimensions()
 
-	m.treeViewport.SetContent(m.refreshTreeContent())
+	m.treeViewport.SetContent(m.renderTree())
 	m.scrollToCursor()
 
 	m.logViewport.SetContent(placeholderLogContent)
@@ -137,7 +140,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case []lib.Device:
 		m.roots = lib.BuildDeviceTree(msg)
-		m.treeViewport.SetContent(m.refreshTreeContent())
+		m.refreshTreeModel()
+		m.treeViewport.SetContent(m.renderTree())
 		return m, waitForUpdate(m.updates)
 
 	case tea.WindowSizeMsg:
@@ -159,28 +163,34 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Up):
 			if m.focusedView == treeView && m.treeCursor > 0 {
 				m.treeCursor--
+				m.refreshTreeModel()
 				return m, nil
 			}
 
 		case key.Matches(msg, keys.Down):
-			if m.focusedView == treeView && m.treeCursor < m.nodeCount-1 {
+			if m.focusedView == treeView && m.treeCursor < (m.nodeCount-1) {
 				m.treeCursor++
-				return m, nil
+				m.refreshTreeModel()
 			}
+			return m, nil
 
 		case key.Matches(msg, keys.Collapse):
 			if m.focusedView == treeView {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					m.collapsed[node] = true
+					m.refreshTreeModel()
 				}
 			}
+			return m, nil
 
 		case key.Matches(msg, keys.Expand):
 			if m.focusedView == treeView {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					delete(m.collapsed, node)
+					m.refreshTreeModel()
 				}
 			}
+			return m, nil
 
 		case key.Matches(msg, keys.Refresh):
 			lastUpdate, newDevices := lib.Refresh()
@@ -189,11 +199,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if m.focusedView == treeView {
-		m.treeViewport, cmd = m.treeViewport.Update(msg)
-	} else if m.focusedView == logView {
-		m.logViewport, cmd = m.logViewport.Update(msg)
-	}
+	//if m.focusedView == treeView {
+	//	m.treeViewport, cmd = m.treeViewport.Update(msg)
+	//} else if m.focusedView == logView {
+	//	m.logViewport, cmd = m.logViewport.Update(msg)
+	//}
 
 	return m, cmd
 }
@@ -206,6 +216,4 @@ func (m *Model) recalculateDimensions() {
 
 	m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
 	m.logViewport.Width = m.windowWidth - borderSpacing
-
-	m.help.Width = m.windowWidth
 }

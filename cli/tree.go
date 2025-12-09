@@ -34,24 +34,32 @@ func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 	}
 }
 
-// refreshTreeContent rebuilds the visual tree based on roots and cursor
-func (m *Model) refreshTreeContent() string {
-	var deviceTreeSb strings.Builder
-	var speeds []string
+// refreshTreeModel rebuilds the tree model based on roots and cursor
+func (m *Model) refreshTreeModel() {
 	idx := 0
+	m.deviceTrees = []*tree.Tree{}
+	m.deviceSpeeds = []string{}
 	for _, root := range m.roots {
 		var deviceTree *tree.Tree
 		var rootSpeeds []string
 		deviceTree, rootSpeeds, idx = m.buildTreeFromRoot(root, idx)
 
-		deviceTreeSb.WriteString(deviceTree.String())
-		deviceTreeSb.WriteByte('\n')
-		speeds = append(speeds, rootSpeeds...)
+		m.deviceTrees = append(m.deviceTrees, deviceTree)
+		m.deviceSpeeds = append(m.deviceSpeeds, rootSpeeds...)
 	}
 	m.nodeCount = idx
+}
 
+// renderTree renders the tree content to a string
+func (m *Model) renderTree() string {
+	var deviceTreeSb strings.Builder
+
+	for _, deviceTree := range m.deviceTrees {
+		deviceTreeSb.WriteString(deviceTree.String())
+		deviceTreeSb.WriteByte('\n')
+	}
 	nameTreeStr := deviceTreeSb.String()
-	speedStr := strings.Join(speeds, "\n")
+	speedStr := strings.Join(m.deviceSpeeds, "\n")
 
 	nameTreeWidth := lipgloss.Width(nameTreeStr)
 	speedStrWidth := lipgloss.Width(speedStr)
