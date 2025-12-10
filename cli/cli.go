@@ -37,8 +37,8 @@ const (
 )
 
 const (
-	treeView focusIndex = 0
-	logView  focusIndex = 1
+	treeView focusIndex = iota
+	logView
 )
 
 var (
