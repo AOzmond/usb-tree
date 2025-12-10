@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/tree"
+	"github.com/go-playground/locales"
 )
 
 type focusIndex int
@@ -25,13 +26,14 @@ type Model struct {
 	deviceTrees    []*tree.Tree
 	deviceSpeeds   []string
 	treeViewport   viewport.Model
+	logViewport    viewport.Model
 	treeCursor     int
 	nodeCount      int
 	selectedDevice lib.Device
-	logViewport    viewport.Model
 	help           help.Model
-	lastUpdated    time.Time
 	focusedView    focusIndex
+	lastUpdated    time.Time
+	translator     locales.Translator
 }
 
 const (
@@ -46,8 +48,8 @@ const (
 )
 
 const (
-	treeView focusIndex = 0
-	logView  focusIndex = 1
+	treeView focusIndex = iota
+	logView
 )
 
 var (
@@ -87,6 +89,7 @@ func InitialModel() Model {
 		treeCursor:     0,
 		updates:        updates,
 		collapsed:      make(map[*lib.TreeNode]bool),
+		translator:     getSystemLocale(),
 	}
 	return m
 }
@@ -103,7 +106,7 @@ func (m Model) Init() tea.Cmd {
 func (m Model) View() string {
 	var treeStyle, logStyle lipgloss.Style
 
-	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
+	lastUpdatedString := "Last Updated: " + m.translator.FmtTimeMedium(m.lastUpdated)
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
 
 	helpView := m.help.FullHelpView(keys.FullHelp())
