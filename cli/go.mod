@@ -3,9 +3,12 @@ module github.com/AOzmond/usb-tree/cli
 go 1.25.0
 
 require (
+	github.com/AOzmond/usb-tree/lib v0.0.0-20251119184339-bef97e103b5f
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/go-playground/locales v0.14.1
+
 )
 
 require (
@@ -15,6 +18,9 @@ require (
 	github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
+	github.com/google/gousb v1.1.3 // indirect
+	github.com/jkeiser/iter v0.0.0-20200628201005-c8aa0ae784d1 // indirect
+	github.com/jochenvg/go-udev v0.0.0-20240801134859-b65ed646224b // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
