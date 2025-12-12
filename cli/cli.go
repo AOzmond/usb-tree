@@ -145,6 +145,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.logViewport.SetContent(m.logContent)
 
 		m.treeViewport.SetContent(m.renderTree())
+		m.lastUpdated = time.Now()
 		return m, waitForUpdate(m.updates)
 
 	case tea.WindowSizeMsg:
