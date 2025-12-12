@@ -115,7 +115,6 @@ func (m Model) View() string {
 	m.treeViewport.SetContent(m.renderTree())
 	m.scrollToCursor()
 
-
 	fullWidthStyle := lipgloss.NewStyle().Width(m.windowWidth - borderSpacing)
 
 	if m.focusedView == treeView {

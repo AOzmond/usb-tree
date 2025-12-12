@@ -222,7 +222,7 @@ func getDbAddress(vid string, pid string) string {
 	return baseAddress + vid + "&p=" + pid
 }
 
-func (m *model) formatLogContent() string {
+func (m *Model) formatLogContent() string {
 	var sb strings.Builder
 	for _, entry := range m.log {
 		sb.WriteString(m.formatLogEntry(entry))
@@ -231,7 +231,7 @@ func (m *model) formatLogContent() string {
 	return sb.String()
 }
 
-func (m *model) formatLogEntry(log lib.Log) string {
+func (m *Model) formatLogEntry(log lib.Log) string {
 	addedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(green))
 	removedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(red))
 	stateStyle := lipgloss.NewStyle()
