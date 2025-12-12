@@ -42,9 +42,7 @@ const (
 	green         = "#00FF00"
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
-<<<<<<< HEAD:cli/cli.go
 	tooltipHeight = 5
-=======
 
 	// Tooltip colors
 	skyBlue   = "#00BFFF"
@@ -52,7 +50,6 @@ const (
 	coralRed  = "#FF6B6B"
 	paleGreen = "#98FB98"
 	plum      = "#DDA0DD"
->>>>>>> 412d94b (Add tooltip support with dynamic device information and improve styling adjustments):cli/main.go
 )
 
 const (
@@ -77,11 +74,6 @@ var (
 // ***** Placeholder content *****
 // TODO: replace with real data
 
-<<<<<<< HEAD:cli/cli.go
-var placeHolderDevice = "Bus 001 \nGaming Mouse \nhttps://www.google.com"
-
-=======
->>>>>>> 412d94b (Add tooltip support with dynamic device information and improve styling adjustments):cli/main.go
 var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 00:00:01 Device abc 100000 Gbps
 00:00:02 Device pqr 100000 Gbps
@@ -92,7 +84,7 @@ var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
 	updates := make(chan []lib.Device, 1)
-<<<<<<< HEAD:cli/cli.go
+
 	m := Model{
 		selectedDevice: lib.Device{},
 		help:           help.New(),
@@ -101,22 +93,6 @@ func InitialModel() Model {
 		treeCursor:     0,
 		updates:        updates,
 		collapsed:      make(map[*lib.TreeNode]bool),
-=======
-
-	treeViewport := viewport.New(0, 0)
-
-	logViewport := viewport.New(0, 0)
-	logViewport.SetContent(placeholderLogContent)
-
-	m := model{
-		treeViewport: treeViewport,
-		logViewport:  logViewport,
-		help:         help.New(),
-		focusedView:  treeView,
-		lastUpdated:  time.Now(),
-		updates:      updates,
-		collapsed:    make(map[*lib.TreeNode]bool),
->>>>>>> 412d94b (Add tooltip support with dynamic device information and improve styling adjustments):cli/main.go
 	}
 	return m
 }
@@ -133,7 +109,6 @@ func (m Model) Init() tea.Cmd {
 func (m Model) View() string {
 	var treeStyle, logStyle lipgloss.Style
 
-<<<<<<< HEAD:cli/cli.go
 	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
 
@@ -150,9 +125,8 @@ func (m Model) View() string {
 	m.scrollToCursor()
 
 	m.logViewport.SetContent(placeholderLogContent)
-=======
+
 	fullWidthStyle := lipgloss.NewStyle().Width(m.windowWidth - borderSpacing)
->>>>>>> 412d94b (Add tooltip support with dynamic device information and improve styling adjustments):cli/main.go
 
 	if m.focusedView == treeView {
 		treeStyle = activeStyle
@@ -162,15 +136,8 @@ func (m Model) View() string {
 		logStyle = activeStyle
 	}
 
-<<<<<<< HEAD:cli/cli.go
-	tooltip := tooltipStyle.Width(m.windowWidth - borderSpacing).Render(placeHolderDevice)
-=======
-	m.tooltipContent = fullWidthStyle.Render(m.getSelectedDeviceInfo())
-	m.tooltip = tooltipStyle.Render(m.tooltipContent)
-
-	lastUpdatedString := "Last Updated: " + formatLastUpdated(m.lastUpdated)
-	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
->>>>>>> 412d94b (Add tooltip support with dynamic device information and improve styling adjustments):cli/main.go
+	tooltipContent := fullWidthStyle.Render(m.getSelectedDeviceInfo())
+	tooltip := tooltipStyle.Render(tooltipContent)
 
 	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), statusLine)
 }
@@ -189,27 +156,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
 
-<<<<<<< HEAD:cli/cli.go
-=======
-		helpHeight := 3
-		tooltipHeight := 5
-		remainingHeight := m.windowHeight - helpHeight - tooltipHeight
-
-		m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
-		m.treeViewport.Width = m.windowWidth - borderSpacing
-
-		m.tooltip = tooltipStyle.Width(m.windowWidth - borderSpacing).Render(m.tooltipContent)
-
-		m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
-		m.logViewport.Width = m.windowWidth - borderSpacing
-
-		m.help.Width = m.windowWidth
-
-		m.refreshTreeContent()
-
-		m.treeViewport.SetContent(m.treeContent)
-
->>>>>>> 412d94b (Add tooltip support with dynamic device information and improve styling adjustments):cli/main.go
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, keys.Quit):
@@ -261,12 +207,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.lastUpdated = lastUpdate
 		}
 	}
-
-	//if m.focusedView == treeView {
-	//	m.treeViewport, cmd = m.treeViewport.Update(msg)
-	//} else if m.focusedView == logView {
-	//	m.logViewport, cmd = m.logViewport.Update(msg)
-	//}
 
 	return m, cmd
 }

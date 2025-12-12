@@ -222,7 +222,7 @@ func (m *Model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx in
 }
 
 // getSelectedDeviceInfo returns formatted device info for the currently selected node
-func (m *model) getSelectedDeviceInfo() string {
+func (m *Model) getSelectedDeviceInfo() string {
 	node := m.getNodeAtCursor()
 	if node == nil {
 		return "No device selected"
