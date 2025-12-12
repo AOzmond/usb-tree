@@ -28,7 +28,7 @@ type Model struct {
 	logViewport    viewport.Model
 	treeCursor     int
 	nodeCount      int
-	selectedDevice lib.Device
+	selectedDevice *lib.TreeNode
 	help           help.Model
 	focusedView    focusIndex
 	lastUpdated    time.Time
@@ -86,13 +86,12 @@ func InitialModel() Model {
 	updates := make(chan []lib.Device, 1)
 
 	m := Model{
-		selectedDevice: lib.Device{},
-		help:           help.New(),
-		focusedView:    treeView,
-		lastUpdated:    time.Now(),
-		treeCursor:     0,
-		updates:        updates,
-		collapsed:      make(map[*lib.TreeNode]bool),
+		help:        help.New(),
+		focusedView: treeView,
+		lastUpdated: time.Now(),
+		treeCursor:  0,
+		updates:     updates,
+		collapsed:   make(map[*lib.TreeNode]bool),
 	}
 	return m
 }
@@ -185,7 +184,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, keys.Collapse):
 			if m.focusedView == treeView {
-				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
+				if node := m.selectedDevice; node != nil && len(node.Children) > 0 {
 					m.collapsed[node] = true
 					m.refreshTreeModel()
 				}
@@ -194,7 +193,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, keys.Expand):
 			if m.focusedView == treeView {
-				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
+				if node := m.selectedDevice; node != nil && len(node.Children) > 0 {
 					delete(m.collapsed, node)
 					m.refreshTreeModel()
 				}

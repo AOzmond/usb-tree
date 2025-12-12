@@ -113,7 +113,7 @@ func (m *Model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 	}
 
 	if isSelected {
-		m.selectedDevice = node.Device
+		m.selectedDevice = node
 		nameStyle = nameStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
 		speedStyle = speedStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
 	}
@@ -187,46 +187,12 @@ func (m *Model) scrollToCursor() {
 	m.treeViewport.SetYOffset(idealOffset)
 }
 
-// getNodeAtCursor returns the TreeNode at the current cursor position
-func (m *Model) getNodeAtCursor() *lib.TreeNode {
-	idx := 0
-	for _, root := range m.roots {
-		node, newIdx := m.findNodeAtIndex(root, idx, m.treeCursor)
-		if node != nil {
-			return node
-		}
-		idx = newIdx
-	}
-	return nil
-}
-
-// findNodeAtIndex recursively searches for the node at the target index
-func (m *Model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx int) (*lib.TreeNode, int) {
-	if currentIdx == targetIdx {
-		return node, currentIdx + 1
-	}
-	idx := currentIdx + 1
-
-	if m.collapsed[node] {
-		return nil, idx
-	}
-
-	for _, child := range node.Children {
-		found, newIdx := m.findNodeAtIndex(child, idx, targetIdx)
-		if found != nil {
-			return found, newIdx
-		}
-		idx = newIdx
-	}
-	return nil, idx
-}
-
 // getSelectedDeviceInfo returns formatted device info for the currently selected node
 func (m *Model) getSelectedDeviceInfo() string {
-	node := m.getNodeAtCursor()
-	if node == nil {
-		return "No device selected"
+	if m.selectedDevice == nil {
+		return ""
 	}
+	node := m.selectedDevice.Device
 
 	busStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(plum))
 	deviceStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(gold))
