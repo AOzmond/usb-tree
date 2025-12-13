@@ -143,6 +143,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.log = lib.GetLog()
 		m.logContent = m.formatLogContent()
 		m.logViewport.SetContent(m.logContent)
+		m.clampLogViewport()
 
 		m.treeViewport.SetContent(m.renderTree())
 		return m, waitForUpdate(m.updates)
@@ -167,15 +168,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.focusedView == treeView && m.treeCursor > 0 {
 				m.treeCursor--
 				m.refreshTreeModel()
-				return m, nil
+			} else {
+				m.logViewport, cmd = m.logViewport.Update(msg)
+				m.clampLogViewport()
 			}
+			return m, cmd
 
 		case key.Matches(msg, keys.Down):
-			if m.focusedView == treeView && m.treeCursor < (m.nodeCount-1) {
-				m.treeCursor++
-				m.refreshTreeModel()
+			if m.focusedView == treeView {
+				if m.treeCursor < (m.nodeCount - 1) {
+					m.treeCursor++
+					m.refreshTreeModel()
+				}
+			} else {
+				m.logViewport, cmd = m.logViewport.Update(msg)
+				m.clampLogViewport()
 			}
-			return m, nil
+			return m, cmd
 
 		case key.Matches(msg, keys.Collapse):
 			if m.focusedView == treeView {
@@ -205,6 +214,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// clampLogViewport prevents the log viewport from scrolling past the available content.
+func (m *Model) clampLogViewport() {
+	if m.logViewport.Height <= 0 {
+		return
+	}
+
+	contentHeight := lipgloss.Height(m.logContent)
+	maxYOffset := contentHeight - m.logViewport.Height
+	if maxYOffset < 0 {
+		maxYOffset = 0
+	}
+	if m.logViewport.YOffset > maxYOffset {
+		m.logViewport.SetYOffset(maxYOffset)
+		return
+	}
+}
+
 func (m *Model) recalculateDimensions() {
 	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
 
@@ -213,4 +239,6 @@ func (m *Model) recalculateDimensions() {
 
 	m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
 	m.logViewport.Width = m.windowWidth - borderSpacing
+
+	m.clampLogViewport()
 }
