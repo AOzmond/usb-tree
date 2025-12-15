@@ -138,7 +138,7 @@ func (m *Model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 	return nameTree, speeds, idx
 }
 
-// formatSpeed formats the speed string to have a uniform size, and units.
+// formatSpeed formats the speed string to have a uniform size and units.
 func formatSpeed(speed string) string {
 	if speed == "" {
 		return ""
