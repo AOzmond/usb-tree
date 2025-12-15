@@ -199,12 +199,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	//if m.focusedView == treeView {
-	//	m.treeViewport, cmd = m.treeViewport.Update(msg)
-	//} else if m.focusedView == logView {
-	//	m.logViewport, cmd = m.logViewport.Update(msg)
-	//}
-
 	return m, cmd
 }
 
