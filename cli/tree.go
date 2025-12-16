@@ -159,7 +159,7 @@ func formatSpeed(speed string) string {
 	return fmt.Sprintf("%8s", fmt.Sprintf("%g Mbps", val))
 }
 
-// scrollToCursor adjusts the tree viewport's Y offset to keep the cursor centered when possible.
+// scrollToCursor adjusts the tree viewport's Y offset to keep the cursor centered when possible and stops scrolling past the content.
 func (m *Model) scrollToCursor() {
 	viewportHeight := m.treeViewport.Height
 	// Guard against uninitialized or invalid viewport dimensions
