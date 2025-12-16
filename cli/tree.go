@@ -39,6 +39,7 @@ func (m *Model) refreshTreeModel() {
 	idx := 0
 	m.deviceTrees = []*tree.Tree{}
 	m.deviceSpeeds = []string{}
+
 	for _, root := range m.roots {
 		var deviceTree *tree.Tree
 		var rootSpeeds []string
@@ -58,6 +59,7 @@ func (m *Model) renderTree() string {
 		deviceTreeSb.WriteString(deviceTree.String())
 		deviceTreeSb.WriteByte('\n')
 	}
+
 	nameTreeStr := deviceTreeSb.String()
 	speedStr := strings.Join(m.deviceSpeeds, "\n")
 
@@ -130,6 +132,7 @@ func (m *Model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 		for _, child := range node.Children {
 			var childDeviceTree *tree.Tree
 			var childSpeeds []string
+
 			childDeviceTree, childSpeeds, idx = m.buildTreeFromRoot(child, idx)
 			nameTree.Child(childDeviceTree)
 			speeds = append(speeds, childSpeeds...)
