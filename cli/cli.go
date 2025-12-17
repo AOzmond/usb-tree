@@ -111,9 +111,8 @@ func (m Model) View() string {
 	helpView = helpViewStyle.Render(helpView)
 
 	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpView)
-	m.statusHeight = lipgloss.Height(statusLine)
 
-	m.recalculateDimensions()
+	m.recalculateDimensions(statusLine)
 
 	m.treeViewport.SetContent(m.renderTree())
 	m.scrollToCursor()
@@ -202,7 +201,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *Model) recalculateDimensions() {
+func (m *Model) recalculateDimensions(statusLine string) {
+	m.statusHeight = lipgloss.Height(statusLine)
 	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
 
 	m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing

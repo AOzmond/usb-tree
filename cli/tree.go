@@ -43,11 +43,12 @@ func (m *Model) refreshTreeModel() {
 	for _, root := range m.roots {
 		var deviceTree *tree.Tree
 		var rootSpeeds []string
-		deviceTree, rootSpeeds, idx = m.buildTreeFromRoot(root, idx)
+		deviceTree, rootSpeeds, idx = m.buildTreeFromNode(root, idx)
 
 		m.deviceTrees = append(m.deviceTrees, deviceTree)
 		m.deviceSpeeds = append(m.deviceSpeeds, rootSpeeds...)
 	}
+
 	m.nodeCount = idx
 }
 
@@ -76,13 +77,13 @@ func (m *Model) renderTree() string {
 	return lipgloss.JoinHorizontal(lipgloss.Top, nameTreeStr, gap, speedStr)
 }
 
-// buildTreeFromRoot iterates over the tree to build the view and track the cursor
+// buildTreeFromNode iterates over the tree to build the view and track the cursor
 // Returns a name tree and a slice of speed strings, as well as the next index to use
-func (m *Model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tree, []string, int) {
+func (m *Model) buildTreeFromNode(node *lib.TreeNode, currentIdx int) (*tree.Tree, []string, int) {
 	isSelected := currentIdx == m.treeCursor
 	idx := currentIdx + 1
 
-	name := node.Name
+	name := strings.TrimSpace(node.Name)
 	speed := formatSpeed(node.Speed)
 	nameStyle := lipgloss.NewStyle()
 	speedStyle := lipgloss.NewStyle()
@@ -133,11 +134,12 @@ func (m *Model) buildTreeFromRoot(node *lib.TreeNode, currentIdx int) (*tree.Tre
 			var childDeviceTree *tree.Tree
 			var childSpeeds []string
 
-			childDeviceTree, childSpeeds, idx = m.buildTreeFromRoot(child, idx)
+			childDeviceTree, childSpeeds, idx = m.buildTreeFromNode(child, idx)
 			nameTree.Child(childDeviceTree)
 			speeds = append(speeds, childSpeeds...)
 		}
 	}
+
 	return nameTree, speeds, idx
 }
 
@@ -208,6 +210,7 @@ func (m *Model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx in
 	if currentIdx == targetIdx {
 		return node, currentIdx + 1
 	}
+
 	idx := currentIdx + 1
 
 	if m.collapsed[node] {
@@ -221,5 +224,6 @@ func (m *Model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx in
 		}
 		idx = newIdx
 	}
+
 	return nil, idx
 }
