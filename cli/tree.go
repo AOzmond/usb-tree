@@ -88,6 +88,12 @@ func (m *Model) buildTreeFromNode(node *lib.TreeNode, currentIdx int) (*tree.Tre
 	nameStyle := lipgloss.NewStyle()
 	speedStyle := lipgloss.NewStyle()
 
+	if isSelected {
+		m.selectedDevice = node.Device
+		nameStyle = nameStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
+		speedStyle = speedStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
+	}
+
 	var statusPrefix string
 	switch node.State {
 	case lib.StateAdded:
@@ -113,12 +119,6 @@ func (m *Model) buildTreeFromNode(node *lib.TreeNode, currentIdx int) (*tree.Tre
 		} else {
 			childrenIndicator = "▼ "
 		}
-	}
-
-	if isSelected {
-		m.selectedDevice = node.Device
-		nameStyle = nameStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
-		speedStyle = speedStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
 	}
 
 	nameTree := tree.New().
