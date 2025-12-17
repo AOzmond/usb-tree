@@ -151,10 +151,7 @@ func formatSpeed(speed string) string {
 
 	speed = strings.TrimSpace(speed)
 
-	val, err := strconv.ParseFloat(speed, 64)
-	if err != nil {
-		return fmt.Sprintf("%8s", speed)
-	}
+	val, _ := strconv.ParseFloat(speed, 64)
 
 	if val >= 1000 {
 		// Convert to Gbps
