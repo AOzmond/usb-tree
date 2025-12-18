@@ -131,6 +131,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
 		m.refreshContent()
+		m.scrollToCursor()
+		return m, nil
 
 	case tea.KeyMsg:
 		switch {

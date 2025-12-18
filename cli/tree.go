@@ -161,7 +161,12 @@ func formatSpeed(speed string) string {
 	return fmt.Sprintf("%8s", fmt.Sprintf("%g Mbps", val))
 }
 
-// scrollToCursor adjusts the tree viewport's Y offset to keep the cursor centered when possible and stops scrolling past the content.
+// scrollToCursor adjusts the viewport's offset to ensure the cursor is visible when resizing the screen
+func (m *Model) scrollToCursor() {
+	m.treeViewport.SetYOffset(m.treeCursor)
+}
+
+// scrollUpToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves up
 func (m *Model) scrollUpToCursor() {
 	viewportHeight := m.treeViewport.Height
 	// Guard against uninitialized or invalid viewport dimensions
@@ -179,6 +184,7 @@ func (m *Model) scrollUpToCursor() {
 	}
 }
 
+// scrollUpToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves down
 func (m *Model) scrollDownToCursor() {
 	viewportHeight := m.treeViewport.Height
 	// Guard against uninitialized or invalid viewport dimensions
