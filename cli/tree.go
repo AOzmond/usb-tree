@@ -162,31 +162,38 @@ func formatSpeed(speed string) string {
 }
 
 // scrollToCursor adjusts the tree viewport's Y offset to keep the cursor centered when possible and stops scrolling past the content.
-func (m *Model) scrollToCursor() {
+func (m *Model) scrollUpToCursor() {
 	viewportHeight := m.treeViewport.Height
 	// Guard against uninitialized or invalid viewport dimensions
 	if viewportHeight <= 0 || m.nodeCount <= 0 {
 		return
 	}
 
-	// Calculate the ideal offset to center the cursor
-	idealOffset := m.treeCursor - viewportHeight/2
-
-	// Clamp to valid range: can't scroll above 0
-	if idealOffset < 0 {
-		idealOffset = 0
+	padding := 0
+	if (viewportHeight - 2) > 4 {
+		padding = 2
 	}
 
-	// Can't scroll past the end of content
-	maxOffset := m.nodeCount - viewportHeight
-	if maxOffset < 0 {
-		maxOffset = 0
+	if m.treeCursor < (m.treeViewport.YOffset + padding) {
+		m.treeViewport.SetYOffset(m.treeCursor - padding)
 	}
-	if idealOffset > maxOffset {
-		idealOffset = maxOffset
+}
+
+func (m *Model) scrollDownToCursor() {
+	viewportHeight := m.treeViewport.Height
+	// Guard against uninitialized or invalid viewport dimensions
+	if viewportHeight <= 0 || m.nodeCount <= 0 {
+		return
 	}
 
-	m.treeViewport.SetYOffset(idealOffset)
+	padding := 0
+	if (viewportHeight - 2) > 4 {
+		padding = 3
+	}
+
+	if m.treeCursor > (m.treeViewport.YOffset + viewportHeight - padding) {
+		m.treeViewport.SetYOffset(m.treeCursor - viewportHeight + padding)
+	}
 }
 
 // getNodeAtCursor returns the TreeNode at the current cursor position

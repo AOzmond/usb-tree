@@ -19,6 +19,7 @@ type Model struct {
 	windowWidth    int
 	windowHeight   int
 	statusHeight   int
+	statusLine     string
 	updates        chan []lib.Device
 	roots          []*lib.TreeNode
 	collapsed      map[*lib.TreeNode]bool // tracks which nodes are collapsed
@@ -103,22 +104,6 @@ func (m Model) Init() tea.Cmd {
 func (m Model) View() string {
 	var treeStyle, logStyle lipgloss.Style
 
-	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
-	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
-
-	helpView := m.help.FullHelpView(keys.FullHelp())
-	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
-	helpView = helpViewStyle.Render(helpView)
-
-	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpView)
-
-	m.recalculateDimensions(statusLine)
-
-	m.treeViewport.SetContent(m.renderTree())
-	m.scrollToCursor()
-
-	m.logViewport.SetContent(placeholderLogContent)
-
 	if m.focusedView == treeView {
 		treeStyle = activeStyle
 		logStyle = inactiveStyle
@@ -129,7 +114,7 @@ func (m Model) View() string {
 
 	tooltip := tooltipStyle.Width(m.windowWidth - borderSpacing).Render(placeHolderDevice)
 
-	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), statusLine)
+	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), m.statusLine)
 }
 
 // Update processes incoming messages, updates the model state, and returns the updated model and an optional command.
@@ -140,11 +125,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []lib.Device:
 		m.roots = lib.BuildDeviceTree(msg)
 		m.refreshTreeModel()
-		m.treeViewport.SetContent(m.renderTree())
+		m.refreshContent()
 		return m, waitForUpdate(m.updates)
 
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
+		m.refreshContent()
 
 	case tea.KeyMsg:
 		switch {
@@ -157,19 +143,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.focusedView = treeView
 			}
+			m.refreshContent()
 			return m, nil
 
 		case key.Matches(msg, keys.Up):
 			if m.focusedView == treeView && m.treeCursor > 0 {
 				m.treeCursor--
 				m.refreshTreeModel()
-				return m, nil
+				m.refreshContent()
+				m.scrollUpToCursor()
 			}
+			return m, nil
 
 		case key.Matches(msg, keys.Down):
 			if m.focusedView == treeView && m.treeCursor < (m.nodeCount-1) {
 				m.treeCursor++
 				m.refreshTreeModel()
+				m.refreshContent()
+				m.scrollDownToCursor()
 			}
 			return m, nil
 
@@ -178,6 +169,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					m.collapsed[node] = true
 					m.refreshTreeModel()
+					m.refreshContent()
 				}
 			}
 			return m, nil
@@ -187,6 +179,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					delete(m.collapsed, node)
 					m.refreshTreeModel()
+					m.refreshContent()
 				}
 			}
 			return m, nil
@@ -199,6 +192,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, cmd
+}
+
+func (m *Model) refreshContent() {
+	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
+	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
+
+	helpView := m.help.FullHelpView(keys.FullHelp())
+	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
+	m.statusLine = lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpViewStyle.Render(helpView))
+
+	m.recalculateDimensions(m.statusLine)
+	m.treeViewport.SetContent(m.renderTree())
+	m.logViewport.SetContent(placeholderLogContent)
 }
 
 func (m *Model) recalculateDimensions(statusLine string) {
