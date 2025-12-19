@@ -22,24 +22,24 @@ var keys = keyMap{
 		key.WithHelp("tab", "switch focus"),
 	),
 	Up: key.NewBinding(
-		key.WithKeys("up"),
-		key.WithHelp("↑", "move up"),
+		key.WithKeys("up", "k"),
+		key.WithHelp("↑/k", "up"),
 	),
 	Down: key.NewBinding(
-		key.WithKeys("down"),
-		key.WithHelp("↓", "move down"),
+		key.WithKeys("down", "j"),
+		key.WithHelp("↓/j", "down"),
 	),
 	Refresh: key.NewBinding(
 		key.WithKeys("r"),
 		key.WithHelp("r", "refresh"),
 	),
 	Collapse: key.NewBinding(
-		key.WithKeys("left"),
-		key.WithHelp("←", "collapse"),
+		key.WithKeys("left", "h"),
+		key.WithHelp("←/h", "collapse"),
 	),
 	Expand: key.NewBinding(
-		key.WithKeys("right"),
-		key.WithHelp("→", "expand"),
+		key.WithKeys("right", "l"),
+		key.WithHelp("→/l", "expand"),
 	),
 }
 

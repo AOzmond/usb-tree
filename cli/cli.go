@@ -30,7 +30,7 @@ type Model struct {
 	treeCursor     int
 	nodeCount      int
 	selectedDevice lib.Device
-	help           help.Model
+	helpModel      help.Model
 	focusedView    focusIndex
 	lastUpdated    time.Time
 }
@@ -41,6 +41,7 @@ const (
 	hotPink       = "#ff028d"
 	red           = "#FF0000"
 	green         = "#00FF00"
+	background    = "#003a3a"
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
 	tooltipHeight = 5
@@ -54,15 +55,24 @@ const (
 var (
 	activeStyle = lipgloss.NewStyle().
 			Border(lipgloss.DoubleBorder()).
-			BorderForeground(lipgloss.Color(hotPink))
+			BorderForeground(lipgloss.Color(hotPink)).
+			BorderBackground(lipgloss.Color(background)).
+			Background(lipgloss.Color(background))
 
 	inactiveStyle = lipgloss.NewStyle().
 			BorderForeground(lipgloss.Color(gray)).
-			Border(lipgloss.DoubleBorder())
+			Border(lipgloss.DoubleBorder()).
+			BorderBackground(lipgloss.Color(background)).
+			Background(lipgloss.Color(background))
 
 	tooltipStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color(white)).
-			Border(lipgloss.RoundedBorder())
+			Background(lipgloss.Color(background)).
+			Border(lipgloss.RoundedBorder()).
+			BorderBackground(lipgloss.Color(background))
+
+	windowStyle = lipgloss.NewStyle().
+			Background(lipgloss.Color(background))
 )
 
 // ***** Placeholder content *****
@@ -80,9 +90,17 @@ var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
 	updates := make(chan []lib.Device, 1)
+	helpModel := help.New()
+	helpModel.Styles.FullDesc = windowStyle
+	helpModel.Styles.FullKey = windowStyle
+	helpModel.Styles.FullSeparator = windowStyle
+	helpModel.Styles.Ellipsis = windowStyle
+	helpModel.Styles.ShortDesc = windowStyle
+	helpModel.Styles.ShortKey = windowStyle
+	helpModel.Styles.ShortSeparator = windowStyle
 	m := Model{
 		selectedDevice: lib.Device{},
-		help:           help.New(),
+		helpModel:      helpModel,
 		focusedView:    treeView,
 		lastUpdated:    time.Now(),
 		treeCursor:     0,
@@ -200,9 +218,18 @@ func (m *Model) refreshContent() {
 	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
 
-	helpView := m.help.FullHelpView(keys.FullHelp())
-	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
-	m.statusLine = lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpViewStyle.Render(helpView))
+	helpView := m.helpModel.View(keys)
+
+	helpViewStyle := lipgloss.NewStyle().
+		Width(m.windowWidth - lastUpdatedWidth).
+		Align(lipgloss.Center)
+
+	renderedHelp := helpViewStyle.Render(helpView)
+
+	m.statusLine = lipgloss.NewStyle().
+		Background(lipgloss.Color(background)).
+		Width(m.windowWidth).
+		Render(lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, renderedHelp))
 
 	m.recalculateDimensions(m.statusLine)
 	m.treeViewport.SetContent(m.renderTree())

@@ -56,12 +56,15 @@ func (m *Model) refreshTreeModel() {
 func (m *Model) renderTree() string {
 	var deviceTreeSb strings.Builder
 
-	for _, deviceTree := range m.deviceTrees {
+	for i, deviceTree := range m.deviceTrees {
 		deviceTreeSb.WriteString(deviceTree.String())
-		deviceTreeSb.WriteByte('\n')
+		if i < len(m.deviceTrees)-1 {
+			deviceTreeSb.WriteByte('\n')
+		}
 	}
 
 	nameTreeStr := deviceTreeSb.String()
+	nameTreeStr = windowStyle.Render(nameTreeStr)
 	speedStr := strings.Join(m.deviceSpeeds, "\n")
 
 	nameTreeWidth := lipgloss.Width(nameTreeStr)
@@ -72,7 +75,13 @@ func (m *Model) renderTree() string {
 		gapWidth = 1
 	}
 
-	gap := strings.Repeat(" ", gapWidth)
+	// Create a multi-line gap with same number of lines as nameTreeStr
+	numLines := strings.Count(nameTreeStr, "\n") + 1
+	gapLines := make([]string, numLines)
+	for i := 0; i < numLines; i++ {
+		gapLines[i] = strings.Repeat(" ", gapWidth)
+	}
+	gap := windowStyle.Render(strings.Join(gapLines, "\n"))
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, nameTreeStr, gap, speedStr)
 }
@@ -85,8 +94,8 @@ func (m *Model) buildTreeFromNode(node *lib.TreeNode, currentIdx int) (*tree.Tre
 
 	name := strings.TrimSpace(node.Name)
 	speed := formatSpeed(node.Speed)
-	nameStyle := lipgloss.NewStyle()
-	speedStyle := lipgloss.NewStyle()
+	nameStyle := windowStyle
+	speedStyle := windowStyle
 
 	if isSelected {
 		m.selectedDevice = node.Device
@@ -192,7 +201,7 @@ func (m *Model) scrollDownToCursor() {
 		return
 	}
 
-	padding := 0
+	padding := 1
 	if (viewportHeight - 2) > 4 {
 		padding = 3
 	}
