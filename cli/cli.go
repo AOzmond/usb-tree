@@ -22,7 +22,7 @@ type Model struct {
 	statusLine     string
 	updates        chan []lib.Device
 	roots          []*lib.TreeNode
-	collapsed      map[*lib.TreeNode]bool // tracks which nodes are collapsed
+	collapsed      map[string]bool // tracks which nodes are collapsed by their unique key
 	deviceTrees    []*tree.Tree
 	deviceSpeeds   []string
 	treeViewport   viewport.Model
@@ -105,7 +105,7 @@ func InitialModel() Model {
 		lastUpdated:    time.Now(),
 		treeCursor:     0,
 		updates:        updates,
-		collapsed:      make(map[*lib.TreeNode]bool),
+		collapsed:      make(map[string]bool),
 	}
 	return m
 }
@@ -187,10 +187,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Collapse):
 			if m.focusedView == treeView {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
-					m.collapsed[node] = true
-					if m.treeCursor > 0 {
-						m.treeCursor--
-					}
+					m.collapsed[node.Key()] = true
 					m.refreshTreeModel()
 					m.refreshContent()
 					m.scrollUpToCursor()
@@ -201,7 +198,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Expand):
 			if m.focusedView == treeView {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
-					delete(m.collapsed, node)
+					delete(m.collapsed, node.Key())
 					m.treeCursor++
 					m.refreshTreeModel()
 					m.refreshContent()

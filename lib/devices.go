@@ -160,6 +160,11 @@ func (d *Device) key() string {
 	return fmt.Sprintf("%d:%v:%s:%s:%s", d.Bus, d.Path, d.VendorID, d.ProductID, d.Speed)
 }
 
+// Key returns a unique identifier for the device, used for tracking state across updates.
+func (d *Device) Key() string {
+	return d.key()
+}
+
 func deviceDiff(newDevices []Device, logTime time.Time) (changed bool, merged []Device) {
 	mergedMap := make(map[string]Device)
 	changed = false

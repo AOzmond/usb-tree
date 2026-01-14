@@ -123,7 +123,7 @@ func (m *Model) buildTreeFromNode(node *lib.TreeNode, currentIdx int) (*tree.Tre
 	// Add expand/collapse indicator for nodes with children
 	var childrenIndicator string
 	if len(node.Children) > 0 {
-		if m.collapsed[node] {
+		if m.collapsed[node.Key()] {
 			childrenIndicator = "▶ "
 		} else {
 			childrenIndicator = "▼ "
@@ -138,7 +138,7 @@ func (m *Model) buildTreeFromNode(node *lib.TreeNode, currentIdx int) (*tree.Tre
 	speeds := []string{speedStyle.Render(speed)}
 
 	// Only render children if not collapsed
-	if !m.collapsed[node] {
+	if !m.collapsed[node.Key()] {
 		for _, child := range node.Children {
 			var childDeviceTree *tree.Tree
 			var childSpeeds []string
@@ -232,7 +232,7 @@ func (m *Model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx in
 
 	idx := currentIdx + 1
 
-	if m.collapsed[node] {
+	if m.collapsed[node.Key()] {
 		return nil, idx
 	}
 
