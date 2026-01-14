@@ -125,6 +125,10 @@ func (m *Model) buildTreeFromNode(node *lib.TreeNode, currentIdx int) (*tree.Tre
 	if len(node.Children) > 0 {
 		if m.collapsed[node.Key()] {
 			childrenIndicator = "▶ "
+			if m.hasChangedChild(node) {
+				nameStyle = nameStyle.Foreground(lipgloss.Color(orange))
+				speedStyle = speedStyle.Foreground(lipgloss.Color(orange))
+			}
 		} else {
 			childrenIndicator = "▼ "
 		}
@@ -245,4 +249,17 @@ func (m *Model) findNodeAtIndex(node *lib.TreeNode, currentIdx int, targetIdx in
 	}
 
 	return nil, idx
+}
+
+// hasChangedChild recursively checks if any child of the node has a status update
+func (m *Model) hasChangedChild(node *lib.TreeNode) bool {
+	for _, child := range node.Children {
+		if child.State != lib.StateNormal {
+			return true
+		}
+		if m.hasChangedChild(child) {
+			return true
+		}
+	}
+	return false
 }

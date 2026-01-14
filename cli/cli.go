@@ -39,6 +39,7 @@ const (
 	gray          = "#888888"
 	white         = "#ffffff"
 	hotPink       = "#ff028d"
+	orange        = "#FFA500"
 	red           = "#FF0000"
 	green         = "#00FF00"
 	background    = "#003a3a"
