@@ -188,8 +188,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.focusedView == treeView {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					m.collapsed[node] = true
+					if m.treeCursor > 0 {
+						m.treeCursor--
+					}
 					m.refreshTreeModel()
 					m.refreshContent()
+					m.scrollUpToCursor()
 				}
 			}
 			return m, nil
@@ -198,8 +202,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.focusedView == treeView {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					delete(m.collapsed, node)
+					m.treeCursor++
 					m.refreshTreeModel()
 					m.refreshContent()
+					m.scrollDownToCursor()
 				}
 			}
 			return m, nil
