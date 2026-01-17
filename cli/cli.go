@@ -121,6 +121,9 @@ func (m Model) Init() tea.Cmd {
 
 // View renders the current state of the Model, combining styled views for tree, log, tooltip, and status line.
 func (m Model) View() string {
+	if m.windowWidth == 0 || m.windowHeight == 0 {
+		return ""
+	}
 	var treeStyle, logStyle lipgloss.Style
 
 	if m.focusedView == treeView {
