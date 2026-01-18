@@ -263,3 +263,42 @@ func (m *Model) hasChangedChild(node *lib.TreeNode) bool {
 	}
 	return false
 }
+
+// checkOffscreenChanges returns whether there are changes (added/removed) above and below the visible viewport
+func (m *Model) checkOffscreenChanges() (above bool, below bool) {
+	idx := 0
+	for _, root := range m.roots {
+		above, below, idx = m.checkNodeOffscreenChanges(root, idx, above, below)
+	}
+	return above, below
+}
+
+func (m *Model) checkNodeOffscreenChanges(node *lib.TreeNode, currentIdx int, above bool, below bool) (bool, bool, int) {
+	if node.State != lib.StateNormal {
+		if currentIdx < m.treeViewport.YOffset {
+			above = true
+		} else if currentIdx >= m.treeViewport.YOffset+m.treeViewport.Height {
+			below = true
+		}
+	}
+
+	// check children within collapsed nodes
+	if m.collapsed[node.Key()] {
+		if m.hasChangedChild(node) {
+			if currentIdx < m.treeViewport.YOffset {
+				above = true
+			} else if currentIdx >= m.treeViewport.YOffset+m.treeViewport.Height {
+				below = true
+			}
+		}
+		return above, below, currentIdx + 1
+	}
+
+	// check children within non-collapsed nodes
+	idx := currentIdx + 1
+	for _, child := range node.Children {
+		above, below, idx = m.checkNodeOffscreenChanges(child, idx, above, below)
+	}
+
+	return above, below, idx
+}

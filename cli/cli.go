@@ -39,7 +39,7 @@ const (
 	gray          = "#888888"
 	white         = "#ffffff"
 	hotPink       = "#ff028d"
-	orange        = "#FFA500"
+	orange        = "#FF5c00"
 	red           = "#FF0000"
 	green         = "#00FF00"
 	background    = "#003a3a"
@@ -132,6 +132,25 @@ func (m Model) View() string {
 	} else {
 		treeStyle = inactiveStyle
 		logStyle = activeStyle
+	}
+
+	// Check for offscreen changes to highlight borders
+	above, below := m.checkOffscreenChanges()
+	if above || below {
+		borderStyle := treeStyle.GetBorderStyle()
+		topBorderColor := treeStyle.GetBorderTopForeground()
+		bottomBorderColor := treeStyle.GetBorderBottomForeground()
+
+		if above {
+			topBorderColor = lipgloss.Color(orange)
+		}
+		if below {
+			bottomBorderColor = lipgloss.Color(orange)
+		}
+
+		treeStyle = treeStyle.Border(borderStyle, true, true, true, true).
+			BorderTopForeground(topBorderColor).
+			BorderBottomForeground(bottomBorderColor)
 	}
 
 	tooltip := tooltipStyle.Width(m.windowWidth - borderSpacing).Render(placeHolderDevice)
