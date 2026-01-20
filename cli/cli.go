@@ -9,7 +9,6 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/tree"
 )
 
 type focusIndex int
@@ -23,8 +22,6 @@ type Model struct {
 	updates        chan []lib.Device
 	roots          []*lib.TreeNode
 	collapsed      map[string]bool // tracks which nodes are collapsed by their unique key
-	deviceTrees    []*tree.Tree
-	deviceSpeeds   []string
 	treeViewport   viewport.Model
 	logViewport    viewport.Model
 	treeCursor     int
@@ -165,7 +162,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case []lib.Device:
 		m.roots = lib.BuildDeviceTree(msg)
-		m.refreshTreeModel()
+		m.updateNodeCount()
 		m.refreshContent()
 		return m, waitForUpdate(m.updates)
 
@@ -192,7 +189,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Up):
 			if m.focusedView == treeView && m.treeCursor > 0 {
 				m.treeCursor--
-				m.refreshTreeModel()
+				m.updateNodeCount()
 				m.refreshContent()
 				m.scrollUpToCursor()
 			}
@@ -201,7 +198,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Down):
 			if m.focusedView == treeView && m.treeCursor < (m.nodeCount-1) {
 				m.treeCursor++
-				m.refreshTreeModel()
+				m.updateNodeCount()
 				m.refreshContent()
 				m.scrollDownToCursor()
 			}
@@ -214,7 +211,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if m.treeCursor > 0 {
 						m.treeCursor--
 					}
-					m.refreshTreeModel()
+					m.updateNodeCount()
 					m.refreshContent()
 					m.scrollUpToCursor()
 				}
@@ -226,7 +223,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if node := m.getNodeAtCursor(); node != nil && len(node.Children) > 0 {
 					delete(m.collapsed, node.Key())
 					m.treeCursor++
-					m.refreshTreeModel()
+					m.updateNodeCount()
 					m.refreshContent()
 					m.scrollDownToCursor()
 				}

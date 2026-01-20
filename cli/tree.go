@@ -8,24 +8,7 @@ import (
 	"github.com/AOzmond/usb-tree/lib"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/tree"
 )
-
-// compactIndenter overwrite the default tree indenter to use a single space instead of two
-func compactIndenter(children tree.Children, index int) string {
-	if children.Length()-1 == index {
-		return "  "
-	}
-	return "│ "
-}
-
-// compactEnumerator overwrite the default tree enumerator to reduce spacing
-func compactEnumerator(children tree.Children, index int) string {
-	if children.Length()-1 == index {
-		return "└─"
-	}
-	return "├─"
-}
 
 // waitForUpdate consumes the next update message from the provided subscription channel and returns it as a command.
 func waitForUpdate(sub chan []lib.Device) tea.Cmd {
@@ -34,126 +17,175 @@ func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 	}
 }
 
-// refreshTreeModel rebuilds the tree model based on roots and cursor
-func (m *Model) refreshTreeModel() {
+// updateNodeCount updates the nodeCount based on visible devices.
+func (m *Model) updateNodeCount() {
 	idx := 0
-	m.deviceTrees = []*tree.Tree{}
-	m.deviceSpeeds = []string{}
-
 	for _, root := range m.roots {
-		var deviceTree *tree.Tree
-		var rootSpeeds []string
-		deviceTree, rootSpeeds, idx = m.buildTreeFromNode(root, idx)
-
-		m.deviceTrees = append(m.deviceTrees, deviceTree)
-		m.deviceSpeeds = append(m.deviceSpeeds, rootSpeeds...)
+		idx = m.countVisibleNodes(root, idx)
 	}
-
 	m.nodeCount = idx
+}
+
+// countVisibleNodes recursively counts the number of visible nodes under the given node
+func (m *Model) countVisibleNodes(node *lib.TreeNode, currentIdx int) int {
+	idx := currentIdx + 1
+	if !m.collapsed[node.Key()] {
+		for _, child := range node.Children {
+			idx = m.countVisibleNodes(child, idx)
+		}
+	}
+	return idx
 }
 
 // renderTree renders the tree content to a string
 func (m *Model) renderTree() string {
 	var deviceTreeSb strings.Builder
+	idx := 0
 
-	for i, deviceTree := range m.deviceTrees {
-		deviceTreeSb.WriteString(deviceTree.String())
-		if i < len(m.deviceTrees)-1 {
+	totalWidth := m.treeViewport.Width
+
+	for _, root := range m.roots {
+		lines, nextIdx := m.renderNode(root, idx, []bool{}, totalWidth)
+		deviceTreeSb.WriteString(strings.Join(lines, "\n"))
+		if nextIdx < m.nodeCount {
 			deviceTreeSb.WriteByte('\n')
 		}
+		idx = nextIdx
 	}
 
-	nameTreeStr := deviceTreeSb.String()
-	nameTreeStr = windowStyle.Render(nameTreeStr)
-	speedStr := strings.Join(m.deviceSpeeds, "\n")
-
-	nameTreeWidth := lipgloss.Width(nameTreeStr)
-	speedStrWidth := lipgloss.Width(speedStr)
-	gapWidth := m.treeViewport.Width - nameTreeWidth - speedStrWidth
-
-	if gapWidth < 1 {
-		gapWidth = 1
-	}
-
-	// Create a multi-line gap with same number of lines as nameTreeStr
-	numLines := strings.Count(nameTreeStr, "\n") + 1
-	gapLines := make([]string, numLines)
-	for i := 0; i < numLines; i++ {
-		gapLines[i] = strings.Repeat(" ", gapWidth)
-	}
-	gap := windowStyle.Render(strings.Join(gapLines, "\n"))
-
-	return lipgloss.JoinHorizontal(lipgloss.Top, nameTreeStr, gap, speedStr)
+	return deviceTreeSb.String()
 }
 
-// buildTreeFromNode iterates over the tree to build the view and track the cursor
-// Returns a name tree and a slice of speed strings, as well as the next index to use
-func (m *Model) buildTreeFromNode(node *lib.TreeNode, currentIdx int) (*tree.Tree, []string, int) {
+// renderNode recursively renders a node and its children
+func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool, totalWidth int) ([]string, int) {
 	isSelected := currentIdx == m.treeCursor
 	idx := currentIdx + 1
 
-	name := strings.TrimSpace(node.Name)
-	speed := formatSpeed(node.Speed)
-	nameStyle := windowStyle
-	speedStyle := windowStyle
+	rowStyle, contentStyle := m.getNodeStyles(node, isSelected)
+	indicators, contentStyle := m.getNodeIndicators(node, contentStyle)
+	prefixStr := m.buildTreePrefix(continues)
 
-	if isSelected {
-		m.selectedDevice = node.Device
-		nameStyle = nameStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
-		speedStyle = speedStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
+	line := m.renderNodeLine(node, prefixStr, indicators, rowStyle, contentStyle, totalWidth)
+	renderedDevices := []string{line}
+
+	// Only render children if not collapsed
+	if !m.collapsed[node.Key()] {
+		for i, child := range node.Children {
+			isLast := i == len(node.Children)-1
+			childContinues := append(continues, !isLast)
+			var childLines []string
+			childLines, idx = m.renderNode(child, idx, childContinues, totalWidth)
+			renderedDevices = append(renderedDevices, childLines...)
+		}
 	}
 
-	var statusPrefix string
+	return renderedDevices, idx
+}
+
+// getNodeStyles determines and returns the row and content styles for a tree node based on its state and selection status.
+func (m *Model) getNodeStyles(node *lib.TreeNode, isSelected bool) (lipgloss.Style, lipgloss.Style) {
+	rowStyle := windowStyle
+	if isSelected {
+		rowStyle = rowStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
+	}
+
+	contentStyle := rowStyle
 	switch node.State {
 	case lib.StateAdded:
-		statusPrefix = "+ "
-		nameStyle = nameStyle.Foreground(lipgloss.Color(green))
-		speedStyle = speedStyle.Foreground(lipgloss.Color(green))
-
+		contentStyle = contentStyle.Foreground(lipgloss.Color(green))
 	case lib.StateRemoved:
-		statusPrefix = "- "
-		nameStyle = nameStyle.Foreground(lipgloss.Color(red))
-		speedStyle = speedStyle.Foreground(lipgloss.Color(red))
-
-	default:
-		statusPrefix = ""
-
+		contentStyle = contentStyle.Foreground(lipgloss.Color(red))
 	}
 
-	// Add expand/collapse indicator for nodes with children
+	return rowStyle, contentStyle
+}
+
+// getNodeIndicators returns visual indicators for a node, such as collapse/expand symbols and state prefixes.
+func (m *Model) getNodeIndicators(node *lib.TreeNode, contentStyle lipgloss.Style) (string, lipgloss.Style) {
 	var childrenIndicator string
 	if len(node.Children) > 0 {
 		if m.collapsed[node.Key()] {
 			childrenIndicator = "▶ "
 			if m.hasChangedChild(node) {
-				nameStyle = nameStyle.Foreground(lipgloss.Color(orange))
-				speedStyle = speedStyle.Foreground(lipgloss.Color(orange))
+				contentStyle = contentStyle.Foreground(lipgloss.Color(orange))
 			}
 		} else {
 			childrenIndicator = "▼ "
 		}
 	}
 
-	nameTree := tree.New().
-		Root(nameStyle.Render(childrenIndicator + statusPrefix + name)).
-		Indenter(compactIndenter).
-		Enumerator(compactEnumerator)
-
-	speeds := []string{speedStyle.Render(speed)}
-
-	// Only render children if not collapsed
-	if !m.collapsed[node.Key()] {
-		for _, child := range node.Children {
-			var childDeviceTree *tree.Tree
-			var childSpeeds []string
-
-			childDeviceTree, childSpeeds, idx = m.buildTreeFromNode(child, idx)
-			nameTree.Child(childDeviceTree)
-			speeds = append(speeds, childSpeeds...)
-		}
+	var statusPrefix string
+	switch node.State {
+	case lib.StateAdded:
+		statusPrefix = "+ "
+	case lib.StateRemoved:
+		statusPrefix = "- "
 	}
 
-	return nameTree, speeds, idx
+	return childrenIndicator + statusPrefix, contentStyle
+}
+
+// buildTreePrefix generates a string representation of a tree structure prefix based on the provided continues slice.
+func (m *Model) buildTreePrefix(continues []bool) string {
+	var prefix strings.Builder
+	for i := 0; i < len(continues); i++ {
+		if i == len(continues)-1 {
+			if continues[i] {
+				prefix.WriteString("├─")
+			} else {
+				prefix.WriteString("└─")
+			}
+		} else {
+			if continues[i] {
+				prefix.WriteString("│ ")
+			} else {
+				prefix.WriteString("  ")
+			}
+		}
+	}
+	return prefix.String()
+}
+
+// renderNodeLine generates a formatted string representing a tree node line with styles, truncation, and aligned elements.
+func (m *Model) renderNodeLine(node *lib.TreeNode, prefixStr, indicators string, rowStyle, contentStyle lipgloss.Style, totalWidth int) string {
+	name := strings.TrimSpace(node.Name)
+	speed := formatSpeed(node.Speed)
+
+	speedWidth := lipgloss.Width(speed)
+	prefixWidth := lipgloss.Width(prefixStr)
+	indicatorsWidth := lipgloss.Width(indicators)
+	gapWidth := 1
+
+	availableForName := totalWidth - prefixWidth - indicatorsWidth - gapWidth - speedWidth
+	if availableForName < 5 {
+		availableForName = 5
+	}
+
+	truncatedName := middleTruncate(name, availableForName)
+
+	leftPart := prefixStr + indicators + truncatedName
+	rightPart := speed
+
+	actualGapWidth := totalWidth - lipgloss.Width(leftPart) - lipgloss.Width(rightPart)
+	if actualGapWidth < 1 {
+		actualGapWidth = 1
+	}
+	gap := strings.Repeat(" ", actualGapWidth)
+
+	return rowStyle.Render(prefixStr) + contentStyle.Render(indicators+truncatedName) + rowStyle.Render(gap+rightPart)
+}
+
+// middleTruncate shortens a string by replacing its middle with "…" if its length exceeds the specified maxLen.
+func middleTruncate(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	if maxLen < 3 {
+		return s[:maxLen]
+	}
+
+	half := (maxLen - 1) / 2
+	return s[:half] + "…" + s[len(s)-(maxLen-half-1):]
 }
 
 // formatSpeed formats the speed string to have a uniform size and units.
