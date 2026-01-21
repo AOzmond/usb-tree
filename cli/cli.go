@@ -19,7 +19,7 @@ type Model struct {
 	windowHeight   int
 	statusHeight   int
 	statusLine     string
-	updates        chan []lib.Device
+	updateChan     chan []lib.Device
 	roots          []*lib.TreeNode
 	collapsed      map[string]bool // tracks which nodes are collapsed by their unique key
 	treeViewport   viewport.Model
@@ -102,18 +102,18 @@ func InitialModel() Model {
 		focusedView:    treeView,
 		lastUpdated:    time.Now(),
 		treeCursor:     0,
-		updates:        updates,
+		updateChan:     updates,
 		collapsed:      make(map[string]bool),
 	}
 	return m
 }
 
-// Init initializes the Model, preparing it to handle updates and rendering. It returns an optional initial command.
+// Init initializes the Model, preparing it to handle updateChan and rendering. It returns an optional initial command.
 func (m Model) Init() tea.Cmd {
 	lib.Init(func(devices []lib.Device) {
-		m.updates <- devices
+		m.updateChan <- devices
 	})
-	return waitForUpdate(m.updates)
+	return waitForUpdate(m.updateChan)
 }
 
 // View renders the current state of the Model, combining styled views for tree, log, tooltip, and status line.
@@ -155,7 +155,7 @@ func (m Model) View() string {
 	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), m.statusLine)
 }
 
-// Update processes incoming messages, updates the model state, and returns the updated model and an optional command.
+// Update processes incoming messages, updateChan the model state, and returns the updated model and an optional command.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
@@ -164,7 +164,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.roots = lib.BuildDeviceTree(msg)
 		m.updateNodeCount()
 		m.refreshContent()
-		return m, waitForUpdate(m.updates)
+		return m, waitForUpdate(m.updateChan)
 
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
@@ -232,7 +232,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, keys.Refresh):
 			lastUpdate, newDevices := lib.Refresh()
-			m.updates <- newDevices
+			m.updateChan <- newDevices
 			m.lastUpdated = lastUpdate
 		}
 	}
@@ -240,7 +240,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-// refreshContent updates the UI content, including status line, tree viewport, and log viewport, based on current state.
+// refreshContent updateChan the UI content, including status line, tree viewport, and log viewport, based on current state.
 func (m *Model) refreshContent() {
 	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)

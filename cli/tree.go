@@ -10,14 +10,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// waitForUpdate listens to a channel for a slice of lib.Device updates and returns a tea.Cmd to process the message.
+// waitForUpdate listens to a channel for a slice of lib.Device updateChan and returns a tea.Cmd to process the message.
 func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 	return func() tea.Msg {
 		return <-sub
 	}
 }
 
-// updateNodeCount updates the nodeCount based on visible devices.
+// updateNodeCount updateChan the nodeCount based on visible devices.
 func (m *Model) updateNodeCount() {
 	idx := 0
 	for _, root := range m.roots {
