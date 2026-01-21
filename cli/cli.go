@@ -240,6 +240,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// refreshContent updates the UI content, including status line, tree viewport, and log viewport, based on current state.
 func (m *Model) refreshContent() {
 	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
@@ -262,6 +263,7 @@ func (m *Model) refreshContent() {
 	m.logViewport.SetContent(placeholderLogContent)
 }
 
+// recalculateDimensions adjusts the dimensions of the tree and log viewports based on window size and status line height.
 func (m *Model) recalculateDimensions(statusLine string) {
 	m.statusHeight = lipgloss.Height(statusLine)
 	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight

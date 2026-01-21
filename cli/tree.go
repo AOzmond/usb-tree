@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// waitForUpdate consumes the next update message from the provided subscription channel and returns it as a command.
+// waitForUpdate listens to a channel for a slice of lib.Device updates and returns a tea.Cmd to process the message.
 func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 	return func() tea.Msg {
 		return <-sub
