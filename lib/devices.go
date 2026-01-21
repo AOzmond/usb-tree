@@ -156,13 +156,9 @@ func descToDevice(desc gousb.DeviceDesc) Device {
 	}
 }
 
-func (d *Device) key() string {
-	return fmt.Sprintf("%d:%v:%s:%s:%s", d.Bus, d.Path, d.VendorID, d.ProductID, d.Speed)
-}
-
-// Key returns a unique identifier for the device, used for tracking state across updates.
+// Key returns a unique string identifier for the device using its bus, path, vendor ID, product ID, and speed attributes.
 func (d *Device) Key() string {
-	return d.key()
+	return fmt.Sprintf("%d:%v:%s:%s:%s", d.Bus, d.Path, d.VendorID, d.ProductID, d.Speed)
 }
 
 func deviceDiff(newDevices []Device, logTime time.Time) (changed bool, merged []Device) {
@@ -172,12 +168,12 @@ func deviceDiff(newDevices []Device, logTime time.Time) (changed bool, merged []
 	// Mark all cachedDevices as removed initially
 	for _, device := range cachedDevices {
 		device.State = StateRemoved
-		mergedMap[device.key()] = device
+		mergedMap[device.Key()] = device
 	}
 
 	// Reset persisting devices to normal and add new devices
 	for _, newDevice := range newDevices {
-		key := newDevice.key()
+		key := newDevice.Key()
 		if existingDevice, exists := mergedMap[key]; exists {
 			// Device exists, reset its status to normal
 			existingDevice.State = StateNormal
