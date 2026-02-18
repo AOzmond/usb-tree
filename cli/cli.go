@@ -18,10 +18,19 @@ type focusIndex int
 type Model struct {
 	windowWidth    int
 	windowHeight   int
+	statusHeight   int
+	updates        chan []lib.Device
+	roots          []*lib.TreeNode
+	collapsed      map[*lib.TreeNode]bool // tracks which nodes are collapsed
+	deviceTrees    []*tree.Tree
+	deviceSpeeds   []string
 	treeViewport   viewport.Model
+	treeCursor     int
+	nodeCount      int
+	selectedDevice *lib.TreeNode
+	log            []lib.Log
+	logContent     string
 	logViewport    viewport.Model
-	deviceTree     *tree.Tree
-	selectedDevice lib.Device
 	help           help.Model
 	focusedView    focusIndex
 	lastUpdated    time.Time
@@ -31,9 +40,18 @@ const (
 	gray          = "#888888"
 	white         = "#ffffff"
 	hotPink       = "#ff028d"
+	red           = "#FF0000"
+	green         = "#00FF00"
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
 	tooltipHeight = 5
+
+	// Tooltip colors
+	skyBlue   = "#00BFFF"
+	gold      = "#FFD700"
+	coralRed  = "#FF6B6B"
+	paleGreen = "#98FB98"
+	plum      = "#DDA0DD"
 )
 
 const (
@@ -55,57 +73,49 @@ var (
 			Border(lipgloss.RoundedBorder())
 )
 
-// ***** Placeholder content *****
-// TODO: replace with real data
-var deviceTreePlaceHolder = tree.Root(".").
-	Child("Hub 1").
-	Child(
-		tree.New().
-			Root("Hub 2").
-			Child("Device 1      300Gbps").
-			Child("Device 2      300Gbps").
-			Child("Device 3      300Gbps"),
-	).
-	Child(
-		tree.New().
-			Root("Hub 3").
-			Child("Device 4      300Gbps").
-			Child("Device 5      300Gbps"),
-	)
-
-var placeHolderDevice = "Bus 001 \nGaming Mouse \nhttps://www.google.com"
-
-var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
-00:00:01 Device abc 100000 Gbps
-00:00:02 Device pqr 100000 Gbps
-00:00:03 Device xyz 100000 Gbps`
-
-// ***** End of placeholder content *****
-
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
+	updates := make(chan []lib.Device, 1)
+
 	m := Model{
-		deviceTree:     deviceTreePlaceHolder,
-		selectedDevice: lib.Device{},
-		help:           help.New(),
-		focusedView:    treeView,
-		lastUpdated:    time.Now(),
+		help:        help.New(),
+		focusedView: treeView,
+		lastUpdated: time.Now(),
+		treeCursor:  0,
+		updates:     updates,
+		collapsed:   make(map[*lib.TreeNode]bool),
 	}
 	return m
 }
 
 // Init initializes the Model, preparing it to handle updates and rendering. It returns an optional initial command.
 func (m Model) Init() tea.Cmd {
-	return nil
+	lib.Init(func(devices []lib.Device) {
+		m.updates <- devices
+	})
+	return waitForUpdate(m.updates)
 }
 
 // View renders the current state of the Model, combining styled views for tree, log, tooltip, and status line.
 func (m Model) View() string {
 	var treeStyle, logStyle lipgloss.Style
 
+	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
+	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
+
+	helpView := m.help.FullHelpView(keys.FullHelp())
+	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
+	helpView = helpViewStyle.Render(helpView)
+
+	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpView)
+	m.statusHeight = lipgloss.Height(statusLine)
+
 	m.recalculateDimensions()
-	m.treeViewport.SetContent(deviceTreePlaceHolder.String())
-	m.logViewport.SetContent(placeholderLogContent)
+
+	m.treeViewport.SetContent(m.renderTree())
+	m.scrollToCursor()
+
+	fullWidthStyle := lipgloss.NewStyle().Width(m.windowWidth - borderSpacing)
 
 	if m.focusedView == treeView {
 		treeStyle = activeStyle
@@ -115,16 +125,8 @@ func (m Model) View() string {
 		logStyle = activeStyle
 	}
 
-	tooltip := tooltipStyle.Width(m.windowWidth - borderSpacing).Render(placeHolderDevice)
-
-	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
-	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
-
-	helpView := m.help.View(keys)
-	helpViewStyle := lipgloss.Style{}.Width(m.windowWidth - lastUpdatedWidth).Align(lipgloss.Center)
-	helpView = helpViewStyle.Render(helpView)
-
-	statusLine := lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, helpView)
+	tooltipContent := fullWidthStyle.Render(m.getSelectedDeviceInfo())
+	tooltip := tooltipStyle.Render(tooltipContent)
 
 	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), statusLine)
 }
@@ -133,6 +135,18 @@ func (m Model) View() string {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+
+	case []lib.Device:
+		m.roots = lib.BuildDeviceTree(msg)
+		m.refreshTreeModel()
+
+		m.log = lib.GetLog()
+		m.logContent = m.formatLogContent()
+		m.logViewport.SetContent(m.logContent)
+		m.clampLogViewport()
+
+		m.treeViewport.SetContent(m.renderTree())
+		return m, waitForUpdate(m.updates)
 
 	case tea.WindowSizeMsg:
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
@@ -149,21 +163,76 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusedView = treeView
 			}
 			return m, nil
-		}
-	}
 
-	if m.focusedView == treeView {
-		m.treeViewport, cmd = m.treeViewport.Update(msg)
-	} else if m.focusedView == logView {
-		m.logViewport, cmd = m.logViewport.Update(msg)
+		case key.Matches(msg, keys.Up):
+			if m.focusedView == treeView && m.treeCursor > 0 {
+				m.treeCursor--
+				m.refreshTreeModel()
+			} else {
+				m.logViewport, cmd = m.logViewport.Update(msg)
+				m.clampLogViewport()
+			}
+			return m, cmd
+
+		case key.Matches(msg, keys.Down):
+			if m.focusedView == treeView {
+				if m.treeCursor < (m.nodeCount - 1) {
+					m.treeCursor++
+					m.refreshTreeModel()
+				}
+			} else {
+				m.logViewport, cmd = m.logViewport.Update(msg)
+				m.clampLogViewport()
+			}
+			return m, cmd
+
+		case key.Matches(msg, keys.Collapse):
+			if m.focusedView == treeView {
+				if node := m.selectedDevice; node != nil && len(node.Children) > 0 {
+					m.collapsed[node] = true
+					m.refreshTreeModel()
+				}
+			}
+			return m, nil
+
+		case key.Matches(msg, keys.Expand):
+			if m.focusedView == treeView {
+				if node := m.selectedDevice; node != nil && len(node.Children) > 0 {
+					delete(m.collapsed, node)
+					m.refreshTreeModel()
+				}
+			}
+			return m, nil
+
+		case key.Matches(msg, keys.Refresh):
+			lastUpdate, newDevices := lib.Refresh()
+			m.updates <- newDevices
+			m.lastUpdated = lastUpdate
+		}
 	}
 
 	return m, cmd
 }
 
+// clampLogViewport prevents the log viewport from scrolling past the available content.
+func (m *Model) clampLogViewport() {
+	if m.logViewport.Height <= 0 {
+		return
+	}
+
+	contentHeight := lipgloss.Height(m.logContent)
+	maxYOffset := contentHeight - m.logViewport.Height
+	if maxYOffset < 0 {
+		maxYOffset = 0
+	}
+	if m.logViewport.YOffset > maxYOffset {
+		m.logViewport.SetYOffset(maxYOffset)
+		return
+	}
+}
+
 func (m *Model) recalculateDimensions() {
-	helpHeight := lipgloss.Height(m.help.View(keys))
-	remainingHeight := m.windowHeight - helpHeight - tooltipHeight
+	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
 
 	m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
 	m.treeViewport.Width = m.windowWidth - borderSpacing
@@ -171,5 +240,5 @@ func (m *Model) recalculateDimensions() {
 	m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
 	m.logViewport.Width = m.windowWidth - borderSpacing
 
-	m.help.Width = m.windowWidth
+	m.clampLogViewport()
 }
