@@ -226,7 +226,7 @@ func BuildDeviceTree(devices []Device) []*TreeNode {
 
 	for _, dev := range devices {
 		newNode := dev.treeNode()
-		nodes = append(nodes, &(newNode))
+		nodes = append(nodes, &newNode)
 	}
 
 	// Loop through each node to assign children
