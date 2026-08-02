@@ -1,4 +1,9 @@
 # USB Tree
+> **Note**
+>
+> The Arch User Repository (AUR) is currently undergoing maintenance and is temporarily not accepting package updates. Any pending PKGBUILD changes will be pushed as soon as the AUR is available again.
+>
+
 
 [![Looking for Work](https://img.shields.io/badge/hiring-I'm%20looking%20for%20work-blue?style=flat-square)](https://www.linkedin.com/in/alastair-ozmond-108512179)
 [![Build Status](https://github.com/AOzmond/usb-tree/actions/workflows/release.yml/badge.svg)](https://github.com/AOzmond/usb-tree/actions)
