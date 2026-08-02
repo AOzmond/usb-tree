@@ -3,6 +3,7 @@ import { writable } from "svelte/store"
 
 export type TooltipContent = {
   bus: number | null
+  devNum: number | null
   vendorId: string | null
   productId: string | null
 }

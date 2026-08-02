@@ -6,6 +6,7 @@ export class Device {
   productId: string
   speed: string
   bus: number
+  devNum: number
   state: string
 
   static createFrom(source: any = {}) {
@@ -20,6 +21,7 @@ export class Device {
     this.productId = source["productId"]
     this.speed = source["speed"]
     this.bus = source["bus"]
+    this.devNum = source["devNum"]
     this.state = source["state"]
   }
 }

@@ -30,6 +30,7 @@
 
   const tooltipContent = $derived(() => ({
     bus: node.device?.bus ?? undefined,
+    devNum: node.device?.devNum ?? undefined,
     vendorId: node.device?.vendorId ?? undefined,
     productId: node.device?.productId ?? undefined,
   }))
