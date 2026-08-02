@@ -20,6 +20,7 @@
   let vendorLabel = $derived(tooltipState.content?.vendorId?.trim() ?? "")
   let productLabel = $derived(tooltipState.content?.productId?.trim() ?? "")
   let busLabel = $derived(formatBus(tooltipState.content?.bus ?? undefined) ?? "")
+  let deviceLabel = $derived(formatBus(tooltipState.content?.devNum ?? undefined) ?? "")
   let idLabel = $derived(buildIdLabel(vendorLabel, productLabel))
 </script>
 
@@ -33,7 +34,7 @@
       onpointerenter={() => hideTooltip()}
     >
       <div class="header">
-        <span class="summary">Bus {busLabel}</span>
+        <span class="summary">Bus {busLabel} Device {deviceLabel}</span>
         <span class="id">ID {idLabel}</span>
       </div>
       <span>Click to search on online device database</span>
