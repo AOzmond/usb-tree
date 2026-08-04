@@ -10,10 +10,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type deviceMessage []lib.Device
+
 // waitForUpdate listens to a channel for a slice of lib.Device updateChan and returns a tea.Cmd to process the message.
 func waitForUpdate(sub chan []lib.Device) tea.Cmd {
 	return func() tea.Msg {
-		return <-sub
+		devices := <-sub
+		return deviceMessage(devices)
 	}
 }
 
@@ -42,10 +45,8 @@ func (m *Model) renderTree() string {
 	var deviceTreeSb strings.Builder
 	idx := 0
 
-	totalWidth := m.treeViewport.Width
-
 	for _, root := range m.roots {
-		lines, nextIdx := m.renderNode(root, idx, []bool{}, totalWidth)
+		lines, nextIdx := m.renderNode(root, idx, []bool{})
 		deviceTreeSb.WriteString(strings.Join(lines, "\n"))
 		if nextIdx < m.nodeCount {
 			deviceTreeSb.WriteByte('\n')
@@ -57,7 +58,7 @@ func (m *Model) renderTree() string {
 }
 
 // renderNode recursively renders a node and its children
-func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool, totalWidth int) ([]string, int) {
+func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool) ([]string, int) {
 	isSelected := currentIdx == m.treeCursor
 	idx := currentIdx + 1
 
@@ -65,16 +66,17 @@ func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool,
 	indicators, contentStyle := m.getNodeIndicators(node, contentStyle)
 	prefixStr := m.buildTreePrefix(continues)
 
-	line := m.renderNodeLine(node, prefixStr, indicators, rowStyle, contentStyle, totalWidth)
+	line := m.renderNodeLine(node, prefixStr, indicators, rowStyle, contentStyle)
 	renderedDevices := []string{line}
 
 	// Only render children if not collapsed
 	if !m.collapsed[node.Key()] {
+		lastIdx := len(node.Children) - 1
 		for i, child := range node.Children {
-			isLast := i == len(node.Children)-1
+			isLast := i == lastIdx
 			childContinues := append(continues, !isLast)
 			var childLines []string
-			childLines, idx = m.renderNode(child, idx, childContinues, totalWidth)
+			childLines, idx = m.renderNode(child, idx, childContinues)
 			renderedDevices = append(renderedDevices, childLines...)
 		}
 	}
@@ -86,15 +88,15 @@ func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool,
 func (m *Model) getNodeStyles(node *lib.TreeNode, isSelected bool) (lipgloss.Style, lipgloss.Style) {
 	rowStyle := windowStyle
 	if isSelected {
-		rowStyle = rowStyle.Background(lipgloss.Color(white)).Foreground(lipgloss.Color("0"))
+		rowStyle = rowStyle.Background(lipgloss.Color(lineHighlightColor)).Foreground(lipgloss.Color(lineHighlightTextColor))
 	}
 
 	contentStyle := rowStyle
 	switch node.State {
 	case lib.StateAdded:
-		contentStyle = contentStyle.Foreground(lipgloss.Color(green))
+		contentStyle = contentStyle.Foreground(lipgloss.Color(addedStateColor))
 	case lib.StateRemoved:
-		contentStyle = contentStyle.Foreground(lipgloss.Color(red))
+		contentStyle = contentStyle.Foreground(lipgloss.Color(removedStateColor))
 	}
 
 	return rowStyle, contentStyle
@@ -107,7 +109,7 @@ func (m *Model) getNodeIndicators(node *lib.TreeNode, contentStyle lipgloss.Styl
 		if m.collapsed[node.Key()] {
 			childrenIndicator = "▶ "
 			if m.hasChangedChild(node) {
-				contentStyle = contentStyle.Foreground(lipgloss.Color(orange))
+				contentStyle = contentStyle.Foreground(lipgloss.Color(childChangeHighlightColor))
 			}
 		} else {
 			childrenIndicator = "▼ "
@@ -147,7 +149,8 @@ func (m *Model) buildTreePrefix(continues []bool) string {
 }
 
 // renderNodeLine generates a formatted string representing a tree node line with styles, truncation, and aligned elements.
-func (m *Model) renderNodeLine(node *lib.TreeNode, prefixStr, indicators string, rowStyle, contentStyle lipgloss.Style, totalWidth int) string {
+func (m *Model) renderNodeLine(node *lib.TreeNode, prefixStr, indicators string, rowStyle, contentStyle lipgloss.Style) string {
+	totalWidth := m.treeViewport.Width
 	name := strings.TrimSpace(node.Name)
 	speed := formatSpeed(node.Speed)
 

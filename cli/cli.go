@@ -33,13 +33,26 @@ type Model struct {
 }
 
 const (
-	gray          = "#888888"
-	white         = "#ffffff"
-	hotPink       = "#ff028d"
-	orange        = "#FF5c00"
-	red           = "#FF0000"
-	green         = "#00FF00"
-	background    = "#003a3a"
+	gray    = "#888888"
+	white   = "#ffffff"
+	black   = "#000000"
+	hotPink = "#ff028d"
+	orange  = "#FF5c00"
+	red     = "#FF0000"
+	green   = "#00FF00"
+	cyan    = "#003a3a"
+
+	background                = cyan
+	inactiveNodeBorderColor   = gray
+	lineHighlightColor        = white
+	lineHighlightTextColor    = black
+	tooltipTextColor          = white
+	activeNodeBorderColor     = hotPink
+	edgeHighlightChangeColor  = orange
+	childChangeHighlightColor = orange
+	removedStateColor         = red
+	addedStateColor           = green
+
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
 	tooltipHeight = 5
@@ -53,18 +66,18 @@ const (
 var (
 	activeStyle = lipgloss.NewStyle().
 			Border(lipgloss.DoubleBorder()).
-			BorderForeground(lipgloss.Color(hotPink)).
+			BorderForeground(lipgloss.Color(activeNodeBorderColor)).
 			BorderBackground(lipgloss.Color(background)).
 			Background(lipgloss.Color(background))
 
 	inactiveStyle = lipgloss.NewStyle().
-			BorderForeground(lipgloss.Color(gray)).
+			BorderForeground(lipgloss.Color(inactiveNodeBorderColor)).
 			Border(lipgloss.DoubleBorder()).
 			BorderBackground(lipgloss.Color(background)).
 			Background(lipgloss.Color(background))
 
 	tooltipStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(white)).
+			Foreground(lipgloss.Color(tooltipTextColor)).
 			Background(lipgloss.Color(background)).
 			Border(lipgloss.RoundedBorder()).
 			BorderBackground(lipgloss.Color(background))
@@ -139,10 +152,10 @@ func (m Model) View() string {
 		bottomBorderColor := treeStyle.GetBorderBottomForeground()
 
 		if above {
-			topBorderColor = lipgloss.Color(orange)
+			topBorderColor = lipgloss.Color(edgeHighlightChangeColor)
 		}
 		if below {
-			bottomBorderColor = lipgloss.Color(orange)
+			bottomBorderColor = lipgloss.Color(edgeHighlightChangeColor)
 		}
 
 		treeStyle = treeStyle.Border(borderStyle, true, true, true, true).
@@ -160,8 +173,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 
-	case []lib.Device:
-		m.roots = lib.BuildDeviceTree(msg)
+	case deviceMessage:
+		devices := []lib.Device(msg)
+		m.roots = lib.BuildDeviceTree(devices)
 		m.updateNodeCount()
 		m.refreshContent()
 		return m, waitForUpdate(m.updateChan)
@@ -231,9 +245,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case key.Matches(msg, keys.Refresh):
-			lastUpdate, newDevices := lib.Refresh()
-			m.updateChan <- newDevices
-			m.lastUpdated = lastUpdate
+			lib.Refresh()
+			//m.updateChan <- newDevices
+			//m.lastUpdated = lastUpdate
 		}
 	}
 
@@ -243,7 +257,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // refreshContent updateChan the UI content, including status line, tree viewport, and log viewport, based on current state.
 func (m *Model) refreshContent() {
 	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
-	lastUpdatedWidth := lipgloss.Width(lastUpdatedString)
+	lastUpdatedWidth := lipgloss.Width(lastUpdatedString) + 1
 
 	helpView := m.helpModel.View(keys)
 
@@ -256,7 +270,7 @@ func (m *Model) refreshContent() {
 	m.statusLine = lipgloss.NewStyle().
 		Background(lipgloss.Color(background)).
 		Width(m.windowWidth).
-		Render(lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, renderedHelp))
+		Render(lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, " ", renderedHelp))
 
 	m.recalculateDimensions(m.statusLine)
 	m.treeViewport.SetContent(m.renderTree())
