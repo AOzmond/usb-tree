@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"strings"
 	"time"
 
 	"charm.land/bubbles/v2/help"
@@ -23,10 +24,12 @@ type Model struct {
 	roots          []*lib.TreeNode
 	collapsed      map[string]bool // tracks which nodes are collapsed by their unique key
 	treeViewport   viewport.Model
-	logViewport    viewport.Model
 	treeCursor     int
 	nodeCount      int
 	selectedDevice *lib.Device
+	logViewport    viewport.Model
+	log            []lib.Log
+	logContent     string
 	helpModel      help.Model
 	focusedView    focusIndex
 	lastUpdated    time.Time
@@ -60,16 +63,6 @@ var (
 
 	statusStyle = windowStyle
 )
-
-// ***** Placeholder content *****
-// TODO: replace with real data
-
-var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
-00:00:01 Device abc 100000 Gbps
-00:00:02 Device pqr 100000 Gbps
-00:00:03 Device xyz 100000 Gbps`
-
-// ***** End of placeholder content *****
 
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
@@ -176,6 +169,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.updateSelectedDevice()
 		m.refreshContent()
 		m.scrollToCursor()
+
+		m.log = lib.GetLog()
+		m.logContent = m.formatLogContent()
+		m.logViewport.SetContent(m.logContent)
+		m.clampLogViewport()
+
 		return m, waitForUpdate(m.updateChan)
 
 	case tea.WindowSizeMsg:
@@ -274,7 +273,7 @@ func (m *Model) refreshContent() {
 
 	m.recalculateDimensions(m.statusLine)
 	m.treeViewport.SetContent(m.renderTree())
-	m.logViewport.SetContent(placeholderLogContent)
+	m.logViewport.SetContent(m.logContent)
 }
 
 // recalculateDimensions adjusts the dimensions of the tree and log viewports based on window size and status line height.
@@ -287,4 +286,52 @@ func (m *Model) recalculateDimensions(statusLine string) {
 
 	m.logViewport.SetHeight(remainingHeight - m.treeViewport.Height() - (2 * borderSpacing))
 	m.logViewport.SetWidth(m.windowWidth - borderSpacing)
+}
+
+func (m *Model) formatLogContent() string {
+	var sb strings.Builder
+	for _, entry := range m.log {
+		sb.WriteString(m.formatLogEntry(entry))
+		sb.WriteByte('\n')
+	}
+	return sb.String()
+}
+
+func (m *Model) formatLogEntry(log lib.Log) string {
+	addedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(green))
+	removedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(red))
+	stateStyle := lipgloss.NewStyle()
+	stateString := " "
+	if log.State == lib.StateRemoved {
+		stateStyle = removedStyle
+		stateString = "-"
+	} else if log.State == lib.StateAdded {
+		stateStyle = addedStyle
+		stateString = "+"
+	}
+	lhsString := stateStyle.Render(log.Time.Format("15:04:05") + " " + stateString + " " + log.Text + " ")
+	rhsString := formatSpeed(log.Speed)
+	paddingSize := m.windowWidth - lipgloss.Width(rhsString) - lipgloss.Width(lhsString) - borderSpacing
+	if paddingSize < 0 {
+		paddingSize = 0
+	}
+	padding := strings.Repeat(" ", paddingSize)
+	return lipgloss.JoinHorizontal(lipgloss.Left, lhsString, padding, rhsString)
+}
+
+// clampLogViewport prevents the log viewport from scrolling past the available content.
+func (m *Model) clampLogViewport() {
+	if m.logViewport.Height() <= 0 {
+		return
+	}
+
+	contentHeight := lipgloss.Height(m.logContent)
+	maxYOffset := contentHeight - m.logViewport.Height()
+	if maxYOffset < 0 {
+		maxYOffset = 0
+	}
+	if m.logViewport.YOffset() > maxYOffset {
+		m.logViewport.SetYOffset(maxYOffset)
+		return
+	}
 }
