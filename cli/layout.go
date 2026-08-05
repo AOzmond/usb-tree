@@ -1,6 +1,12 @@
 package cli
 
-import "charm.land/lipgloss/v2"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	"charm.land/lipgloss/v2"
+)
 
 // refreshContent updateChan the UI content, including status line, tree viewport, and log viewport, based on current state.
 func (m *Model) refreshContent() {
@@ -34,4 +40,22 @@ func (m *Model) recalculateDimensions(statusLine string) {
 
 	m.logViewport.SetHeight(remainingHeight - m.treeViewport.Height() - (2 * borderSpacing))
 	m.logViewport.SetWidth(m.windowWidth - borderSpacing)
+}
+
+// formatSpeed formats the speed string to have a uniform size and units.
+func formatSpeed(speed string) string {
+	if speed == "" {
+		return ""
+	}
+
+	speed = strings.TrimSpace(speed)
+
+	val, _ := strconv.ParseFloat(speed, 64)
+
+	if val >= 1000 {
+		// Convert to Gbps
+		return fmt.Sprintf("%8s", fmt.Sprintf("%g Gbps", val/1000))
+	}
+
+	return fmt.Sprintf("%8s", fmt.Sprintf("%g Mbps", val))
 }
