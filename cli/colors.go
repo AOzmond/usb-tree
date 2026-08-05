@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/charmbracelet/lipgloss"
+import "charm.land/lipgloss/v2"
 
 const (
 	gray      = "#888888"
@@ -16,7 +16,9 @@ const (
 	coralRed  = "#FF6B6B"
 	paleGreen = "#98FB98"
 	plum      = "#DDA0DD"
+)
 
+var (
 	backgroundColor           = lipgloss.Color(cyan)
 	inactiveNodeBorderColor   = lipgloss.Color(gray)
 	lineHighlightColor        = lipgloss.Color(white)

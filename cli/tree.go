@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/AOzmond/usb-tree/lib"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type deviceMessage []lib.Device
@@ -153,7 +153,7 @@ func (m *Model) buildTreePrefix(continues []bool) string {
 
 // renderNodeLine generates a formatted string representing a tree node line with styles, truncation, and aligned elements.
 func (m *Model) renderNodeLine(node *lib.TreeNode, prefixStr, indicators string, rowStyle, contentStyle lipgloss.Style) string {
-	totalWidth := m.treeViewport.Width
+	totalWidth := m.treeViewport.Width()
 	name := strings.TrimSpace(node.Name)
 	speed := formatSpeed(node.Speed)
 
@@ -219,7 +219,7 @@ func (m *Model) scrollToCursor() {
 
 // scrollUpToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves up
 func (m *Model) scrollUpToCursor() {
-	viewportHeight := m.treeViewport.Height
+	viewportHeight := m.treeViewport.Height()
 	// Guard against uninitialized or invalid viewport dimensions
 	if viewportHeight <= 0 || m.nodeCount <= 0 {
 		return
@@ -230,14 +230,14 @@ func (m *Model) scrollUpToCursor() {
 		padding = 2
 	}
 
-	if m.treeCursor < (m.treeViewport.YOffset + padding) {
+	if m.treeCursor < (m.treeViewport.YOffset() + padding) {
 		m.treeViewport.SetYOffset(m.treeCursor - padding)
 	}
 }
 
 // scrollUpToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves down
 func (m *Model) scrollDownToCursor() {
-	viewportHeight := m.treeViewport.Height
+	viewportHeight := m.treeViewport.Height()
 	// Guard against uninitialized or invalid viewport dimensions
 	if viewportHeight <= 0 || m.nodeCount <= 0 {
 		return
@@ -248,7 +248,7 @@ func (m *Model) scrollDownToCursor() {
 		padding = 3
 	}
 
-	if m.treeCursor > (m.treeViewport.YOffset + viewportHeight - padding) {
+	if m.treeCursor > (m.treeViewport.YOffset() + viewportHeight - padding) {
 		m.treeViewport.SetYOffset(m.treeCursor - viewportHeight + padding)
 	}
 }
@@ -313,9 +313,9 @@ func (m *Model) checkOffscreenChanges() (above bool, below bool) {
 
 func (m *Model) checkNodeOffscreenChanges(node *lib.TreeNode, currentIdx int, above bool, below bool) (bool, bool, int) {
 	if node.State != lib.StateNormal {
-		if currentIdx < m.treeViewport.YOffset {
+		if currentIdx < m.treeViewport.YOffset() {
 			above = true
-		} else if currentIdx >= m.treeViewport.YOffset+m.treeViewport.Height {
+		} else if currentIdx >= m.treeViewport.YOffset()+m.treeViewport.Height() {
 			below = true
 		}
 	}
@@ -323,9 +323,9 @@ func (m *Model) checkNodeOffscreenChanges(node *lib.TreeNode, currentIdx int, ab
 	// check children within collapsed nodes
 	if m.collapsed[node.Key()] {
 		if m.hasChangedChild(node) {
-			if currentIdx < m.treeViewport.YOffset {
+			if currentIdx < m.treeViewport.YOffset() {
 				above = true
-			} else if currentIdx >= m.treeViewport.YOffset+m.treeViewport.Height {
+			} else if currentIdx >= m.treeViewport.YOffset()+m.treeViewport.Height() {
 				below = true
 			}
 		}

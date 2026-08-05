@@ -3,12 +3,12 @@ package cli
 import (
 	"time"
 
+	"charm.land/bubbles/v2/help"
+	"charm.land/bubbles/v2/key"
+	"charm.land/bubbles/v2/viewport"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/AOzmond/usb-tree/lib"
-	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type focusIndex int
@@ -44,9 +44,7 @@ const (
 )
 
 var (
-	windowStyle = lipgloss.NewStyle().
-			Background(backgroundColor).
-			BorderBackground(backgroundColor)
+	windowStyle = lipgloss.NewStyle()
 
 	activeStyle = windowStyle.
 			Border(lipgloss.DoubleBorder()).
@@ -107,9 +105,9 @@ func (m Model) Init() tea.Cmd {
 }
 
 // View renders the current state of the Model, combining styled views for tree, log, tooltip, and status line.
-func (m Model) View() string {
+func (m Model) View() tea.View {
 	if m.windowWidth == 0 || m.windowHeight == 0 {
-		return ""
+		return tea.NewView("")
 	}
 	var treeStyle, logStyle lipgloss.Style
 
@@ -141,11 +139,21 @@ func (m Model) View() string {
 	}
 
 	tooltip := tooltipStyle.
-		Border(lipgloss.RoundedBorder()).
-		Width(m.windowWidth - borderSpacing).
+		Width(m.windowWidth).
 		Render(m.getSelectedDeviceInfo())
 
-	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), m.statusLine)
+	appContent := lipgloss.JoinVertical(
+		lipgloss.Center,
+		treeStyle.Render(m.treeViewport.View()),
+		tooltip,
+		logStyle.Render(m.logViewport.View()),
+		m.statusLine,
+	)
+
+	view := tea.NewView(appContent)
+	view.AltScreen = true
+	view.BackgroundColor = backgroundColor
+	return view
 }
 
 // Update processes incoming messages, updateChan the model state, and returns the updated model and an optional command.
@@ -262,9 +270,9 @@ func (m *Model) recalculateDimensions(statusLine string) {
 	m.statusHeight = lipgloss.Height(statusLine)
 	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
 
-	m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
-	m.treeViewport.Width = m.windowWidth - borderSpacing
+	m.treeViewport.SetHeight(int(float64(remainingHeight)*splitRatio) - borderSpacing)
+	m.treeViewport.SetWidth(m.windowWidth - borderSpacing)
 
-	m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
-	m.logViewport.Width = m.windowWidth - borderSpacing
+	m.logViewport.SetHeight(remainingHeight - m.treeViewport.Height() - (2 * borderSpacing))
+	m.logViewport.SetWidth(m.windowWidth - borderSpacing)
 }
