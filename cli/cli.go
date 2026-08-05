@@ -46,24 +46,6 @@ const (
 	logView
 )
 
-var (
-	windowStyle = lipgloss.NewStyle()
-
-	activeStyle = windowStyle.
-			Border(lipgloss.DoubleBorder()).
-			BorderForeground(activeNodeBorderColor)
-
-	inactiveStyle = windowStyle.
-			BorderForeground(inactiveNodeBorderColor).
-			Border(lipgloss.DoubleBorder())
-
-	tooltipStyle = windowStyle.
-			Foreground(tooltipTextColor).
-			Border(lipgloss.RoundedBorder())
-
-	statusStyle = windowStyle
-)
-
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
 	updates := make(chan []lib.Device, 1)
@@ -298,15 +280,12 @@ func (m *Model) formatLogContent() string {
 }
 
 func (m *Model) formatLogEntry(log lib.Log) string {
-	addedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(green))
-	removedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(red))
-	stateStyle := lipgloss.NewStyle()
 	stateString := " "
 	if log.State == lib.StateRemoved {
-		stateStyle = removedStyle
+		stateStyle = removedLogStyle
 		stateString = "-"
 	} else if log.State == lib.StateAdded {
-		stateStyle = addedStyle
+		stateStyle = addedLogStyle
 		stateString = "+"
 	}
 	lhsString := stateStyle.Render(log.Time.Format("15:04:05") + " " + stateString + " " + log.Text + " ")
