@@ -61,6 +61,9 @@ func (m *Model) renderTree() string {
 func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool) ([]string, int) {
 	isSelected := currentIdx == m.treeCursor
 	idx := currentIdx + 1
+	if isSelected {
+		m.selectedDevice = &node.Device
+	}
 
 	rowStyle, contentStyle := m.getNodeStyles(node, isSelected)
 	indicators, contentStyle := m.getNodeIndicators(node, contentStyle)
@@ -88,15 +91,15 @@ func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool)
 func (m *Model) getNodeStyles(node *lib.TreeNode, isSelected bool) (lipgloss.Style, lipgloss.Style) {
 	rowStyle := windowStyle
 	if isSelected {
-		rowStyle = rowStyle.Background(lipgloss.Color(lineHighlightColor)).Foreground(lipgloss.Color(lineHighlightTextColor))
+		rowStyle = rowStyle.Background(lineHighlightColor).Foreground(lineHighlightTextColor)
 	}
 
 	contentStyle := rowStyle
 	switch node.State {
 	case lib.StateAdded:
-		contentStyle = contentStyle.Foreground(lipgloss.Color(addedStateColor))
+		contentStyle = contentStyle.Foreground(addedStateColor)
 	case lib.StateRemoved:
-		contentStyle = contentStyle.Foreground(lipgloss.Color(removedStateColor))
+		contentStyle = contentStyle.Foreground(removedStateColor)
 	}
 
 	return rowStyle, contentStyle
@@ -109,7 +112,7 @@ func (m *Model) getNodeIndicators(node *lib.TreeNode, contentStyle lipgloss.Styl
 		if m.collapsed[node.Key()] {
 			childrenIndicator = "▶ "
 			if m.hasChangedChild(node) {
-				contentStyle = contentStyle.Foreground(lipgloss.Color(childChangeHighlightColor))
+				contentStyle = contentStyle.Foreground(childChangeHighlightColor)
 			}
 		} else {
 			childrenIndicator = "▼ "
@@ -336,4 +339,39 @@ func (m *Model) checkNodeOffscreenChanges(node *lib.TreeNode, currentIdx int, ab
 	}
 
 	return above, below, idx
+}
+
+// getSelectedDeviceInfo returns formatted device info for the currently selected node
+func (m *Model) getSelectedDeviceInfo() string {
+	if m.selectedDevice == nil {
+		return ""
+	}
+	node := m.selectedDevice
+
+	busStyle := windowStyle.Foreground(busTextColor)
+	deviceStyle := windowStyle.Foreground(deviceTextColor)
+	vidStyle := windowStyle.Foreground(vidTextColor)
+	pidStyle := windowStyle.Foreground(pidTextColor)
+	nameStyle := windowStyle.Foreground(nameTextColor)
+	linkStyle := windowStyle.Foreground(linkTextColor)
+
+	busString := busStyle.Render("Bus: ", strconv.Itoa(node.Bus))
+	deviceString := deviceStyle.Render(" Device: ", strconv.Itoa(node.DevNum))
+	vidString := vidStyle.Render(" VID: ", node.VendorID)
+	pidString := pidStyle.Render(" PID: ", node.ProductID)
+
+	deviceInfo := busString + deviceString + vidString + pidString
+
+	nameString := nameStyle.Render(node.Name)
+	linkString := linkStyle.Render(getDbAddress(node.VendorID, node.ProductID))
+
+	tooltipString := deviceInfo + "\n" + nameString + "\n" + linkString
+
+	return tooltipString
+}
+
+// getDbAddress returns the USB-ID database link for the given VID and PID
+func getDbAddress(vid string, pid string) string {
+	baseAddress := "https://the-sz.com/products/usbid/?v="
+	return baseAddress + vid + "&p=" + pid
 }
