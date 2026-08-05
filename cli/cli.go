@@ -3,12 +3,12 @@ package cli
 import (
 	"time"
 
+	"charm.land/bubbles/v2/help"
+	"charm.land/bubbles/v2/key"
+	"charm.land/bubbles/v2/viewport"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/AOzmond/usb-tree/lib"
-	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type focusIndex int
@@ -26,33 +26,13 @@ type Model struct {
 	logViewport    viewport.Model
 	treeCursor     int
 	nodeCount      int
-	selectedDevice lib.Device
+	selectedDevice *lib.Device
 	helpModel      help.Model
 	focusedView    focusIndex
 	lastUpdated    time.Time
 }
 
 const (
-	gray    = "#888888"
-	white   = "#ffffff"
-	black   = "#000000"
-	hotPink = "#ff028d"
-	orange  = "#FF5c00"
-	red     = "#FF0000"
-	green   = "#00FF00"
-	cyan    = "#003a3a"
-
-	background                = cyan
-	inactiveNodeBorderColor   = gray
-	lineHighlightColor        = white
-	lineHighlightTextColor    = black
-	tooltipTextColor          = white
-	activeNodeBorderColor     = hotPink
-	edgeHighlightChangeColor  = orange
-	childChangeHighlightColor = orange
-	removedStateColor         = red
-	addedStateColor           = green
-
 	splitRatio    = 0.7 // Ratio of tree view to log view
 	borderSpacing = 2   // the space taken up by the border
 	tooltipHeight = 5
@@ -64,32 +44,25 @@ const (
 )
 
 var (
-	activeStyle = lipgloss.NewStyle().
+	windowStyle = lipgloss.NewStyle()
+
+	activeStyle = windowStyle.
 			Border(lipgloss.DoubleBorder()).
-			BorderForeground(lipgloss.Color(activeNodeBorderColor)).
-			BorderBackground(lipgloss.Color(background)).
-			Background(lipgloss.Color(background))
+			BorderForeground(activeNodeBorderColor)
 
-	inactiveStyle = lipgloss.NewStyle().
-			BorderForeground(lipgloss.Color(inactiveNodeBorderColor)).
-			Border(lipgloss.DoubleBorder()).
-			BorderBackground(lipgloss.Color(background)).
-			Background(lipgloss.Color(background))
+	inactiveStyle = windowStyle.
+			BorderForeground(inactiveNodeBorderColor).
+			Border(lipgloss.DoubleBorder())
 
-	tooltipStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(tooltipTextColor)).
-			Background(lipgloss.Color(background)).
-			Border(lipgloss.RoundedBorder()).
-			BorderBackground(lipgloss.Color(background))
+	tooltipStyle = windowStyle.
+			Foreground(tooltipTextColor).
+			Border(lipgloss.RoundedBorder())
 
-	windowStyle = lipgloss.NewStyle().
-			Background(lipgloss.Color(background))
+	statusStyle = windowStyle
 )
 
 // ***** Placeholder content *****
 // TODO: replace with real data
-
-var placeHolderDevice = "Bus 001 \nGaming Mouse \nhttps://www.google.com"
 
 var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 00:00:01 Device abc 100000 Gbps
@@ -101,22 +74,19 @@ var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
 	updates := make(chan []lib.Device, 1)
+
 	helpModel := help.New()
-	helpModel.Styles.FullDesc = windowStyle
-	helpModel.Styles.FullKey = windowStyle
-	helpModel.Styles.FullSeparator = windowStyle
-	helpModel.Styles.Ellipsis = windowStyle
 	helpModel.Styles.ShortDesc = windowStyle
 	helpModel.Styles.ShortKey = windowStyle
 	helpModel.Styles.ShortSeparator = windowStyle
+
 	m := Model{
-		selectedDevice: lib.Device{},
-		helpModel:      helpModel,
-		focusedView:    treeView,
-		lastUpdated:    time.Now(),
-		treeCursor:     0,
-		updateChan:     updates,
-		collapsed:      make(map[string]bool),
+		helpModel:   helpModel,
+		focusedView: treeView,
+		lastUpdated: time.Now(),
+		treeCursor:  0,
+		updateChan:  updates,
+		collapsed:   make(map[string]bool),
 	}
 	return m
 }
@@ -130,9 +100,9 @@ func (m Model) Init() tea.Cmd {
 }
 
 // View renders the current state of the Model, combining styled views for tree, log, tooltip, and status line.
-func (m Model) View() string {
+func (m Model) View() tea.View {
 	if m.windowWidth == 0 || m.windowHeight == 0 {
-		return ""
+		return tea.NewView("")
 	}
 	var treeStyle, logStyle lipgloss.Style
 
@@ -152,10 +122,10 @@ func (m Model) View() string {
 		bottomBorderColor := treeStyle.GetBorderBottomForeground()
 
 		if above {
-			topBorderColor = lipgloss.Color(edgeHighlightChangeColor)
+			topBorderColor = edgeHighlightChangeColor
 		}
 		if below {
-			bottomBorderColor = lipgloss.Color(edgeHighlightChangeColor)
+			bottomBorderColor = edgeHighlightChangeColor
 		}
 
 		treeStyle = treeStyle.Border(borderStyle, true, true, true, true).
@@ -163,9 +133,22 @@ func (m Model) View() string {
 			BorderBottomForeground(bottomBorderColor)
 	}
 
-	tooltip := tooltipStyle.Width(m.windowWidth - borderSpacing).Render(placeHolderDevice)
+	tooltip := tooltipStyle.
+		Width(m.windowWidth).
+		Render(m.getSelectedDeviceInfo())
 
-	return lipgloss.JoinVertical(lipgloss.Center, treeStyle.Render(m.treeViewport.View()), tooltip, logStyle.Render(m.logViewport.View()), m.statusLine)
+	appContent := lipgloss.JoinVertical(
+		lipgloss.Center,
+		treeStyle.Render(m.treeViewport.View()),
+		tooltip,
+		logStyle.Render(m.logViewport.View()),
+		m.statusLine,
+	)
+
+	view := tea.NewView(appContent)
+	view.AltScreen = true
+	view.BackgroundColor = backgroundColor
+	return view
 }
 
 // Update processes incoming messages, updateChan the model state, and returns the updated model and an optional command.
@@ -175,8 +158,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case deviceMessage:
 		devices := []lib.Device(msg)
+		previousKey := ""
+		if m.selectedDevice != nil {
+			previousKey = m.selectedDevice.Key()
+		}
 		m.roots = lib.BuildDeviceTree(devices)
 		m.updateNodeCount()
+		if previousKey != "" {
+			if cursor, found := m.visibleNodeIndexByKey(previousKey); found {
+				m.treeCursor = cursor
+			} else if m.treeCursor >= m.nodeCount {
+				m.treeCursor = max(0, m.nodeCount-1)
+			}
+		} else {
+			m.treeCursor = 0
+		}
+		m.updateSelectedDevice()
 		m.refreshContent()
 		return m, waitForUpdate(m.updateChan)
 
@@ -203,6 +200,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Up):
 			if m.focusedView == treeView && m.treeCursor > 0 {
 				m.treeCursor--
+				m.updateSelectedDevice()
 				m.updateNodeCount()
 				m.refreshContent()
 				m.scrollUpToCursor()
@@ -212,6 +210,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Down):
 			if m.focusedView == treeView && m.treeCursor < (m.nodeCount-1) {
 				m.treeCursor++
+				m.updateSelectedDevice()
 				m.updateNodeCount()
 				m.refreshContent()
 				m.scrollDownToCursor()
@@ -226,6 +225,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.treeCursor--
 					}
 					m.updateNodeCount()
+					m.updateSelectedDevice()
 					m.refreshContent()
 					m.scrollUpToCursor()
 				}
@@ -238,6 +238,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					delete(m.collapsed, node.Key())
 					m.treeCursor++
 					m.updateNodeCount()
+					m.updateSelectedDevice()
 					m.refreshContent()
 					m.scrollDownToCursor()
 				}
@@ -245,9 +246,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case key.Matches(msg, keys.Refresh):
-			lib.Refresh()
-			//m.updateChan <- newDevices
-			//m.lastUpdated = lastUpdate
+			lastUpdate, _ := lib.Refresh()
+			m.lastUpdated = lastUpdate
 		}
 	}
 
@@ -261,14 +261,13 @@ func (m *Model) refreshContent() {
 
 	helpView := m.helpModel.View(keys)
 
-	helpViewStyle := lipgloss.NewStyle().
+	helpViewStyle := windowStyle.
 		Width(m.windowWidth - lastUpdatedWidth).
 		Align(lipgloss.Center)
 
 	renderedHelp := helpViewStyle.Render(helpView)
 
-	m.statusLine = lipgloss.NewStyle().
-		Background(lipgloss.Color(background)).
+	m.statusLine = statusStyle.
 		Width(m.windowWidth).
 		Render(lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, " ", renderedHelp))
 
@@ -282,9 +281,9 @@ func (m *Model) recalculateDimensions(statusLine string) {
 	m.statusHeight = lipgloss.Height(statusLine)
 	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
 
-	m.treeViewport.Height = int(float64(remainingHeight)*splitRatio) - borderSpacing
-	m.treeViewport.Width = m.windowWidth - borderSpacing
+	m.treeViewport.SetHeight(int(float64(remainingHeight)*splitRatio) - borderSpacing)
+	m.treeViewport.SetWidth(m.windowWidth - borderSpacing)
 
-	m.logViewport.Height = remainingHeight - m.treeViewport.Height - (2 * borderSpacing)
-	m.logViewport.Width = m.windowWidth - borderSpacing
+	m.logViewport.SetHeight(remainingHeight - m.treeViewport.Height() - (2 * borderSpacing))
+	m.logViewport.SetWidth(m.windowWidth - borderSpacing)
 }

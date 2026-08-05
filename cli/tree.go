@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/AOzmond/usb-tree/lib"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type deviceMessage []lib.Device
@@ -84,19 +84,57 @@ func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool)
 	return renderedDevices, idx
 }
 
+// updateSelectedDevice keeps the selected device in sync with the cursor.
+func (m *Model) updateSelectedDevice() {
+	node := m.getNodeAtCursor()
+	if node == nil {
+		m.selectedDevice = nil
+		return
+	}
+	m.selectedDevice = &node.Device
+}
+
+// visibleNodeIndexByKey finds a device's current cursor index.
+func (m *Model) visibleNodeIndexByKey(key string) (int, bool) {
+	index := 0
+	var visit func(*lib.TreeNode) (int, bool)
+	visit = func(node *lib.TreeNode) (int, bool) {
+		if node.Device.Key() == key {
+			return index, true
+		}
+		index++
+		if m.collapsed[node.Key()] {
+			return 0, false
+		}
+		for _, child := range node.Children {
+			if foundIndex, found := visit(child); found {
+				return foundIndex, true
+			}
+		}
+		return 0, false
+	}
+
+	for _, root := range m.roots {
+		if foundIndex, found := visit(root); found {
+			return foundIndex, true
+		}
+	}
+	return 0, false
+}
+
 // getNodeStyles determines and returns the row and content styles for a tree node based on its state and selection status.
 func (m *Model) getNodeStyles(node *lib.TreeNode, isSelected bool) (lipgloss.Style, lipgloss.Style) {
 	rowStyle := windowStyle
 	if isSelected {
-		rowStyle = rowStyle.Background(lipgloss.Color(lineHighlightColor)).Foreground(lipgloss.Color(lineHighlightTextColor))
+		rowStyle = rowStyle.Background(lineHighlightColor).Foreground(lineHighlightTextColor)
 	}
 
 	contentStyle := rowStyle
 	switch node.State {
 	case lib.StateAdded:
-		contentStyle = contentStyle.Foreground(lipgloss.Color(addedStateColor))
+		contentStyle = contentStyle.Foreground(addedStateColor)
 	case lib.StateRemoved:
-		contentStyle = contentStyle.Foreground(lipgloss.Color(removedStateColor))
+		contentStyle = contentStyle.Foreground(removedStateColor)
 	}
 
 	return rowStyle, contentStyle
@@ -109,7 +147,7 @@ func (m *Model) getNodeIndicators(node *lib.TreeNode, contentStyle lipgloss.Styl
 		if m.collapsed[node.Key()] {
 			childrenIndicator = "▶ "
 			if m.hasChangedChild(node) {
-				contentStyle = contentStyle.Foreground(lipgloss.Color(childChangeHighlightColor))
+				contentStyle = contentStyle.Foreground(childChangeHighlightColor)
 			}
 		} else {
 			childrenIndicator = "▼ "
@@ -150,7 +188,7 @@ func (m *Model) buildTreePrefix(continues []bool) string {
 
 // renderNodeLine generates a formatted string representing a tree node line with styles, truncation, and aligned elements.
 func (m *Model) renderNodeLine(node *lib.TreeNode, prefixStr, indicators string, rowStyle, contentStyle lipgloss.Style) string {
-	totalWidth := m.treeViewport.Width
+	totalWidth := m.treeViewport.Width()
 	name := strings.TrimSpace(node.Name)
 	speed := formatSpeed(node.Speed)
 
@@ -216,7 +254,7 @@ func (m *Model) scrollToCursor() {
 
 // scrollUpToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves up
 func (m *Model) scrollUpToCursor() {
-	viewportHeight := m.treeViewport.Height
+	viewportHeight := m.treeViewport.Height()
 	// Guard against uninitialized or invalid viewport dimensions
 	if viewportHeight <= 0 || m.nodeCount <= 0 {
 		return
@@ -227,14 +265,14 @@ func (m *Model) scrollUpToCursor() {
 		padding = 2
 	}
 
-	if m.treeCursor < (m.treeViewport.YOffset + padding) {
+	if m.treeCursor < (m.treeViewport.YOffset() + padding) {
 		m.treeViewport.SetYOffset(m.treeCursor - padding)
 	}
 }
 
 // scrollUpToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves down
 func (m *Model) scrollDownToCursor() {
-	viewportHeight := m.treeViewport.Height
+	viewportHeight := m.treeViewport.Height()
 	// Guard against uninitialized or invalid viewport dimensions
 	if viewportHeight <= 0 || m.nodeCount <= 0 {
 		return
@@ -245,7 +283,7 @@ func (m *Model) scrollDownToCursor() {
 		padding = 3
 	}
 
-	if m.treeCursor > (m.treeViewport.YOffset + viewportHeight - padding) {
+	if m.treeCursor > (m.treeViewport.YOffset() + viewportHeight - padding) {
 		m.treeViewport.SetYOffset(m.treeCursor - viewportHeight + padding)
 	}
 }
@@ -310,9 +348,9 @@ func (m *Model) checkOffscreenChanges() (above bool, below bool) {
 
 func (m *Model) checkNodeOffscreenChanges(node *lib.TreeNode, currentIdx int, above bool, below bool) (bool, bool, int) {
 	if node.State != lib.StateNormal {
-		if currentIdx < m.treeViewport.YOffset {
+		if currentIdx < m.treeViewport.YOffset() {
 			above = true
-		} else if currentIdx >= m.treeViewport.YOffset+m.treeViewport.Height {
+		} else if currentIdx >= m.treeViewport.YOffset()+m.treeViewport.Height() {
 			below = true
 		}
 	}
@@ -320,9 +358,9 @@ func (m *Model) checkNodeOffscreenChanges(node *lib.TreeNode, currentIdx int, ab
 	// check children within collapsed nodes
 	if m.collapsed[node.Key()] {
 		if m.hasChangedChild(node) {
-			if currentIdx < m.treeViewport.YOffset {
+			if currentIdx < m.treeViewport.YOffset() {
 				above = true
-			} else if currentIdx >= m.treeViewport.YOffset+m.treeViewport.Height {
+			} else if currentIdx >= m.treeViewport.YOffset()+m.treeViewport.Height() {
 				below = true
 			}
 		}
@@ -336,4 +374,39 @@ func (m *Model) checkNodeOffscreenChanges(node *lib.TreeNode, currentIdx int, ab
 	}
 
 	return above, below, idx
+}
+
+// getSelectedDeviceInfo returns formatted device info for the currently selected node
+func (m *Model) getSelectedDeviceInfo() string {
+	if m.selectedDevice == nil {
+		return ""
+	}
+	node := m.selectedDevice
+
+	busStyle := windowStyle.Foreground(busTextColor)
+	deviceStyle := windowStyle.Foreground(deviceTextColor)
+	vidStyle := windowStyle.Foreground(vidTextColor)
+	pidStyle := windowStyle.Foreground(pidTextColor)
+	nameStyle := windowStyle.Foreground(nameTextColor)
+	linkStyle := windowStyle.Foreground(linkTextColor)
+
+	busString := busStyle.Render("Bus: ", strconv.Itoa(node.Bus))
+	deviceString := deviceStyle.Render(" Device: ", strconv.Itoa(node.DevNum))
+	vidString := vidStyle.Render(" VID: ", node.VendorID)
+	pidString := pidStyle.Render(" PID: ", node.ProductID)
+
+	deviceInfo := busString + deviceString + vidString + pidString
+
+	nameString := nameStyle.Render(node.Name)
+	linkString := linkStyle.Render(getDbAddress(node.VendorID, node.ProductID))
+
+	tooltipString := deviceInfo + "\n" + nameString + "\n" + linkString
+
+	return tooltipString
+}
+
+// getDbAddress returns the USB-ID database link for the given VID and PID
+func getDbAddress(vid string, pid string) string {
+	baseAddress := "https://the-sz.com/products/usbid/?v="
+	return baseAddress + vid + "&p=" + pid
 }

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	tea "charm.land/bubbletea/v2"
 	"github.com/AOzmond/usb-tree/cli"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	teaProgram := tea.NewProgram(cli.InitialModel(), tea.WithAltScreen())
+	teaProgram := tea.NewProgram(cli.InitialModel())
 	if _, err := teaProgram.Run(); err != nil {
 		fmt.Printf("Error: %v", err)
 		os.Exit(1)
