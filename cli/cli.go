@@ -75,12 +75,7 @@ var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
 func InitialModel() Model {
 	updates := make(chan []lib.Device, 1)
 
-	// TODO: When working on status/help fix background issue.
 	helpModel := help.New()
-	helpModel.Styles.FullDesc = windowStyle
-	helpModel.Styles.FullKey = windowStyle
-	helpModel.Styles.FullSeparator = windowStyle
-	helpModel.Styles.Ellipsis = windowStyle
 	helpModel.Styles.ShortDesc = windowStyle
 	helpModel.Styles.ShortKey = windowStyle
 	helpModel.Styles.ShortSeparator = windowStyle
@@ -235,7 +230,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, keys.Refresh):
 			lastUpdate, _ := lib.Refresh()
-			//m.updateChan <- newDevices
 			m.lastUpdated = lastUpdate
 		}
 	}
@@ -258,7 +252,7 @@ func (m *Model) refreshContent() {
 
 	m.statusLine = statusStyle.
 		Width(m.windowWidth).
-		Render(lastUpdatedString, " ", renderedHelp)
+		Render(lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, " ", renderedHelp))
 
 	m.recalculateDimensions(m.statusLine)
 	m.treeViewport.SetContent(m.renderTree())
