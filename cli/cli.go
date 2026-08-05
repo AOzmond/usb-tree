@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"strings"
 	"time"
 
 	"charm.land/bubbles/v2/help"
@@ -234,83 +233,4 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, cmd
-}
-
-// refreshContent updateChan the UI content, including status line, tree viewport, and log viewport, based on current state.
-func (m *Model) refreshContent() {
-	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
-	lastUpdatedWidth := lipgloss.Width(lastUpdatedString) + 1
-
-	helpView := m.helpModel.View(keys)
-
-	helpViewStyle := windowStyle.
-		Width(m.windowWidth - lastUpdatedWidth).
-		Align(lipgloss.Center)
-
-	renderedHelp := helpViewStyle.Render(helpView)
-
-	m.statusLine = statusStyle.
-		Width(m.windowWidth).
-		Render(lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, " ", renderedHelp))
-
-	m.recalculateDimensions(m.statusLine)
-	m.treeViewport.SetContent(m.renderTree())
-	m.logViewport.SetContent(m.logContent)
-}
-
-// recalculateDimensions adjusts the dimensions of the tree and log viewports based on window size and status line height.
-func (m *Model) recalculateDimensions(statusLine string) {
-	m.statusHeight = lipgloss.Height(statusLine)
-	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
-
-	m.treeViewport.SetHeight(int(float64(remainingHeight)*splitRatio) - borderSpacing)
-	m.treeViewport.SetWidth(m.windowWidth - borderSpacing)
-
-	m.logViewport.SetHeight(remainingHeight - m.treeViewport.Height() - (2 * borderSpacing))
-	m.logViewport.SetWidth(m.windowWidth - borderSpacing)
-}
-
-func (m *Model) formatLogContent() string {
-	var sb strings.Builder
-	for _, entry := range m.log {
-		sb.WriteString(m.formatLogEntry(entry))
-		sb.WriteByte('\n')
-	}
-	return sb.String()
-}
-
-func (m *Model) formatLogEntry(log lib.Log) string {
-	stateString := " "
-	if log.State == lib.StateRemoved {
-		stateStyle = removedLogStyle
-		stateString = "-"
-	} else if log.State == lib.StateAdded {
-		stateStyle = addedLogStyle
-		stateString = "+"
-	}
-	lhsString := stateStyle.Render(log.Time.Format("15:04:05") + " " + stateString + " " + log.Text + " ")
-	rhsString := formatSpeed(log.Speed)
-	paddingSize := m.windowWidth - lipgloss.Width(rhsString) - lipgloss.Width(lhsString) - borderSpacing
-	if paddingSize < 0 {
-		paddingSize = 0
-	}
-	padding := strings.Repeat(" ", paddingSize)
-	return lipgloss.JoinHorizontal(lipgloss.Left, lhsString, padding, rhsString)
-}
-
-// clampLogViewport prevents the log viewport from scrolling past the available content.
-func (m *Model) clampLogViewport() {
-	if m.logViewport.Height() <= 0 {
-		return
-	}
-
-	contentHeight := lipgloss.Height(m.logContent)
-	maxYOffset := contentHeight - m.logViewport.Height()
-	if maxYOffset < 0 {
-		maxYOffset = 0
-	}
-	if m.logViewport.YOffset() > maxYOffset {
-		m.logViewport.SetYOffset(maxYOffset)
-		return
-	}
 }
