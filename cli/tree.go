@@ -61,9 +61,6 @@ func (m *Model) renderTree() string {
 func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool) ([]string, int) {
 	isSelected := currentIdx == m.treeCursor
 	idx := currentIdx + 1
-	if isSelected {
-		m.selectedDevice = &node.Device
-	}
 
 	rowStyle, contentStyle := m.getNodeStyles(node, isSelected)
 	indicators, contentStyle := m.getNodeIndicators(node, contentStyle)
@@ -85,6 +82,44 @@ func (m *Model) renderNode(node *lib.TreeNode, currentIdx int, continues []bool)
 	}
 
 	return renderedDevices, idx
+}
+
+// updateSelectedDevice keeps the selected device in sync with the cursor.
+func (m *Model) updateSelectedDevice() {
+	node := m.getNodeAtCursor()
+	if node == nil {
+		m.selectedDevice = nil
+		return
+	}
+	m.selectedDevice = &node.Device
+}
+
+// visibleNodeIndexByKey finds a device's current cursor index.
+func (m *Model) visibleNodeIndexByKey(key string) (int, bool) {
+	index := 0
+	var visit func(*lib.TreeNode) (int, bool)
+	visit = func(node *lib.TreeNode) (int, bool) {
+		if node.Device.Key() == key {
+			return index, true
+		}
+		index++
+		if m.collapsed[node.Key()] {
+			return 0, false
+		}
+		for _, child := range node.Children {
+			if foundIndex, found := visit(child); found {
+				return foundIndex, true
+			}
+		}
+		return 0, false
+	}
+
+	for _, root := range m.roots {
+		if foundIndex, found := visit(root); found {
+			return foundIndex, true
+		}
+	}
+	return 0, false
 }
 
 // getNodeStyles determines and returns the row and content styles for a tree node based on its state and selection status.

@@ -158,10 +158,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case deviceMessage:
 		devices := []lib.Device(msg)
+		previousKey := ""
+		if m.selectedDevice != nil {
+			previousKey = m.selectedDevice.Key()
+		}
 		m.roots = lib.BuildDeviceTree(devices)
 		m.updateNodeCount()
+		if previousKey != "" {
+			if cursor, found := m.visibleNodeIndexByKey(previousKey); found {
+				m.treeCursor = cursor
+			} else if m.treeCursor >= m.nodeCount {
+				m.treeCursor = max(0, m.nodeCount-1)
+			}
+		} else {
+			m.treeCursor = 0
+		}
+		m.updateSelectedDevice()
 		m.refreshContent()
-		m.selectedDevice = &devices[0]
 		return m, waitForUpdate(m.updateChan)
 
 	case tea.WindowSizeMsg:
@@ -187,6 +200,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Up):
 			if m.focusedView == treeView && m.treeCursor > 0 {
 				m.treeCursor--
+				m.updateSelectedDevice()
 				m.updateNodeCount()
 				m.refreshContent()
 				m.scrollUpToCursor()
@@ -196,6 +210,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Down):
 			if m.focusedView == treeView && m.treeCursor < (m.nodeCount-1) {
 				m.treeCursor++
+				m.updateSelectedDevice()
 				m.updateNodeCount()
 				m.refreshContent()
 				m.scrollDownToCursor()
@@ -210,6 +225,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.treeCursor--
 					}
 					m.updateNodeCount()
+					m.updateSelectedDevice()
 					m.refreshContent()
 					m.scrollUpToCursor()
 				}
@@ -222,6 +238,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					delete(m.collapsed, node.Key())
 					m.treeCursor++
 					m.updateNodeCount()
+					m.updateSelectedDevice()
 					m.refreshContent()
 					m.scrollDownToCursor()
 				}
