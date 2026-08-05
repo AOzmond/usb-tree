@@ -108,7 +108,7 @@ func Init(onUpdateCallback func([]Device)) []Device {
 func Refresh() (time.Time, []Device) {
 	logTime, retrievedDevices := getDevices()
 	if retrievedDevices != nil {
-		cachedDevices = retrievedDevices
+		cachedDevices = sortDevices(retrievedDevices)
 		lastMergedMap = nil
 		return logTime, cachedDevices
 	}
