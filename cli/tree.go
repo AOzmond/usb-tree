@@ -249,7 +249,20 @@ func formatSpeed(speed string) string {
 
 // scrollToCursor adjusts the viewport's offset to ensure the cursor is visible when resizing the screen
 func (m *Model) scrollToCursor() {
-	m.treeViewport.SetYOffset(m.treeCursor)
+	viewportHeight := m.treeViewport.Height()
+	if viewportHeight <= 0 || m.nodeCount <= 0 {
+		return
+	}
+
+	offset := m.treeViewport.YOffset()
+	if m.treeCursor < offset {
+		m.treeViewport.SetYOffset(m.treeCursor)
+		return
+	}
+
+	if m.treeCursor >= offset+viewportHeight {
+		m.treeViewport.SetYOffset(m.treeCursor - viewportHeight + 1)
+	}
 }
 
 // scrollUpToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves up

@@ -175,6 +175,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.updateSelectedDevice()
 		m.refreshContent()
+		m.scrollToCursor()
 		return m, waitForUpdate(m.updateChan)
 
 	case tea.WindowSizeMsg:
