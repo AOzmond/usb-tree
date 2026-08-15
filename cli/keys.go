@@ -7,6 +7,8 @@ type keyMap struct {
 	SwitchFocus key.Binding
 	Up          key.Binding
 	Down        key.Binding
+	PageUp      key.Binding
+	PageDown    key.Binding
 	Refresh     key.Binding
 	Collapse    key.Binding
 	Expand      key.Binding
@@ -29,6 +31,14 @@ var keys = keyMap{
 		key.WithKeys("down", "j"),
 		key.WithHelp("↓/j", "down"),
 	),
+	PageUp: key.NewBinding(
+		key.WithKeys("pgup"),
+		key.WithHelp("pgup", "page up"),
+	),
+	PageDown: key.NewBinding(
+		key.WithKeys("pgdown"),
+		key.WithHelp("pgdn", "page down"),
+	),
 	Refresh: key.NewBinding(
 		key.WithKeys("r"),
 		key.WithHelp("r", "refresh"),
@@ -47,11 +57,11 @@ func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Quit},
 		{k.SwitchFocus, k.Refresh},
-		{k.Up, k.Down},
+		{k.Up, k.Down, k.PageUp, k.PageDown},
 		{k.Collapse, k.Expand},
 	}
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Quit, k.SwitchFocus, k.Up, k.Down, k.Refresh, k.Collapse, k.Expand}
+	return []key.Binding{k.Quit, k.SwitchFocus, k.Up, k.Down, k.PageUp, k.PageDown, k.Refresh, k.Collapse, k.Expand}
 }

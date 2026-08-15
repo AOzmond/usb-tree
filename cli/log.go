@@ -9,11 +9,30 @@ import (
 
 func (m *Model) formatLogContent() string {
 	var sb strings.Builder
-	for _, entry := range m.log {
+	for i, entry := range m.log {
+		if i > 0 {
+			sb.WriteByte('\n')
+		}
 		sb.WriteString(m.formatLogEntry(entry))
-		sb.WriteByte('\n')
 	}
 	return sb.String()
+}
+
+func (m *Model) scrollLogUp() {
+	m.logViewport.ScrollUp(1)
+	m.clampLogViewport()
+}
+
+func (m *Model) scrollLogDown() {
+	m.logViewport.ScrollDown(1)
+	m.updateLogScrollState()
+	m.clampLogViewport()
+}
+
+func (m *Model) updateLogScrollState() {
+	if m.logViewport.AtBottom() {
+		m.logHasNew = false
+	}
 }
 
 func (m *Model) formatLogEntry(log lib.Log) string {
@@ -27,7 +46,7 @@ func (m *Model) formatLogEntry(log lib.Log) string {
 	}
 	lhsString := stateStyle.Render(log.Time.Format("15:04:05") + " " + stateString + " " + log.Text + " ")
 	rhsString := formatSpeed(log.Speed)
-	paddingSize := m.windowWidth - lipgloss.Width(rhsString) - lipgloss.Width(lhsString) - borderSpacing
+	paddingSize := m.logViewport.Width() - lipgloss.Width(rhsString) - lipgloss.Width(lhsString)
 	if paddingSize < 0 {
 		paddingSize = 0
 	}
@@ -48,6 +67,7 @@ func (m *Model) clampLogViewport() {
 	}
 	if m.logViewport.YOffset() > maxYOffset {
 		m.logViewport.SetYOffset(maxYOffset)
-		return
+	} else if m.logViewport.YOffset() < 0 {
+		m.logViewport.SetYOffset(0)
 	}
 }

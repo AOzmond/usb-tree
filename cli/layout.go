@@ -36,10 +36,10 @@ func (m *Model) recalculateDimensions(statusLine string) {
 	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
 
 	m.treeViewport.SetHeight(int(float64(remainingHeight)*splitRatio) - borderSpacing)
-	m.treeViewport.SetWidth(m.windowWidth - borderSpacing)
+	m.treeViewport.SetWidth(m.windowWidth - borderSpacing - (2 * horizontalPadding))
 
 	m.logViewport.SetHeight(remainingHeight - m.treeViewport.Height() - (2 * borderSpacing))
-	m.logViewport.SetWidth(m.windowWidth - borderSpacing)
+	m.logViewport.SetWidth(m.windowWidth - borderSpacing - (2 * horizontalPadding))
 }
 
 // formatSpeed formats the speed string to have a uniform size and units.

@@ -44,15 +44,18 @@ var (
 
 	activeStyle = windowStyle.
 			Border(lipgloss.DoubleBorder()).
-			BorderForeground(activeNodeBorderColor)
+			BorderForeground(activeNodeBorderColor).
+			Padding(0, horizontalPadding)
 
 	inactiveStyle = windowStyle.
 			BorderForeground(inactiveNodeBorderColor).
-			Border(lipgloss.DoubleBorder())
+			Border(lipgloss.DoubleBorder()).
+			Padding(0, horizontalPadding)
 
 	tooltipStyle = windowStyle.
 			Foreground(tooltipTextColor).
-			Border(lipgloss.RoundedBorder())
+			Border(lipgloss.RoundedBorder()).
+			Padding(0, horizontalPadding)
 
 	statusStyle = windowStyle
 

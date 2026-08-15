@@ -32,12 +32,14 @@ type Model struct {
 	helpModel      help.Model
 	focusedView    focusIndex
 	lastUpdated    time.Time
+	logHasNew      bool
 }
 
 const (
-	splitRatio    = 0.7 // Ratio of tree view to log view
-	borderSpacing = 2   // the space taken up by the border
-	tooltipHeight = 5
+	splitRatio        = 0.7 // Ratio of tree view to log view
+	borderSpacing     = 2   // the space taken up by the border
+	horizontalPadding = 1
+	tooltipHeight     = 5
 )
 
 const (
@@ -106,6 +108,11 @@ func (m Model) View() tea.View {
 			BorderTopForeground(topBorderColor).
 			BorderBottomForeground(bottomBorderColor)
 	}
+	if m.logHasNew {
+		borderStyle := logStyle.GetBorderStyle()
+		logStyle = logStyle.Border(borderStyle, true, true, true, true).
+			BorderBottomForeground(edgeHighlightChangeColor)
+	}
 
 	tooltip := tooltipStyle.
 		Width(m.windowWidth).
@@ -129,8 +136,9 @@ func (m Model) View() tea.View {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-
 	case deviceMessage:
+		wasAtBottom := m.logViewport.AtBottom()
+		previousLogCount := len(m.log)
 		devices := []lib.Device(msg)
 		previousKey := ""
 		if m.selectedDevice != nil {
@@ -154,13 +162,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.log = lib.GetLog()
 		m.logContent = m.formatLogContent()
 		m.logViewport.SetContent(m.logContent)
+		if wasAtBottom {
+			m.logViewport.GotoBottom()
+			m.logHasNew = false
+		} else if len(m.log) > previousLogCount {
+			m.logHasNew = true
+		}
 		m.clampLogViewport()
 
 		return m, waitForUpdate(m.updateChan)
 
 	case tea.WindowSizeMsg:
+		wasAtBottom := m.logViewport.AtBottom()
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
 		m.refreshContent()
+		m.logContent = m.formatLogContent()
+		m.logViewport.SetContent(m.logContent)
+		if wasAtBottom {
+			m.logViewport.GotoBottom()
+		}
+		m.clampLogViewport()
 		m.scrollToCursor()
 		return m, nil
 
@@ -179,7 +200,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case key.Matches(msg, keys.Up):
-			if m.focusedView == treeView && m.treeCursor > 0 {
+			if m.focusedView == logView {
+				m.scrollLogUp()
+			} else if m.treeCursor > 0 {
 				m.treeCursor--
 				m.updateSelectedDevice()
 				m.updateNodeCount()
@@ -189,12 +212,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case key.Matches(msg, keys.Down):
-			if m.focusedView == treeView && m.treeCursor < (m.nodeCount-1) {
+			if m.focusedView == logView {
+				m.scrollLogDown()
+			} else if m.treeCursor < (m.nodeCount - 1) {
 				m.treeCursor++
 				m.updateSelectedDevice()
 				m.updateNodeCount()
 				m.refreshContent()
 				m.scrollDownToCursor()
+			}
+			return m, nil
+
+		case key.Matches(msg, keys.PageUp):
+			if m.focusedView == logView {
+				m.logViewport.PageUp()
+				m.clampLogViewport()
+			}
+			return m, nil
+
+		case key.Matches(msg, keys.PageDown):
+			if m.focusedView == logView {
+				m.logViewport.PageDown()
+				m.updateLogScrollState()
+				m.clampLogViewport()
 			}
 			return m, nil
 
