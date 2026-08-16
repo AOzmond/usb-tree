@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -229,24 +227,6 @@ func middleTruncate(s string, maxLen int) string {
 	return s[:half] + "…" + s[len(s)-(maxLen-half-1):]
 }
 
-// formatSpeed formats the speed string to have a uniform size and units.
-func formatSpeed(speed string) string {
-	if speed == "" {
-		return ""
-	}
-
-	speed = strings.TrimSpace(speed)
-
-	val, _ := strconv.ParseFloat(speed, 64)
-
-	if val >= 1000 {
-		// Convert to Gbps
-		return fmt.Sprintf("%8s", fmt.Sprintf("%g Gbps", val/1000))
-	}
-
-	return fmt.Sprintf("%8s", fmt.Sprintf("%g Mbps", val))
-}
-
 // scrollToCursor adjusts the viewport's offset to ensure the cursor is visible when resizing the screen
 func (m *Model) scrollToCursor() {
 	viewportHeight := m.treeViewport.Height()
@@ -283,7 +263,7 @@ func (m *Model) scrollUpToCursor() {
 	}
 }
 
-// scrollUpToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves down
+// scrollDownToCursor ensures that the tree cursor remains within the visible portion of the viewport when the cursor moves down
 func (m *Model) scrollDownToCursor() {
 	viewportHeight := m.treeViewport.Height()
 	// Guard against uninitialized or invalid viewport dimensions
@@ -387,39 +367,4 @@ func (m *Model) checkNodeOffscreenChanges(node *lib.TreeNode, currentIdx int, ab
 	}
 
 	return above, below, idx
-}
-
-// getSelectedDeviceInfo returns formatted device info for the currently selected node
-func (m *Model) getSelectedDeviceInfo() string {
-	if m.selectedDevice == nil {
-		return ""
-	}
-	node := m.selectedDevice
-
-	busStyle := windowStyle.Foreground(busTextColor)
-	deviceStyle := windowStyle.Foreground(deviceTextColor)
-	vidStyle := windowStyle.Foreground(vidTextColor)
-	pidStyle := windowStyle.Foreground(pidTextColor)
-	nameStyle := windowStyle.Foreground(nameTextColor)
-	linkStyle := windowStyle.Foreground(linkTextColor)
-
-	busString := busStyle.Render("Bus: ", strconv.Itoa(node.Bus))
-	deviceString := deviceStyle.Render(" Device: ", strconv.Itoa(node.DevNum))
-	vidString := vidStyle.Render(" VID: ", node.VendorID)
-	pidString := pidStyle.Render(" PID: ", node.ProductID)
-
-	deviceInfo := busString + deviceString + vidString + pidString
-
-	nameString := nameStyle.Render(node.Name)
-	linkString := linkStyle.Render(getDbAddress(node.VendorID, node.ProductID))
-
-	tooltipString := deviceInfo + "\n" + nameString + "\n" + linkString
-
-	return tooltipString
-}
-
-// getDbAddress returns the USB-ID database link for the given VID and PID
-func getDbAddress(vid string, pid string) string {
-	baseAddress := "https://the-sz.com/products/usbid/?v="
-	return baseAddress + vid + "&p=" + pid
 }

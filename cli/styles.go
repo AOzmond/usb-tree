@@ -35,4 +35,35 @@ var (
 	vidTextColor              = lipgloss.Color(coralRed)
 	pidTextColor              = lipgloss.Color(paleGreen)
 	nameTextColor             = lipgloss.Color(gray)
+	logAddedColor             = lipgloss.Color(green)
+	logRemovedColor           = lipgloss.Color(red)
+)
+
+var (
+	windowStyle = lipgloss.NewStyle()
+
+	activeStyle = windowStyle.
+			Border(lipgloss.DoubleBorder()).
+			BorderForeground(activeNodeBorderColor).
+			Padding(0, horizontalPadding)
+
+	inactiveStyle = windowStyle.
+			BorderForeground(inactiveNodeBorderColor).
+			Border(lipgloss.DoubleBorder()).
+			Padding(0, horizontalPadding)
+
+	tooltipStyle = windowStyle.
+			Foreground(tooltipTextColor).
+			Border(lipgloss.RoundedBorder()).
+			Padding(0, horizontalPadding)
+
+	statusStyle = windowStyle
+
+	addedLogStyle = windowStyle.
+			Foreground(logAddedColor)
+
+	removedLogStyle = windowStyle.
+			Foreground(logRemovedColor)
+
+	stateStyle = windowStyle
 )

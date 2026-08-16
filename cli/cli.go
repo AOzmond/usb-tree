@@ -23,53 +23,29 @@ type Model struct {
 	roots          []*lib.TreeNode
 	collapsed      map[string]bool // tracks which nodes are collapsed by their unique key
 	treeViewport   viewport.Model
-	logViewport    viewport.Model
 	treeCursor     int
 	nodeCount      int
 	selectedDevice *lib.Device
+	logViewport    viewport.Model
+	log            []lib.Log
+	logContent     string
 	helpModel      help.Model
 	focusedView    focusIndex
 	lastUpdated    time.Time
+	logHasNew      bool
 }
 
 const (
-	splitRatio    = 0.7 // Ratio of tree view to log view
-	borderSpacing = 2   // the space taken up by the border
-	tooltipHeight = 5
+	splitRatio        = 0.7 // Ratio of tree view to log view
+	borderSpacing     = 2   // the space taken up by the border
+	horizontalPadding = 1
+	tooltipHeight     = 5
 )
 
 const (
 	treeView focusIndex = iota
 	logView
 )
-
-var (
-	windowStyle = lipgloss.NewStyle()
-
-	activeStyle = windowStyle.
-			Border(lipgloss.DoubleBorder()).
-			BorderForeground(activeNodeBorderColor)
-
-	inactiveStyle = windowStyle.
-			BorderForeground(inactiveNodeBorderColor).
-			Border(lipgloss.DoubleBorder())
-
-	tooltipStyle = windowStyle.
-			Foreground(tooltipTextColor).
-			Border(lipgloss.RoundedBorder())
-
-	statusStyle = windowStyle
-)
-
-// ***** Placeholder content *****
-// TODO: replace with real data
-
-var placeholderLogContent = `00:00:00 Device xyz 100000 Gbps
-00:00:01 Device abc 100000 Gbps
-00:00:02 Device pqr 100000 Gbps
-00:00:03 Device xyz 100000 Gbps`
-
-// ***** End of placeholder content *****
 
 // InitialModel initializes and returns a new Model instance with values for state and views.
 func InitialModel() Model {
@@ -132,6 +108,11 @@ func (m Model) View() tea.View {
 			BorderTopForeground(topBorderColor).
 			BorderBottomForeground(bottomBorderColor)
 	}
+	if m.logHasNew {
+		borderStyle := logStyle.GetBorderStyle()
+		logStyle = logStyle.Border(borderStyle, true, true, true, true).
+			BorderBottomForeground(edgeHighlightChangeColor)
+	}
 
 	tooltip := tooltipStyle.
 		Width(m.windowWidth).
@@ -155,8 +136,9 @@ func (m Model) View() tea.View {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-
 	case deviceMessage:
+		wasAtBottom := m.logViewport.AtBottom()
+		previousLogCount := len(m.log)
 		devices := []lib.Device(msg)
 		previousKey := ""
 		if m.selectedDevice != nil {
@@ -176,11 +158,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.updateSelectedDevice()
 		m.refreshContent()
 		m.scrollToCursor()
+
+		m.log = lib.GetLog()
+		m.logContent = m.formatLogContent()
+		m.logViewport.SetContent(m.logContent)
+		if wasAtBottom {
+			m.logViewport.GotoBottom()
+			m.logHasNew = false
+		} else if len(m.log) > previousLogCount {
+			m.logHasNew = true
+		}
+		m.clampLogViewport()
+
 		return m, waitForUpdate(m.updateChan)
 
 	case tea.WindowSizeMsg:
+		wasAtBottom := m.logViewport.AtBottom()
 		m.windowWidth, m.windowHeight = msg.Width, msg.Height
 		m.refreshContent()
+		m.logContent = m.formatLogContent()
+		m.logViewport.SetContent(m.logContent)
+		if wasAtBottom {
+			m.logViewport.GotoBottom()
+		}
+		m.clampLogViewport()
 		m.scrollToCursor()
 		return m, nil
 
@@ -199,7 +200,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case key.Matches(msg, keys.Up):
-			if m.focusedView == treeView && m.treeCursor > 0 {
+			if m.focusedView == logView {
+				m.scrollLogUp()
+			} else if m.treeCursor > 0 {
 				m.treeCursor--
 				m.updateSelectedDevice()
 				m.updateNodeCount()
@@ -209,12 +212,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case key.Matches(msg, keys.Down):
-			if m.focusedView == treeView && m.treeCursor < (m.nodeCount-1) {
+			if m.focusedView == logView {
+				m.scrollLogDown()
+			} else if m.treeCursor < (m.nodeCount - 1) {
 				m.treeCursor++
 				m.updateSelectedDevice()
 				m.updateNodeCount()
 				m.refreshContent()
 				m.scrollDownToCursor()
+			}
+			return m, nil
+
+		case key.Matches(msg, keys.PageUp):
+			if m.focusedView == logView {
+				m.logViewport.PageUp()
+				m.clampLogViewport()
+			}
+			return m, nil
+
+		case key.Matches(msg, keys.PageDown):
+			if m.focusedView == logView {
+				m.logViewport.PageDown()
+				m.updateLogScrollState()
+				m.clampLogViewport()
 			}
 			return m, nil
 
@@ -253,38 +273,4 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, cmd
-}
-
-// refreshContent updateChan the UI content, including status line, tree viewport, and log viewport, based on current state.
-func (m *Model) refreshContent() {
-	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
-	lastUpdatedWidth := lipgloss.Width(lastUpdatedString) + 1
-
-	helpView := m.helpModel.View(keys)
-
-	helpViewStyle := windowStyle.
-		Width(m.windowWidth - lastUpdatedWidth).
-		Align(lipgloss.Center)
-
-	renderedHelp := helpViewStyle.Render(helpView)
-
-	m.statusLine = statusStyle.
-		Width(m.windowWidth).
-		Render(lipgloss.JoinHorizontal(lipgloss.Left, lastUpdatedString, " ", renderedHelp))
-
-	m.recalculateDimensions(m.statusLine)
-	m.treeViewport.SetContent(m.renderTree())
-	m.logViewport.SetContent(placeholderLogContent)
-}
-
-// recalculateDimensions adjusts the dimensions of the tree and log viewports based on window size and status line height.
-func (m *Model) recalculateDimensions(statusLine string) {
-	m.statusHeight = lipgloss.Height(statusLine)
-	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
-
-	m.treeViewport.SetHeight(int(float64(remainingHeight)*splitRatio) - borderSpacing)
-	m.treeViewport.SetWidth(m.windowWidth - borderSpacing)
-
-	m.logViewport.SetHeight(remainingHeight - m.treeViewport.Height() - (2 * borderSpacing))
-	m.logViewport.SetWidth(m.windowWidth - borderSpacing)
 }
