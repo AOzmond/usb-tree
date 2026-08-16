@@ -44,8 +44,15 @@ func (m *Model) formatLogEntry(log lib.Log) string {
 		stateStyle = addedLogStyle
 		stateString = "+"
 	}
-	lhsString := stateStyle.Render(log.Time.Format("15:04:05") + " " + stateString + " " + log.Text + " ")
 	rhsString := formatSpeed(log.Speed)
+	logPrefix := log.Time.Format("15:04:05") + " " + stateString + " "
+	availableForName := m.logViewport.Width() - lipgloss.Width(logPrefix) - lipgloss.Width(rhsString)
+	if availableForName < 0 {
+		availableForName = 0
+	}
+	name := middleTruncate(log.Text, availableForName)
+	lhsString := stateStyle.Render(logPrefix + name)
+
 	paddingSize := m.logViewport.Width() - lipgloss.Width(rhsString) - lipgloss.Width(lhsString)
 	if paddingSize < 0 {
 		paddingSize = 0
