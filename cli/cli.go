@@ -15,24 +15,25 @@ type focusIndex int
 
 // Model represents the primary structure containing application state and views.
 type Model struct {
-	windowWidth    int
-	windowHeight   int
-	statusHeight   int
-	statusLine     string
-	updateChan     chan []lib.Device
-	roots          []*lib.TreeNode
-	collapsed      map[string]bool // tracks which nodes are collapsed by their unique key
-	treeViewport   viewport.Model
-	treeCursor     int
-	nodeCount      int
-	selectedDevice *lib.Device
-	logViewport    viewport.Model
-	log            []lib.Log
-	logContent     string
-	helpModel      help.Model
-	focusedView    focusIndex
-	lastUpdated    time.Time
-	logHasNew      bool
+	windowWidth         int
+	windowHeight        int
+	statusHeight        int
+	statusLine          string
+	updateChan          chan []lib.Device
+	roots               []*lib.TreeNode
+	collapsed           map[string]bool // tracks which nodes are collapsed by their unique key
+	treeViewport        viewport.Model
+	treeCursor          int
+	nodeCount           int
+	selectedDevice      *lib.Device
+	logViewport         viewport.Model
+	log                 []lib.Log
+	logContent          string
+	helpModel           help.Model
+	focusedView         focusIndex
+	lastUpdated         time.Time
+	logHasNew           bool
+	instructionsVisible bool
 }
 
 const (
@@ -55,6 +56,8 @@ func InitialModel() Model {
 	helpModel.Styles.ShortDesc = windowStyle
 	helpModel.Styles.ShortKey = windowStyle
 	helpModel.Styles.ShortSeparator = windowStyle
+	helpModel.Styles.FullKey = windowStyle
+	helpModel.Styles.FullDesc = windowStyle
 
 	m := Model{
 		helpModel:   helpModel,
@@ -125,6 +128,9 @@ func (m Model) View() tea.View {
 		logStyle.Render(m.logViewport.View()),
 		m.statusLine,
 	)
+	if m.instructionsVisible {
+		appContent = lipgloss.Place(m.windowWidth, m.windowHeight, lipgloss.Center, lipgloss.Center, m.instructionsView())
+	}
 
 	view := tea.NewView(appContent)
 	view.AltScreen = true
@@ -186,10 +192,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, keys.Quit):
+		if key.Matches(msg, keys.Quit) {
 			return m, tea.Quit
+		}
+		if key.Matches(msg, keys.Instructions) {
+			m.instructionsVisible = !m.instructionsVisible
+			return m, nil
+		}
+		if m.instructionsVisible {
+			return m, nil
+		}
 
+		switch {
 		case key.Matches(msg, keys.SwitchFocus):
 			if m.focusedView == treeView {
 				m.focusedView = logView
