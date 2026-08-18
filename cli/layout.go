@@ -10,7 +10,7 @@ import (
 
 // refreshContent updateChan the UI content, including status line, tree viewport, and log viewport, based on current state.
 func (m *Model) refreshContent() {
-	lastUpdatedString := "Last Updated: " + m.lastUpdated.Format("15:04:05")
+	lastUpdatedString := " Last Updated: " + m.lastUpdated.Format("15:04:05")
 	lastUpdatedWidth := lipgloss.Width(lastUpdatedString) + 1
 
 	helpView := m.helpModel.View(keys)
