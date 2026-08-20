@@ -40,7 +40,7 @@ const (
 	splitRatio        = 0.7 // Ratio of tree view to log view
 	borderSpacing     = 2   // the space taken up by the border
 	horizontalPadding = 1
-	tooltipHeight     = 5
+	tooltipHeight     = 4
 )
 
 const (
@@ -95,22 +95,33 @@ func (m Model) View() tea.View {
 
 	// Check for offscreen changes to highlight borders
 	above, below := m.checkOffscreenChanges()
+	topBorderColor := treeStyle.GetBorderTopForeground()
+	middleBorderColor := treeStyle.GetBorderBottomForeground()
 	if above || below {
 		borderStyle := treeStyle.GetBorderStyle()
-		topBorderColor := treeStyle.GetBorderTopForeground()
-		bottomBorderColor := treeStyle.GetBorderBottomForeground()
 
 		if above {
 			topBorderColor = edgeHighlightChangeColor
 		}
 		if below {
-			bottomBorderColor = edgeHighlightChangeColor
+			middleBorderColor = edgeHighlightChangeColor
 		}
 
-		treeStyle = treeStyle.Border(borderStyle, true, true, true, true).
-			BorderTopForeground(topBorderColor).
-			BorderBottomForeground(bottomBorderColor)
+		treeStyle = treeStyle.BorderStyle(borderStyle)
 	}
+
+	// The tree and tooltip form one panel. The tree has no bottom edge; the
+	// tooltip's top edge uses tee junctions to provide their shared divider.
+	treeStyle = treeStyle.
+		Border(treeStyle.GetBorderStyle(), true, true, false, true).
+		BorderTopForeground(topBorderColor)
+	tooltipBorder := treeStyle.GetBorderStyle()
+	tooltipBorder.TopLeft = tooltipBorder.MiddleLeft
+	tooltipBorder.TopRight = tooltipBorder.MiddleRight
+	tooltipStyle := treeStyle.
+		Foreground(tooltipTextColor).
+		Border(tooltipBorder, true, true, true, true).
+		BorderTopForeground(middleBorderColor)
 	if m.logHasNew {
 		borderStyle := logStyle.GetBorderStyle()
 		logStyle = logStyle.Border(borderStyle, true, true, true, true).

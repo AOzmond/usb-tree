@@ -35,7 +35,9 @@ func (m *Model) recalculateDimensions(statusLine string) {
 	m.statusHeight = lipgloss.Height(statusLine)
 	remainingHeight := m.windowHeight - m.statusHeight - tooltipHeight
 
-	m.treeViewport.SetHeight(int(float64(remainingHeight)*splitRatio) - borderSpacing)
+	// The tree omits its bottom border because the tooltip supplies the shared
+	// divider, so its frame consumes only one vertical row.
+	m.treeViewport.SetHeight(int(float64(remainingHeight)*splitRatio) - (borderSpacing - 1))
 	m.treeViewport.SetWidth(m.windowWidth - borderSpacing - (2 * horizontalPadding))
 
 	m.logViewport.SetHeight(remainingHeight - m.treeViewport.Height() - (2 * borderSpacing))

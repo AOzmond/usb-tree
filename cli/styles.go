@@ -52,11 +52,6 @@ var (
 			Border(lipgloss.DoubleBorder()).
 			Padding(0, horizontalPadding)
 
-	tooltipStyle = windowStyle.
-			Foreground(tooltipTextColor).
-			Border(lipgloss.RoundedBorder()).
-			Padding(0, horizontalPadding)
-
 	statusStyle = windowStyle
 
 	addedLogStyle = windowStyle.
